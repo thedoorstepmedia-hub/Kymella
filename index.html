@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kymella, wedding sites with real craft behind them</title>
+<meta name="description" content="Cinematic, interactive wedding sites built around how your day actually feels, not a template with your names dropped in.">
+<meta property="og:title" content="Kymella, wedding sites with real craft behind them">
+<meta property="og:description" content="Cinematic, interactive wedding sites built around how your day actually feels.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230E1F1C'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23B8874A' stroke-width='1.3'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23B8874A' stroke-width='0.8' opacity='0.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1F1C; --ink-2:#152D28; --ink-3:#26433C;
+  --mist:#F5EFE3; --mist-dim:#EDE5D4;
+  --brass:#B8874A; --brass-soft:#E8C9A0; --brass-deep:#8E6836;
+  --palm:#3D5A52;
+  --line:rgba(245,239,227,.13); --line-dk:rgba(14,31,28,.12);
+  --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:var(--body);font-size:15px}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;color:var(--brass-deep)}
+.eyebrow.on-dark{color:var(--brass-soft)}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:26px 40px;mix-blend-mode:difference}
+.nav .word{color:var(--mist);font-family:var(--disp);font-size:20px;font-weight:500}
+.nav .link{color:var(--mist);font-size:12.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+@media(max-width:640px){.nav{padding:20px 22px}}
+
+.hero{position:relative;min-height:660px;padding-bottom:44px;background:var(--ink);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.hero-canvas-wrap{position:absolute;inset:0}
+.hero-canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:pointer;display:block}
+.hero-content{position:relative;z-index:2;pointer-events:none;color:var(--mist)}
+.hero .eyebrow{margin-bottom:22px}
+.hero h1{font-family:var(--disp);font-size:clamp(36px,7vw,66px);font-weight:400;line-height:1.12;max-width:820px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--brass-soft)}
+.hero .sub{margin-top:22px;font-size:15.5px;color:rgba(245,239,227,.65);max-width:440px;margin-left:auto;margin-right:auto}
+.hero-cta{margin-top:36px;pointer-events:auto;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 32px;font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:1px;transition:background .25s,color .25s,border-color .25s}
+.btn-brass{background:var(--brass);color:var(--ink)}
+.btn-brass:hover{background:var(--brass-soft)}
+.btn-line{border:1px solid rgba(245,239,227,.28);color:var(--mist)}
+.btn-line:hover{border-color:var(--brass-soft);color:var(--brass-soft)}
+
+.switcher{position:relative;z-index:3;margin-top:44px;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:14px}
+.hero-hint{margin-top:20px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,239,227,.45)}
+.switcher-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:0 20px;max-width:640px}
+.pill{font-family:var(--body);font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:9px 16px;border:1px solid rgba(245,239,227,.22);color:rgba(245,239,227,.7);border-radius:20px;transition:all .25s;background:rgba(14,31,28,.35);backdrop-filter:blur(6px)}
+.pill:hover:not(:disabled){border-color:var(--brass-soft);color:var(--mist)}
+.pill.active{background:var(--brass);border-color:var(--brass);color:var(--ink)}
+.pill:disabled{opacity:.35;cursor:default}
+.pill .soon{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;margin-left:6px;opacity:.8}
+
+.section{padding:110px 40px}
+.hero + .section{margin-top:8px}
+.inner{max-width:720px;margin:0 auto}
+.wide{max-width:1020px;margin:0 auto}
+@media(max-width:720px){.section{padding:72px 24px}}
+.center{text-align:center}
+.h2{font-family:var(--disp);font-size:clamp(28px,5vw,42px);font-weight:400;line-height:1.2;margin:14px 0 16px}
+.h2 em{font-style:italic;color:var(--brass-deep)}
+.lede{font-size:15.5px;color:var(--ink-3);max-width:520px;margin:0 auto}
+
+.diffs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--line-dk);margin-top:54px;border:1px solid var(--line-dk)}
+.diff{background:var(--mist);padding:34px 30px}
+.diff h3{font-family:var(--disp);font-size:22px;font-weight:500;margin-bottom:10px}
+.diff p{font-size:14px;color:var(--ink-3)}
+
+.teaser{background:var(--ink);color:var(--mist);padding:0;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+.teaser + .section{margin-top:56px}
+@media(max-width:820px){.teaser{grid-template-columns:1fr}}
+.teaser-visual{position:relative;min-height:340px;overflow:hidden}
+.teaser-visual canvas{position:absolute;inset:0;width:100%;height:100%}
+.teaser-copy{padding:80px 56px;display:flex;flex-direction:column;justify-content:center}
+@media(max-width:640px){.teaser-copy{padding:56px 28px}}
+.teaser-copy h2{font-family:var(--disp);font-size:clamp(26px,4vw,36px);font-weight:400;margin:14px 0 18px;line-height:1.25}
+.teaser-copy p{color:rgba(245,239,227,.68);font-size:14.5px;max-width:400px}
+.teaser-copy .btn{margin-top:28px;margin-bottom:12px;align-self:flex-start}
+
+.paths{margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-dk);border:1px solid var(--line-dk)}
+@media(max-width:860px){.paths{grid-template-columns:1fr}}
+.path{background:var(--mist);padding:38px 32px;display:flex;flex-direction:column}
+.path .eyebrow{margin-bottom:14px}
+.path h3{font-family:var(--disp);font-size:23px;font-weight:500;margin-bottom:10px;line-height:1.25}
+.path p{font-size:13.5px;color:var(--ink-3);flex:1}
+.path .pick{margin-top:22px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-deep);display:inline-flex;align-items:center;gap:6px}
+.path.featured{background:var(--ink);color:var(--mist)}
+.path.featured .eyebrow{color:var(--brass-soft)}
+.path.featured p{color:rgba(245,239,227,.65)}
+.path.featured .pick{color:var(--brass-soft)}
+
+.waitlist{background:var(--mist-dim);text-align:center}
+.wl-form{max-width:440px;margin:36px auto 0;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.wl-form input{flex:1;min-width:220px;border:1px solid var(--line-dk);background:var(--mist);padding:15px 16px;outline:none}
+.wl-form input:focus{border-color:var(--brass)}
+.wl-note{margin-top:14px;font-size:12.5px;color:var(--ink-3)}
+.wl-success{display:none;font-family:var(--disp);font-size:19px;margin-top:24px;color:var(--brass-deep)}
+
+.foot{text-align:center;padding:48px 24px;color:var(--ink-3);font-size:12px;letter-spacing:.06em;border-top:1px solid var(--line-dk)}
+.up{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s cubic-bezier(.22,1,.36,1)}
+.up.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.up{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="word" href="#">Kymella</a>
+  <a class="link" href="#waitlist">Join the waitlist</a>
+</nav>
+
+<header class="hero">
+  <div class="hero-canvas-wrap" id="heroCanvasWrap"><canvas id="heroCanvas"></canvas></div>
+  <div class="hero-content">
+    <div class="eyebrow on-dark">Cinematic Wedding Sites</div>
+    <h1>The most <em>magical</em><br>invitation your guests<br>will ever open</h1>
+    <p class="sub">Built around how your day actually feels, not a template with your names dropped in.</p>
+    <div class="hero-hint" id="heroHint">touch the water</div>
+    <div class="hero-cta">
+      <a class="btn btn-brass" href="#waitlist">Join the waitlist</a>
+    </div>
+  </div>
+  <div class="switcher">
+    <div class="switcher-pills" id="switcherPills"></div>
+  </div>
+</header>
+
+<section class="section center">
+  <div class="inner">
+    <div class="eyebrow">What Makes It Different</div>
+    <h2 class="h2">Not a website. <em>An arrival.</em></h2>
+    <p class="lede">Every studio in this space starts from the same template and swaps the colors. We start from how your specific day feels and build the one interaction that captures it.</p>
+    <div class="diffs">
+      <div class="diff"><h3>One touch, one story</h3><p>Every site opens on a single interactive moment: water, light, fabric, or glass, chosen to match your day, not picked from a dropdown.</p></div>
+      <div class="diff"><h3>Real craft, not stock</h3><p>Built with the same interactive techniques used in film and luxury digital work: restrained, deliberate, never gimmicky.</p></div>
+      <div class="diff"><h3>Yours alone</h3><p>No two Kymella sites share a signature moment. What we build for you isn't built for anyone else.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="teaser up">
+  <div class="teaser-visual"><canvas id="teaserCanvas"></canvas></div>
+  <div class="teaser-copy">
+    <div class="eyebrow on-dark">The Flagship Project</div>
+    <h2>Built for one wedding, by water, at dusk.</h2>
+    <p>The site that started Kymella: a single ripple, a chapter-by-chapter story, and a boat guests pull across open water to find the details. See the whole brief, the concept, and the build.</p>
+    <a class="btn btn-line" href="case-study.html">Read the case study</a>
+  </div>
+</section>
+
+<section class="section center">
+  <div class="wide">
+    <div class="eyebrow">Choose Your Path</div>
+    <h2 class="h2">What matters more <em>to you?</em></h2>
+    <p class="lede">Most couples know instinctively whether they want the moment or the machinery. Some want both.</p>
+    <div class="paths">
+      <div class="path featured">
+        <div class="eyebrow">Most Popular</div>
+        <h3>The magical, interactive invite</h3>
+        <p>A cinematic site built around one signature interaction: the thing your guests remember and talk about after the wedding is over.</p>
+        <a class="pick" href="#waitlist">Join the waitlist →</a>
+      </div>
+      <div class="path">
+        <div class="eyebrow">For the Organized</div>
+        <h3>RSVPs & guest management, handled</h3>
+        <p>A clean, working dashboard for RSVPs, meal counts, and guest questions, without the design being the point.</p>
+        <a class="pick" href="#waitlist">Join the waitlist →</a>
+      </div>
+      <div class="path">
+        <div class="eyebrow">Both, Together</div>
+        <h3>The full experience</h3>
+        <p>A signature interactive site with real RSVP and guest management underneath: the moment and the machinery, in one build.</p>
+        <a class="pick" href="#waitlist">Join the waitlist →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section waitlist" id="waitlist">
+  <div class="inner center">
+    <div class="eyebrow">Early Access</div>
+    <h2 class="h2">We're taking a <em>small</em> number of weddings.</h2>
+    <p class="lede">Kymella is intentionally limited-capacity. Every site is built by hand. Join the waitlist and we'll reach out as slots open.</p>
+    <form class="wl-form" id="wlForm">
+      <input type="text" id="wlName" placeholder="Your name" required>
+      <input type="email" id="wlEmail" placeholder="Email" required>
+      <button class="btn btn-brass" type="submit">Request access</button>
+    </form>
+    <p class="wl-note">No pricing yet, no obligation. Just early access when we open.</p>
+    <p class="wl-success" id="wlSuccess">You're on the list. We'll be in touch.</p>
+  </div>
+</section>
+
+<footer class="foot">Kymella, a small studio building wedding sites with real craft behind them.</footer>
+
+<script>
+function createWaterRipple(canvasEl, opts = {}) {
+  const canvas = canvasEl;
+  const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+  if (!gl) return null;
+  const vsSrc = `attribute vec2 aPos; void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }`;
+  const fsSrc = `
+    precision highp float;
+    uniform vec2 uResolution; uniform float uTime; uniform vec3 uTouches[6];
+    uniform vec3 uColorTop; uniform vec3 uColorBottom; uniform vec3 uBrass;
+    float waveHeight(vec2 p){
+      float h = 0.0;
+      for (int i = 0; i < 6; i++){
+        vec3 t = uTouches[i];
+        float age = uTime - t.z;
+        if (age < 0.0 || age > 7.0) continue;
+        float dist = length(p - t.xy);
+        float decay = exp(-age*0.5) * exp(-dist*0.0022);
+        h += decay * sin(dist*0.05 - age*5.0);
+      }
+      float amb = sin(p.x*0.006 + uTime*0.35) * cos(p.y*0.008 - uTime*0.28) * 0.035;
+      return h + amb;
+    }
+    void main(){
+      vec2 p = gl_FragCoord.xy;
+      float eps = 1.6;
+      float hL = waveHeight(p - vec2(eps,0.0));
+      float hR = waveHeight(p + vec2(eps,0.0));
+      float hD = waveHeight(p - vec2(0.0,eps));
+      float hU = waveHeight(p + vec2(0.0,eps));
+      vec2 grad = vec2(hR-hL, hU-hD) / (2.0*eps);
+      vec3 normal = normalize(vec3(-grad.x*18.0, -grad.y*18.0, 1.0));
+      float ft = p.y / uResolution.y;
+      float banding = grad.x*0.6 + grad.y*0.4;
+      vec3 base = mix(uColorBottom, uColorTop, clamp(ft + banding, 0.0, 1.0));
+      vec3 lightDir = normalize(vec3(-0.35, 0.55, 0.78));
+      float spec = pow(max(dot(normal, lightDir), 0.0), 34.0);
+      float ambientSheen = pow(max(dot(normal, vec3(0.0,0.0,1.0)), 0.0), 60.0) * 0.15;
+      vec3 color = base + uBrass * (spec*0.85 + ambientSheen);
+      vec2 uv = p / uResolution;
+      float vig = smoothstep(0.9, 0.25, length(uv - 0.5));
+      color *= mix(0.82, 1.0, vig);
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+  function compile(type, src){ const sh=gl.createShader(type); gl.shaderSource(sh,src); gl.compileShader(sh); if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(sh));return null;} return sh; }
+  const vs = compile(gl.VERTEX_SHADER, vsSrc), fs = compile(gl.FRAGMENT_SHADER, fsSrc);
+  const prog = gl.createProgram(); gl.attachShader(prog,vs); gl.attachShader(prog,fs); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)){ console.error(gl.getProgramInfoLog(prog)); return null; }
+  gl.useProgram(prog);
+  const quad = new Float32Array([-1,-1, 1,-1, -1,1, 1,-1, 1,1, -1,1]);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, "aPos"); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
+  const uResolution = gl.getUniformLocation(prog,"uResolution"), uTime = gl.getUniformLocation(prog,"uTime"),
+        uTouches = gl.getUniformLocation(prog,"uTouches"), uColorTop = gl.getUniformLocation(prog,"uColorTop"),
+        uColorBottom = gl.getUniformLocation(prog,"uColorBottom"), uBrass = gl.getUniformLocation(prog,"uBrass");
+  function hexToVec(hex){ const n=parseInt(hex.replace("#",""),16); return [((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255]; }
+  const colorTop = hexToVec(opts.colorTop || "#0E1F1C"), colorBottom = hexToVec(opts.colorBottom || "#152D28"), brass = hexToVec(opts.brass || "#B8874A");
+  let W,H,DPR;
+  function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=Math.max(1,W*DPR); canvas.height=Math.max(1,H*DPR); gl.viewport(0,0,canvas.width,canvas.height); }
+  window.addEventListener("resize", resize); resize();
+  const startClock = performance.now();
+  const touches = new Array(6).fill(0).map(()=>({x:0,y:0,t:-1000}));
+  let ti = 0;
+  function spawnAt(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    const cssX = clientX-rect.left, cssY = clientY-rect.top;
+    const devX = cssX*DPR, devY = cssY*DPR;
+    const now = (performance.now()-startClock)/1000;
+    touches[ti] = {x:devX, y:canvas.height-devY, t:now}; ti=(ti+1)%touches.length;
+  }
+  function eventXY(e){ if (e.touches && e.touches[0]) return [e.touches[0].clientX, e.touches[0].clientY]; return [e.clientX, e.clientY]; }
+  if (opts.interactive !== false){
+    canvas.addEventListener("pointerdown", e=>spawnAt(...eventXY(e)));
+    canvas.addEventListener("touchstart", e=>spawnAt(...eventXY(e)), {passive:true});
+  }
+  if (opts.seed){ const r=canvas.getBoundingClientRect(); spawnAt(r.left+canvas.clientWidth*0.5, r.top+canvas.clientHeight*0.42); }
+  let raf, auto = opts.autoInterval||0, frame=0;
+  function render(){
+    frame++;
+    if (auto && frame%auto===0){ const r=canvas.getBoundingClientRect(); spawnAt(r.left+r.width*(0.3+Math.random()*0.4), r.top+r.height*(0.4+Math.random()*0.3)); }
+    const now = (performance.now()-startClock)/1000;
+    gl.uniform2f(uResolution, canvas.width, canvas.height);
+    gl.uniform1f(uTime, now);
+    const flat = new Float32Array(18);
+    touches.forEach((t,i)=>{ flat[i*3]=t.x; flat[i*3+1]=t.y; flat[i*3+2]=t.t; });
+    gl.uniform3fv(uTouches, flat);
+    gl.uniform3f(uColorTop, ...colorTop); gl.uniform3f(uColorBottom, ...colorBottom); gl.uniform3f(uBrass, ...brass);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    raf = requestAnimationFrame(render);
+  }
+  render();
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize", resize); } };
+}
+
+function createDiyaLight(canvas){
+  const ctx = canvas.getContext("2d");
+  let W,H,DPR,raf;
+  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  window.addEventListener("resize", size); size();
+  let flame = null;
+  const startClock = performance.now();
+  function spawn(x,y){ flame = {x,y,born:(performance.now()-startClock)/1000}; }
+  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
+  const onDown = e => spawn(...xy(e));
+  canvas.addEventListener("pointerdown", onDown);
+  canvas.addEventListener("touchstart", onDown, {passive:true});
+  function draw(){
+    const t = (performance.now()-startClock)/1000;
+    ctx.clearRect(0,0,W,H);
+    const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    if (!flame){
+      const pulse = 0.05 + Math.sin(t*0.6)*0.015;
+      const rg = ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.min(W,H)*0.25);
+      rg.addColorStop(0, `rgba(184,135,74,${pulse})`); rg.addColorStop(1,"rgba(184,135,74,0)");
+      ctx.fillStyle = rg; ctx.fillRect(0,0,W,H);
+    } else {
+      const age = t - flame.born;
+      const flicker = 1 + Math.sin(t*14)*0.06 + Math.sin(t*23)*0.03;
+
+      // large ambient wash: the whole scene gently lit, growing in over ~2.5s
+      const washGrow = Math.min(age/2.5, 1);
+      const washRadius = Math.max(W,H) * (0.55 + washGrow*0.5) * (1 + Math.sin(t*1.2)*0.02);
+      const wash = ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius);
+      wash.addColorStop(0, `rgba(184,135,74,${0.16*washGrow})`);
+      wash.addColorStop(0.45, `rgba(184,135,74,${0.07*washGrow})`);
+      wash.addColorStop(1, "rgba(184,135,74,0)");
+      ctx.fillStyle = wash; ctx.fillRect(0,0,W,H);
+
+      // medium glow around the flame itself, brighter and closer
+      const radius = Math.min(W,H) * (0.32 + Math.min(age*0.04,0.14)) * flicker;
+      const rg = ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,radius);
+      rg.addColorStop(0,"rgba(232,201,160,0.6)"); rg.addColorStop(0.35,"rgba(184,135,74,0.32)"); rg.addColorStop(1,"rgba(184,135,74,0)");
+      ctx.fillStyle = rg; ctx.fillRect(0,0,W,H);
+
+      // subtle unifying warm color grade over the whole scene once lit
+      ctx.fillStyle = `rgba(184,135,74,${0.03*washGrow})`;
+      ctx.fillRect(0,0,W,H);
+
+      const fh = 22*flicker, fw = 9*flicker;
+      ctx.beginPath();
+      ctx.moveTo(flame.x, flame.y+fh*0.5);
+      ctx.quadraticCurveTo(flame.x-fw, flame.y-fh*0.1, flame.x, flame.y-fh);
+      ctx.quadraticCurveTo(flame.x+fw, flame.y-fh*0.1, flame.x, flame.y+fh*0.5);
+      const fg = ctx.createLinearGradient(flame.x,flame.y-fh,flame.x,flame.y+fh*0.5);
+      fg.addColorStop(0,"#F5EFE3"); fg.addColorStop(0.5,"#E8C9A0"); fg.addColorStop(1,"#B8874A");
+      ctx.fillStyle = fg; ctx.fill();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+  draw();
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); } };
+}
+
+function createFrostReveal(canvas){
+  const ctx = canvas.getContext("2d");
+  let W,H,DPR,raf;
+  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); buildNoise(); }
+  window.addEventListener("resize", size);
+  let clears = [], holding=false, holdPos=null;
+  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
+  const onDown = e => { holding=true; holdPos=xy(e); clears.push({x:holdPos[0], y:holdPos[1], r:0}); };
+  const onMove = e => { if (holding) holdPos = xy(e); };
+  const onUp = () => { holding = false; };
+  canvas.addEventListener("pointerdown", onDown);
+  canvas.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+  canvas.addEventListener("touchstart", onDown, {passive:true});
+  canvas.addEventListener("touchmove", onMove, {passive:true});
+  window.addEventListener("touchend", onUp);
+  const noise = document.createElement("canvas");
+  function buildNoise(){
+    noise.width = W||canvas.clientWidth; noise.height = H||canvas.clientHeight;
+    const nctx = noise.getContext("2d");
+    const img = nctx.createImageData(noise.width, noise.height);
+    for (let i=0;i<img.data.length;i+=4){ const v=235+Math.random()*15; img.data[i]=v; img.data[i+1]=v-3; img.data[i+2]=v-10; img.data[i+3]=28; }
+    nctx.putImageData(img,0,0);
+  }
+  size();
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    ctx.save();
+    ctx.font = "500 28px Fraunces, Georgia, serif";
+    ctx.fillStyle = "rgba(232,201,160,0.85)"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText("Kymella", W/2, H/2);
+    ctx.restore();
+    ctx.save();
+    ctx.fillStyle = "#EDE5D4"; ctx.globalAlpha = 0.94; ctx.fillRect(0,0,W,H);
+    ctx.drawImage(noise,0,0,W,H);
+    ctx.globalCompositeOperation = "destination-out";
+    if (holding && holdPos){ const c=clears[clears.length-1]; c.x=holdPos[0]; c.y=holdPos[1]; c.r=Math.min(c.r+2.2,130); }
+    clears.forEach(c=>{
+      const rg = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
+      rg.addColorStop(0,"rgba(0,0,0,1)"); rg.addColorStop(0.8,"rgba(0,0,0,0.9)"); rg.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.restore();
+    raf = requestAnimationFrame(draw);
+  }
+  draw();
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); window.removeEventListener("touchend",onUp); } };
+}
+
+function createIncenseDrift(canvas){
+  const ctx = canvas.getContext("2d");
+  let W,H,DPR,raf;
+  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  window.addEventListener("resize", size); size();
+  let mouse = {x:0.5,y:0.5};
+  const onMove = e => { const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; mouse.x=(p.clientX-r.left)/W; mouse.y=(p.clientY-r.top)/H; };
+  canvas.addEventListener("pointermove", onMove); canvas.addEventListener("touchmove", onMove, {passive:true});
+  const startClock = performance.now();
+  function draw(){
+    const t = (performance.now()-startClock)/1000;
+    ctx.clearRect(0,0,W,H);
+    const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    const baseX = W*0.5, baseY = H*0.72;
+    const pull = ((mouse.x*W - baseX)/W) * 24;
+    ctx.beginPath(); ctx.moveTo(baseX, baseY);
+    const segments = 60;
+    for (let i=1;i<=segments;i++){ const f=i/segments; const y=baseY-f*H*0.62; const drift=Math.sin(f*6-t*0.8)*(18+f*30)+pull*f; const wobble=Math.sin(f*13+t*1.3)*f*8; ctx.lineTo(baseX+drift+wobble, y); }
+    ctx.strokeStyle = "rgba(232,201,160,0.16)"; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(baseX, baseY);
+    for (let i=1;i<=segments;i++){ const f=i/segments; const y=baseY-f*H*0.62; const drift=Math.sin(f*5-t*0.65+1.4)*(14+f*24)+pull*f*0.7; ctx.lineTo(baseX+drift, y); }
+    ctx.strokeStyle = "rgba(232,201,160,0.09)"; ctx.lineWidth=5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(baseX,baseY,2.4,0,Math.PI*2); ctx.fillStyle="#E8C9A0"; ctx.fill();
+    raf = requestAnimationFrame(draw);
+  }
+  draw();
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointermove",onMove); canvas.removeEventListener("touchmove",onMove); } };
+}
+
+const THEMES = [
+  { id:"ripple",  label:"Ripple",   hint:"touch the water",       soon:false, start:c=>createWaterRipple(c,{seed:true}) },
+  { id:"diya",    label:"Diya",     hint:"touch to light",        soon:false, start:c=>createDiyaLight(c) },
+  { id:"frost",   label:"Frost",    hint:"press and hold",        soon:false, start:c=>createFrostReveal(c) },
+  { id:"incense", label:"Incense",  hint:"move gently nearby",    soon:false, start:c=>createIncenseDrift(c) },
+  { id:"silk",    label:"Silk Drape",     soon:true },
+  { id:"doors",   label:"Threshold Doors",soon:true },
+  { id:"ink",     label:"Ink Calligraphy",soon:true },
+];
+let currentInstance = null;
+const wrap = document.getElementById("heroCanvasWrap");
+const pillsEl = document.getElementById("switcherPills");
+const hintEl = document.getElementById("heroHint");
+
+function mountTheme(theme){
+  if (currentInstance && currentInstance.stop) currentInstance.stop();
+  wrap.innerHTML = "";
+  const canvas = document.createElement("canvas");
+  canvas.id = "heroCanvas";
+  wrap.appendChild(canvas);
+  currentInstance = theme.start(canvas);
+  hintEl.textContent = theme.hint;
+  document.querySelectorAll(".pill").forEach(p => p.classList.toggle("active", p.dataset.id === theme.id));
+}
+THEMES.forEach(theme => {
+  const pill = document.createElement("button");
+  pill.className = "pill";
+  pill.dataset.id = theme.id;
+  pill.innerHTML = theme.soon ? `${theme.label}<span class="soon">Soon</span>` : theme.label;
+  if (theme.soon) { pill.disabled = true; }
+  else { pill.addEventListener("click", () => mountTheme(theme)); }
+  pillsEl.appendChild(pill);
+});
+mountTheme(THEMES[0]);
+
+// Bulletproof hero height: some browsers/webviews don't handle vh/dvh/svh
+// correctly and the hero can collapse, making the switcher overlap the next
+// section. Measuring the real viewport height in JS sidesteps that entirely.
+const heroEl = document.querySelector(".hero");
+function setHeroHeight(){
+  const h = Math.max(window.innerHeight, 660);
+  heroEl.style.minHeight = h + "px";
+  heroEl.style.height = "auto";
+}
+setHeroHeight();
+window.addEventListener("resize", setHeroHeight);
+window.addEventListener("orientationchange", setHeroHeight);
+
+createWaterRipple(document.getElementById("teaserCanvas"), {interactive:false, autoInterval:140, seed:true});
+
+const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll(".up").forEach(el=>io.observe(el));
+
+const KYMELLA_API = "https://evarria-backend-production.up.railway.app/api/kymella-waitlist";
+document.getElementById("wlForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const name = document.getElementById("wlName").value.trim();
+  const email = document.getElementById("wlEmail").value.trim();
+  const btn = this.querySelector("button[type=submit]");
+  btn.disabled = true; btn.textContent = "Sending...";
+  try {
+    const r = await fetch(KYMELLA_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email }),
+    });
+    if (!r.ok) throw new Error("request failed");
+    this.style.display = "none";
+    document.getElementById("wlSuccess").style.display = "block";
+  } catch (err) {
+    btn.disabled = false; btn.textContent = "Request access";
+    alert("That didn't go through. Please try again in a moment.");
+  }
+});
+</script>
+</body>
+</html>
