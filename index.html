@@ -100,6 +100,10 @@ input{font-family:var(--body);font-size:15px}
 .wl-form{max-width:440px;margin:36px auto 0;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .wl-form input{flex:1;min-width:220px;border:1px solid var(--line-dk);background:var(--mist);padding:15px 16px;outline:none}
 .wl-form input:focus{border-color:var(--brass)}
+.interest-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.ipill{font-size:12px;font-weight:600;letter-spacing:.03em;padding:10px 18px;border:1px solid var(--line-dk);color:var(--ink-3);border-radius:20px;transition:all .2s}
+.ipill:hover{border-color:var(--brass)}
+.ipill.active{background:var(--brass);border-color:var(--brass);color:var(--ink)}
 .wl-note{margin-top:14px;font-size:12.5px;color:var(--ink-3)}
 .wl-success{display:none;font-family:var(--disp);font-size:19px;margin-top:24px;color:var(--brass-deep)}
 
@@ -165,19 +169,19 @@ input{font-family:var(--body);font-size:15px}
         <div class="eyebrow">Most Popular</div>
         <h3>The magical, interactive invite</h3>
         <p>A cinematic site built around one signature interaction: the thing your guests remember and talk about after the wedding is over.</p>
-        <a class="pick" href="#waitlist">Join the waitlist →</a>
+        <a class="pick" href="#waitlist" onclick="pickInterest('interactive')">Join the waitlist →</a>
       </div>
       <div class="path">
         <div class="eyebrow">For the Organized</div>
         <h3>RSVPs & guest management, handled</h3>
         <p>A clean, working dashboard for RSVPs, meal counts, and guest questions, without the design being the point.</p>
-        <a class="pick" href="#waitlist">Join the waitlist →</a>
+        <a class="pick" href="#waitlist" onclick="pickInterest('rsvp')">Join the waitlist →</a>
       </div>
       <div class="path">
         <div class="eyebrow">Both, Together</div>
         <h3>The full experience</h3>
         <p>A signature interactive site with real RSVP and guest management underneath: the moment and the machinery, in one build.</p>
-        <a class="pick" href="#waitlist">Join the waitlist →</a>
+        <a class="pick" href="#waitlist" onclick="pickInterest('both')">Join the waitlist →</a>
       </div>
     </div>
   </div>
@@ -188,9 +192,15 @@ input{font-family:var(--body);font-size:15px}
     <div class="eyebrow">Early Access</div>
     <h2 class="h2">We're taking a <em>small</em> number of weddings.</h2>
     <p class="lede">Kymella is intentionally limited-capacity. Every site is built by hand. Join the waitlist and we'll reach out as slots open.</p>
+    <div class="interest-pills" id="interestPills">
+      <button type="button" class="ipill" data-v="interactive" onclick="pickInterest('interactive')">The interactive invite</button>
+      <button type="button" class="ipill" data-v="rsvp" onclick="pickInterest('rsvp')">RSVP & guest management</button>
+      <button type="button" class="ipill" data-v="both" onclick="pickInterest('both')">Both</button>
+    </div>
     <form class="wl-form" id="wlForm">
       <input type="text" id="wlName" placeholder="Your name" required>
       <input type="email" id="wlEmail" placeholder="Email" required>
+      <input type="date" id="wlDate" placeholder="Wedding date">
       <button class="btn btn-brass" type="submit">Request access</button>
     </form>
     <p class="wl-note">No pricing yet, no obligation. Just early access when we open.</p>
@@ -490,17 +500,23 @@ const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.ta
 document.querySelectorAll(".up").forEach(el=>io.observe(el));
 
 const KYMELLA_API = "https://evarria-backend-production.up.railway.app/api/kymella-waitlist";
+let selectedInterest = "";
+function pickInterest(v){
+  selectedInterest = v;
+  document.querySelectorAll(".ipill").forEach(p => p.classList.toggle("active", p.dataset.v === v));
+}
 document.getElementById("wlForm").addEventListener("submit", async function(e){
   e.preventDefault();
   const name = document.getElementById("wlName").value.trim();
   const email = document.getElementById("wlEmail").value.trim();
+  const wedding_date = document.getElementById("wlDate").value;
   const btn = this.querySelector("button[type=submit]");
   btn.disabled = true; btn.textContent = "Sending...";
   try {
     const r = await fetch(KYMELLA_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email }),
+      body: JSON.stringify({ name, email, wedding_date, interest: selectedInterest }),
     });
     if (!r.ok) throw new Error("request failed");
     this.style.display = "none";
