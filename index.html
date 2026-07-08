@@ -213,96 +213,137 @@ input{font-family:var(--body);font-size:15px}
 <script>
 function createWaterRipple(canvasEl, opts = {}) {
   const canvas = canvasEl;
-  const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-  if (!gl) return null;
-  const vsSrc = `attribute vec2 aPos; void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }`;
-  const fsSrc = `
-    precision highp float;
-    uniform vec2 uResolution; uniform float uTime; uniform vec3 uTouches[6];
-    uniform vec3 uColorTop; uniform vec3 uColorBottom; uniform vec3 uBrass;
-    float waveHeight(vec2 p){
-      float h = 0.0;
-      for (int i = 0; i < 6; i++){
-        vec3 t = uTouches[i];
-        float age = uTime - t.z;
-        if (age < 0.0 || age > 7.0) continue;
-        float dist = length(p - t.xy);
-        float decay = exp(-age*0.5) * exp(-dist*0.0022);
-        h += decay * sin(dist*0.05 - age*5.0);
+  const ctx = canvas.getContext("2d");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Real discrete wave-equation simulation (coarse grid, upscaled) —
+  // not a sine-wave approximation. Propagates, reflects, and interferes
+  // like an actual water surface.
+  const RES_W = 150, RES_H = 84, N = RES_W * RES_H;
+  let bufA = new Float32Array(N), bufB = new Float32Array(N), bufC = new Float32Array(N);
+  const DAMPING = 0.985;
+
+  const off = document.createElement("canvas");
+  off.width = RES_W; off.height = RES_H;
+  const offCtx = off.getContext("2d");
+  const imgData = offCtx.createImageData(RES_W, RES_H);
+
+  function hexToRgb(hex){ const n=parseInt(hex.replace("#",""),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C");
+  const BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28");
+  const BRASS = hexToRgb(opts.brass || "#B8874A");
+
+  function splash(gx, gy, strength, radius){
+    for (let dy=-radius; dy<=radius; dy++){
+      for (let dx=-radius; dx<=radius; dx++){
+        const x=gx+dx, y=gy+dy;
+        if (x<1||x>=RES_W-1||y<1||y>=RES_H-1) continue;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist>radius) continue;
+        bufA[y*RES_W+x] += strength * (1 - dist/radius);
       }
-      float amb = sin(p.x*0.006 + uTime*0.35) * cos(p.y*0.008 - uTime*0.28) * 0.035;
-      return h + amb;
     }
-    void main(){
-      vec2 p = gl_FragCoord.xy;
-      float eps = 1.6;
-      float hL = waveHeight(p - vec2(eps,0.0));
-      float hR = waveHeight(p + vec2(eps,0.0));
-      float hD = waveHeight(p - vec2(0.0,eps));
-      float hU = waveHeight(p + vec2(0.0,eps));
-      vec2 grad = vec2(hR-hL, hU-hD) / (2.0*eps);
-      vec3 normal = normalize(vec3(-grad.x*18.0, -grad.y*18.0, 1.0));
-      float ft = p.y / uResolution.y;
-      float banding = grad.x*0.6 + grad.y*0.4;
-      vec3 base = mix(uColorBottom, uColorTop, clamp(ft + banding, 0.0, 1.0));
-      vec3 lightDir = normalize(vec3(-0.35, 0.55, 0.78));
-      float spec = pow(max(dot(normal, lightDir), 0.0), 34.0);
-      float ambientSheen = pow(max(dot(normal, vec3(0.0,0.0,1.0)), 0.0), 60.0) * 0.15;
-      vec3 color = base + uBrass * (spec*0.85 + ambientSheen);
-      vec2 uv = p / uResolution;
-      float vig = smoothstep(0.9, 0.25, length(uv - 0.5));
-      color *= mix(0.82, 1.0, vig);
-      gl_FragColor = vec4(color, 1.0);
+  }
+  function stepWater(){
+    for (let y=1; y<RES_H-1; y++){
+      const row = y*RES_W;
+      for (let x=1; x<RES_W-1; x++){
+        const i = row+x;
+        bufC[i] = (bufA[i-1]+bufA[i+1]+bufA[i-RES_W]+bufA[i+RES_W])*0.5 - bufB[i];
+        bufC[i] *= DAMPING;
+      }
     }
-  `;
-  function compile(type, src){ const sh=gl.createShader(type); gl.shaderSource(sh,src); gl.compileShader(sh); if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(sh));return null;} return sh; }
-  const vs = compile(gl.VERTEX_SHADER, vsSrc), fs = compile(gl.FRAGMENT_SHADER, fsSrc);
-  const prog = gl.createProgram(); gl.attachShader(prog,vs); gl.attachShader(prog,fs); gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)){ console.error(gl.getProgramInfoLog(prog)); return null; }
-  gl.useProgram(prog);
-  const quad = new Float32Array([-1,-1, 1,-1, -1,1, 1,-1, 1,1, -1,1]);
-  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(prog, "aPos"); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
-  const uResolution = gl.getUniformLocation(prog,"uResolution"), uTime = gl.getUniformLocation(prog,"uTime"),
-        uTouches = gl.getUniformLocation(prog,"uTouches"), uColorTop = gl.getUniformLocation(prog,"uColorTop"),
-        uColorBottom = gl.getUniformLocation(prog,"uColorBottom"), uBrass = gl.getUniformLocation(prog,"uBrass");
-  function hexToVec(hex){ const n=parseInt(hex.replace("#",""),16); return [((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255]; }
-  const colorTop = hexToVec(opts.colorTop || "#0E1F1C"), colorBottom = hexToVec(opts.colorBottom || "#152D28"), brass = hexToVec(opts.brass || "#B8874A");
-  let W,H,DPR;
-  function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=Math.max(1,W*DPR); canvas.height=Math.max(1,H*DPR); gl.viewport(0,0,canvas.width,canvas.height); }
+    const tmp=bufB; bufB=bufA; bufA=bufC; bufC=tmp;
+  }
+  const LIGHT_X = 0.72, LIGHT_Y = 0.62;
+  function renderWater(){
+    const data = imgData.data;
+    for (let y=0; y<RES_H; y++){
+      const row = y*RES_W;
+      const vt = y/RES_H;
+      const baseR = BASE_TOP[0] + (BASE_BOTTOM[0]-BASE_TOP[0])*vt;
+      const baseG = BASE_TOP[1] + (BASE_BOTTOM[1]-BASE_TOP[1])*vt;
+      const baseB = BASE_TOP[2] + (BASE_BOTTOM[2]-BASE_TOP[2])*vt;
+      for (let x=0; x<RES_W; x++){
+        const i = row+x;
+        let shade = 0;
+        if (x>0&&x<RES_W-1&&y>0&&y<RES_H-1){
+          const dx = bufA[i+1]-bufA[i-1];
+          const dy = bufA[i+RES_W]-bufA[i-RES_W];
+          shade = (dx*LIGHT_X + dy*LIGHT_Y) * 5.5;
+        }
+        let r=baseR, g=baseG, b=baseB;
+        if (shade>0){
+          const t = Math.min(1, shade/14);
+          r += (BRASS[0]-r)*t; g += (BRASS[1]-g)*t; b += (BRASS[2]-b)*t;
+        } else if (shade<0){
+          const t = Math.min(1, -shade/22)*0.5;
+          r*=(1-t); g*=(1-t); b*=(1-t);
+        }
+        const depth = bufA[i]*0.18;
+        const p = i*4;
+        data[p]=Math.max(0,Math.min(255,r+depth));
+        data[p+1]=Math.max(0,Math.min(255,g+depth));
+        data[p+2]=Math.max(0,Math.min(255,b+depth));
+        data[p+3]=255;
+      }
+    }
+    offCtx.putImageData(imgData,0,0);
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(off,0,0,RES_W,RES_H,0,0,canvas.width,canvas.height);
+    const vg = ctx.createRadialGradient(canvas.width/2,canvas.height*0.4,canvas.width*0.15,canvas.width/2,canvas.height*0.4,canvas.width*0.75);
+    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)");
+    ctx.fillStyle=vg; ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+
+  function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
   window.addEventListener("resize", resize); resize();
-  const startClock = performance.now();
-  const touches = new Array(6).fill(0).map(()=>({x:0,y:0,t:-1000}));
-  let ti = 0;
-  function spawnAt(clientX, clientY){
+
+  function toGrid(clientX, clientY){
     const rect = canvas.getBoundingClientRect();
-    const cssX = clientX-rect.left, cssY = clientY-rect.top;
-    const devX = cssX*DPR, devY = cssY*DPR;
-    const now = (performance.now()-startClock)/1000;
-    touches[ti] = {x:devX, y:canvas.height-devY, t:now}; ti=(ti+1)%touches.length;
+    const x = clientX-rect.left, y = clientY-rect.top;
+    return { gx: Math.floor((x/rect.width)*RES_W), gy: Math.floor((y/rect.height)*RES_H) };
   }
   function eventXY(e){ if (e.touches && e.touches[0]) return [e.touches[0].clientX, e.touches[0].clientY]; return [e.clientX, e.clientY]; }
+
+  let dragging = false;
+  function onDown(e){ const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,26,5); dragging=true; }
+  function onMove(e){ if(!dragging) return; const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,8,3); }
+  function onUp(){ dragging=false; }
   if (opts.interactive !== false){
-    canvas.addEventListener("pointerdown", e=>spawnAt(...eventXY(e)));
-    canvas.addEventListener("touchstart", e=>spawnAt(...eventXY(e)), {passive:true});
+    canvas.addEventListener("pointerdown", onDown);
+    canvas.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    canvas.addEventListener("touchstart", onDown, {passive:true});
+    canvas.addEventListener("touchmove", onMove, {passive:true});
+    window.addEventListener("touchend", onUp);
   }
-  if (opts.seed){ const r=canvas.getBoundingClientRect(); spawnAt(r.left+canvas.clientWidth*0.5, r.top+canvas.clientHeight*0.42); }
-  let raf, auto = opts.autoInterval||0, frame=0;
-  function render(){
-    frame++;
-    if (auto && frame%auto===0){ const r=canvas.getBoundingClientRect(); spawnAt(r.left+r.width*(0.3+Math.random()*0.4), r.top+r.height*(0.4+Math.random()*0.3)); }
-    const now = (performance.now()-startClock)/1000;
-    gl.uniform2f(uResolution, canvas.width, canvas.height);
-    gl.uniform1f(uTime, now);
-    const flat = new Float32Array(18);
-    touches.forEach((t,i)=>{ flat[i*3]=t.x; flat[i*3+1]=t.y; flat[i*3+2]=t.t; });
-    gl.uniform3fv(uTouches, flat);
-    gl.uniform3f(uColorTop, ...colorTop); gl.uniform3f(uColorBottom, ...colorBottom); gl.uniform3f(uBrass, ...brass);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    raf = requestAnimationFrame(render);
+
+  let ambientTimer = null;
+  if (!reduceMotion){
+    ambientTimer = setInterval(() => {
+      const gx = 4+Math.random()*(RES_W-8), gy = 4+Math.random()*(RES_H-8);
+      splash(gx, gy, 9, 3);
+    }, 1800);
   }
-  render();
-  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize", resize); } };
+  if (opts.seed) splash(RES_W/2, RES_H*0.42, 30, 7);
+
+  let raf;
+  function loop(){ stepWater(); renderWater(); if (!reduceMotion) raf = requestAnimationFrame(loop); }
+  if (reduceMotion) renderWater(); else loop();
+
+  return { stop(){
+    if (raf) cancelAnimationFrame(raf);
+    if (ambientTimer) clearInterval(ambientTimer);
+    window.removeEventListener("resize", resize);
+    canvas.removeEventListener("pointerdown", onDown);
+    canvas.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    canvas.removeEventListener("touchstart", onDown);
+    canvas.removeEventListener("touchmove", onMove);
+    window.removeEventListener("touchend", onUp);
+  }};
 }
 
 function createDiyaLight(canvas){
@@ -365,31 +406,74 @@ function createDiyaLight(canvas){
   return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); } };
 }
 
-function createFrostReveal(canvas){
+function createFrostReveal(canvas, label){
   const ctx = canvas.getContext("2d");
-  let W,H,DPR,raf;
-  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); buildNoise(); }
+  let W,H,raf;
+  const frostLayer = document.createElement("canvas");
+  const frostCtx = frostLayer.getContext("2d");
+  const maskLayer = document.createElement("canvas");
+  const maskCtx = maskLayer.getContext("2d");
+
+  function buildFrostTexture(){
+    frostLayer.width = W; frostLayer.height = H;
+    frostCtx.clearRect(0,0,W,H);
+    frostCtx.fillStyle = "#EDE5D4";
+    frostCtx.globalAlpha = 0.88;
+    frostCtx.fillRect(0,0,W,H);
+    frostCtx.globalAlpha = 1;
+    // organic condensation clusters, not uniform per-pixel noise
+    frostCtx.filter = "blur(11px)";
+    for (let i=0;i<40;i++){
+      const x=Math.random()*W, y=Math.random()*H, r=22+Math.random()*75;
+      const op = 0.15+Math.random()*0.35;
+      frostCtx.fillStyle = `rgba(255,255,255,${op})`;
+      frostCtx.beginPath(); frostCtx.arc(x,y,r,0,Math.PI*2); frostCtx.fill();
+    }
+    frostCtx.filter = "none";
+    // fine grain layered on top so it still reads as textured glass up close
+    const img = frostCtx.getImageData(0,0,W,H);
+    for (let i=0;i<img.data.length;i+=4){
+      const n = (Math.random()-0.5)*12;
+      img.data[i]=Math.min(255,Math.max(0,img.data[i]+n));
+      img.data[i+1]=Math.min(255,Math.max(0,img.data[i+1]+n));
+      img.data[i+2]=Math.min(255,Math.max(0,img.data[i+2]+n));
+    }
+    frostCtx.putImageData(img,0,0);
+  }
+
+  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; buildFrostTexture(); maskCtx.clearRect(0,0,W,H); }
   window.addEventListener("resize", size);
-  let clears = [], holding=false, holdPos=null;
+
+  let holding=false, lastPos=null;
   function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
-  const onDown = e => { holding=true; holdPos=xy(e); clears.push({x:holdPos[0], y:holdPos[1], r:0}); };
-  const onMove = e => { if (holding) holdPos = xy(e); };
-  const onUp = () => { holding = false; };
+  function wipeAt(x,y){
+    maskCtx.filter = "blur(9px)";
+    maskCtx.fillStyle = "rgba(0,0,0,1)";
+    maskCtx.beginPath(); maskCtx.arc(x,y,34,0,Math.PI*2); maskCtx.fill();
+    maskCtx.filter = "none";
+  }
+  const onDown = e => { holding=true; const [x,y]=xy(e); lastPos=[x,y]; wipeAt(x,y); };
+  const onMove = e => {
+    if (!holding) return;
+    const [x,y]=xy(e);
+    if (lastPos){
+      const dx=x-lastPos[0], dy=y-lastPos[1];
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const steps=Math.max(1, Math.floor(dist/8));
+      for (let s=0;s<=steps;s++) wipeAt(lastPos[0]+dx*(s/steps), lastPos[1]+dy*(s/steps));
+    }
+    lastPos=[x,y];
+  };
+  const onUp = () => { holding=false; lastPos=null; };
   canvas.addEventListener("pointerdown", onDown);
   canvas.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
   canvas.addEventListener("touchstart", onDown, {passive:true});
   canvas.addEventListener("touchmove", onMove, {passive:true});
   window.addEventListener("touchend", onUp);
-  const noise = document.createElement("canvas");
-  function buildNoise(){
-    noise.width = W||canvas.clientWidth; noise.height = H||canvas.clientHeight;
-    const nctx = noise.getContext("2d");
-    const img = nctx.createImageData(noise.width, noise.height);
-    for (let i=0;i<img.data.length;i+=4){ const v=235+Math.random()*15; img.data[i]=v; img.data[i+1]=v-3; img.data[i+2]=v-10; img.data[i+3]=28; }
-    nctx.putImageData(img,0,0);
-  }
+
   size();
+
   function draw(){
     ctx.clearRect(0,0,W,H);
     const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
@@ -397,23 +481,28 @@ function createFrostReveal(canvas){
     ctx.save();
     ctx.font = "500 28px Fraunces, Georgia, serif";
     ctx.fillStyle = "rgba(232,201,160,0.85)"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("Kymella", W/2, H/2);
+    ctx.fillText(label || "Kymella", W/2, H/2);
     ctx.restore();
+
     ctx.save();
-    ctx.fillStyle = "#EDE5D4"; ctx.globalAlpha = 0.94; ctx.fillRect(0,0,W,H);
-    ctx.drawImage(noise,0,0,W,H);
+    ctx.drawImage(frostLayer,0,0);
     ctx.globalCompositeOperation = "destination-out";
-    if (holding && holdPos){ const c=clears[clears.length-1]; c.x=holdPos[0]; c.y=holdPos[1]; c.r=Math.min(c.r+2.2,130); }
-    clears.forEach(c=>{
-      const rg = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
-      rg.addColorStop(0,"rgba(0,0,0,1)"); rg.addColorStop(0.8,"rgba(0,0,0,0.9)"); rg.addColorStop(1,"rgba(0,0,0,0)");
-      ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2); ctx.fill();
-    });
+    ctx.drawImage(maskLayer,0,0);
     ctx.restore();
+
     raf = requestAnimationFrame(draw);
   }
   draw();
-  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); window.removeEventListener("touchend",onUp); } };
+  return { stop(){
+    cancelAnimationFrame(raf);
+    window.removeEventListener("resize",size);
+    canvas.removeEventListener("pointerdown",onDown);
+    canvas.removeEventListener("pointermove",onMove);
+    window.removeEventListener("pointerup",onUp);
+    canvas.removeEventListener("touchstart",onDown);
+    canvas.removeEventListener("touchmove",onMove);
+    window.removeEventListener("touchend",onUp);
+  } };
 }
 
 function createIncenseDrift(canvas){
@@ -421,29 +510,72 @@ function createIncenseDrift(canvas){
   let W,H,DPR,raf;
   function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
   window.addEventListener("resize", size); size();
-  let mouse = {x:0.5,y:0.5};
-  const onMove = e => { const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; mouse.x=(p.clientX-r.left)/W; mouse.y=(p.clientY-r.top)/H; };
-  canvas.addEventListener("pointermove", onMove); canvas.addEventListener("touchmove", onMove, {passive:true});
+
+  let mouseX=null, mouseY=null, velocity=0;
+  function updateMouse(e){
+    const r=canvas.getBoundingClientRect();
+    const p=(e.touches&&e.touches[0])?e.touches[0]:e;
+    const nx=p.clientX-r.left, ny=p.clientY-r.top;
+    if (mouseX!==null){ const dx=nx-mouseX, dy=ny-mouseY; velocity=Math.min(60,Math.sqrt(dx*dx+dy*dy)); }
+    mouseX=nx; mouseY=ny;
+  }
+  const onMove = e => updateMouse(e);
+  const onLeave = () => { mouseX=null; mouseY=null; velocity=0; };
+  canvas.addEventListener("pointermove", onMove);
+  canvas.addEventListener("touchmove", onMove, {passive:true});
+  canvas.addEventListener("pointerleave", onLeave);
+
+  const segments = 60;
+  let offsets = new Array(segments+1).fill(0);
+
   const startClock = performance.now();
   function draw(){
     const t = (performance.now()-startClock)/1000;
+    velocity *= 0.9;
     ctx.clearRect(0,0,W,H);
     const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
     ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
     const baseX = W*0.5, baseY = H*0.72;
-    const pull = ((mouse.x*W - baseX)/W) * 24;
+
+    for (let i=0;i<=segments;i++){
+      const f = i/segments;
+      const naturalX = baseX + Math.sin(f*6 - t*0.8)*(18+f*30) + Math.sin(f*13+t*1.3)*f*8;
+      const naturalY = baseY - f*H*0.62;
+      let target = 0;
+      if (mouseX !== null){
+        const dx = naturalX-mouseX, dy = naturalY-mouseY;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        const radius = 140 + f*60;
+        if (dist < radius){
+          const strength = 1 - dist/radius;
+          const dirX = dx/(dist||1);
+          target = dirX*strength*(40+f*70) + dirX*velocity*strength*1.8;
+        }
+      }
+      offsets[i] += (target - offsets[i]) * 0.12;
+    }
+
     ctx.beginPath(); ctx.moveTo(baseX, baseY);
-    const segments = 60;
-    for (let i=1;i<=segments;i++){ const f=i/segments; const y=baseY-f*H*0.62; const drift=Math.sin(f*6-t*0.8)*(18+f*30)+pull*f; const wobble=Math.sin(f*13+t*1.3)*f*8; ctx.lineTo(baseX+drift+wobble, y); }
-    ctx.strokeStyle = "rgba(232,201,160,0.16)"; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
+    for (let i=1;i<=segments;i++){
+      const f=i/segments; const y=baseY-f*H*0.62;
+      const drift = Math.sin(f*6-t*0.8)*(18+f*30) + Math.sin(f*13+t*1.3)*f*8;
+      ctx.lineTo(baseX+drift+offsets[i], y);
+    }
+    ctx.strokeStyle = "rgba(232,201,160,0.18)"; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
+
     ctx.beginPath(); ctx.moveTo(baseX, baseY);
-    for (let i=1;i<=segments;i++){ const f=i/segments; const y=baseY-f*H*0.62; const drift=Math.sin(f*5-t*0.65+1.4)*(14+f*24)+pull*f*0.7; ctx.lineTo(baseX+drift, y); }
-    ctx.strokeStyle = "rgba(232,201,160,0.09)"; ctx.lineWidth=5; ctx.stroke();
+    for (let i=1;i<=segments;i++){
+      const f=i/segments; const y=baseY-f*H*0.62;
+      const drift2 = Math.sin(f*5-t*0.65+1.4)*(14+f*24);
+      ctx.lineTo(baseX+drift2+offsets[i]*0.75, y);
+    }
+    ctx.strokeStyle = "rgba(232,201,160,0.1)"; ctx.lineWidth=5; ctx.stroke();
+
     ctx.beginPath(); ctx.arc(baseX,baseY,2.4,0,Math.PI*2); ctx.fillStyle="#E8C9A0"; ctx.fill();
     raf = requestAnimationFrame(draw);
   }
   draw();
-  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointermove",onMove); canvas.removeEventListener("touchmove",onMove); } };
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointermove",onMove); canvas.removeEventListener("touchmove",onMove); canvas.removeEventListener("pointerleave",onLeave); } };
 }
 
 const THEMES = [
