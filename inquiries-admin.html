@@ -109,6 +109,10 @@ function render(data){
     const sub = [inq.email, inq.wedding_date, inq.location].filter(Boolean).join(" · ");
     const transcriptHtml = inq.transcript.map(m => `
       <div class="tmsg ${m.role}"><b>${m.role === "user" ? names : "Concierge"}</b>${esc(m.content)}</div>`).join("");
+    const convertAction = inq.converted_wedding_id
+      ? `<p style="font-size:12.5px;color:#2D6A3E;margin-top:4px">Wedding already created (id ${inq.converted_wedding_id}) — build it out at /setup or /manage on the backend.</p>`
+      : `<button class="btn btn-brass" onclick="convertInquiry(${inq.id}, this)">Create wedding from this</button>
+         <p class="convert-msg" id="convert-msg-${inq.id}" style="font-size:12.5px;margin-top:8px;display:none"></p>`;
     return `
       <div class="card" id="card-${i}">
         <div class="card-head" onclick="document.getElementById('card-${i}').classList.toggle('open')">
@@ -124,10 +128,33 @@ function render(data){
             <dt>Notes</dt><dd>${esc(inq.notes)||"—"}</dd>
             <dt>Updated</dt><dd>${esc(inq.updated_at)}</dd>
           </div>
+          <div style="padding:4px 0 16px">${convertAction}</div>
           <div class="transcript">${transcriptHtml || "<em>No messages yet.</em>"}</div>
         </div>
       </div>`;
   }).join("");
+}
+async function convertInquiry(id, btn){
+  btn.disabled = true; btn.textContent = "Creating…";
+  const msgEl = document.getElementById(`convert-msg-${id}`);
+  try{
+    const r = await fetch(`${API}/${id}/convert`, { method:"POST", headers:{"x-setup-key":ADMIN_KEY} });
+    const data = await r.json();
+    msgEl.style.display = "block";
+    if (!r.ok){
+      msgEl.style.color = "#A4523F";
+      msgEl.textContent = data.error;
+      btn.disabled = false; btn.textContent = "Create wedding from this";
+      return;
+    }
+    msgEl.style.color = "#2D6A3E";
+    msgEl.innerHTML = `Wedding created. Admin key (save this now, shown once): <code>${esc(data.admin_key)}</code><br>${esc(data.setup_note)}`;
+    btn.style.display = "none";
+  }catch(e){
+    msgEl.style.display = "block"; msgEl.style.color = "#A4523F";
+    msgEl.textContent = "Couldn't reach the server — please try again.";
+    btn.disabled = false; btn.textContent = "Create wedding from this";
+  }
 }
 
 async function unlock(key){
