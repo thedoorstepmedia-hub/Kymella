@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Kymella, wedding sites with real craft behind them</title>
-<meta name="description" content="Cinematic, interactive wedding sites built around how your day actually feels, not a template with your names dropped in.">
-<meta property="og:title" content="Kymella, wedding sites with real craft behind them">
-<meta property="og:description" content="Cinematic, interactive wedding sites built around how your day actually feels.">
+<title>Kymella — A wedding site your guests will actually touch</title>
+<meta name="description" content="Pick a live, physics-driven hero effect, set up your wedding in ten minutes, and get your own invite link and RSVP dashboard immediately. One purchase, one wedding.">
+<meta property="og:title" content="Kymella — A wedding site your guests will actually touch">
+<meta property="og:description" content="A real water ripple, a diya flame, a frost reveal, drifting incense — pick one, make it yours, send it to your guests.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230E1F1C'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23B8874A' stroke-width='1.3'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23B8874A' stroke-width='0.8' opacity='0.5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -15,100 +16,110 @@
   --ink:#0E1F1C; --ink-2:#152D28; --ink-3:#26433C;
   --mist:#F5EFE3; --mist-dim:#EDE5D4;
   --brass:#B8874A; --brass-soft:#E8C9A0; --brass-deep:#8E6836;
-  --palm:#3D5A52;
-  --line:rgba(245,239,227,.13); --line-dk:rgba(14,31,28,.12);
+  --line:rgba(14,31,28,.12); --line-dk:rgba(245,239,227,.16);
   --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
-input{font-family:var(--body);font-size:15px}
-:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:2px}
 .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;color:var(--brass-deep)}
 .eyebrow.on-dark{color:var(--brass-soft)}
-
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:26px 40px;mix-blend-mode:difference}
-.nav .word{color:var(--mist);font-family:var(--disp);font-size:20px;font-weight:500}
-.nav .link{color:var(--mist);font-size:12.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
-@media(max-width:640px){.nav{padding:20px 22px}}
-
-.hero{position:relative;min-height:660px;padding-bottom:44px;background:var(--ink);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
-.hero-canvas-wrap{position:absolute;inset:0}
-.hero-canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:pointer;display:block}
-.hero-content{position:relative;z-index:2;pointer-events:none;color:var(--mist)}
-.hero .eyebrow{margin-bottom:22px}
-.hero h1{font-family:var(--disp);font-size:clamp(36px,7vw,66px);font-weight:400;line-height:1.12;max-width:820px}
-.hero h1 em{font-style:italic;font-weight:300;color:var(--brass-soft)}
-.hero .sub{margin-top:22px;font-size:15.5px;color:rgba(245,239,227,.65);max-width:440px;margin-left:auto;margin-right:auto}
-.hero-cta{margin-top:36px;pointer-events:auto;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 32px;font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:1px;transition:background .25s,color .25s,border-color .25s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px 32px;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;transition:background .25s,border-color .25s,color .25s,opacity .25s;border-radius:2px}
 .btn-brass{background:var(--brass);color:var(--ink)}
 .btn-brass:hover{background:var(--brass-soft)}
-.btn-line{border:1px solid rgba(245,239,227,.28);color:var(--mist)}
-.btn-line:hover{border-color:var(--brass-soft);color:var(--brass-soft)}
+.btn-brass:disabled{opacity:.4;cursor:default}
+.btn-solid{background:var(--ink);color:var(--mist)}
+.btn-solid:hover{background:var(--ink-2)}
+.btn-quiet{border:1px solid var(--line);color:var(--ink)}
+.btn-quiet:hover{border-color:var(--brass)}
+.btn-quiet.dark{border-color:var(--line-dk);color:var(--mist)}
+.btn-quiet.dark:hover{border-color:var(--brass);color:var(--brass-soft)}
 
-.switcher{position:relative;z-index:3;margin-top:44px;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:14px}
-.hero-hint{margin-top:20px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,239,227,.45)}
-.switcher-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:0 20px;max-width:640px}
-.pill{font-family:var(--body);font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:9px 16px;border:1px solid rgba(245,239,227,.22);color:rgba(245,239,227,.7);border-radius:20px;transition:all .25s;background:rgba(14,31,28,.35);backdrop-filter:blur(6px)}
-.pill:hover:not(:disabled){border-color:var(--brass-soft);color:var(--mist)}
-.pill.active{background:var(--brass);border-color:var(--brass);color:var(--ink)}
-.pill:disabled{opacity:.35;cursor:default}
-.pill .soon{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;margin-left:6px;opacity:.8}
+/* nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:24px 32px;mix-blend-mode:difference}
+.nav .word{color:var(--mist);font-family:var(--disp);font-size:19px;font-style:italic}
+.nav-links{display:flex;gap:22px;align-items:center;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mist)}
+@media(max-width:640px){.nav-links a:not(.cta){display:none}}
 
-.section{padding:110px 40px}
-.hero + .section{margin-top:8px}
-.inner{max-width:720px;margin:0 auto}
-.wide{max-width:1020px;margin:0 auto}
-@media(max-width:720px){.section{padding:72px 24px}}
+/* ================= PICKER HERO ================= */
+.picker-hero{position:relative;min-height:100svh;background:var(--ink);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:110px 22px 40px}
+#pickerCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.picker-content{position:relative;z-index:2;color:var(--mist);max-width:600px}
+.picker-content .eyebrow{margin-bottom:16px}
+.picker-content h1{font-family:var(--disp);font-size:clamp(30px,6vw,52px);font-weight:400;line-height:1.14}
+.picker-content h1 em{font-style:italic;color:var(--brass-soft)}
+.picker-content .sub{margin-top:16px;font-size:14.5px;color:rgba(245,239,227,.65);max-width:440px;margin-left:auto;margin-right:auto}
+.picker-hint{margin-top:18px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,227,.42)}
+
+.picker-controls{position:relative;z-index:2;margin-top:34px;pointer-events:auto;background:rgba(14,31,28,.55);backdrop-filter:blur(14px);border:1px solid rgba(245,239,227,.14);border-radius:3px;padding:22px 24px;max-width:560px;width:100%}
+.picker-row{display:flex;flex-direction:column;gap:10px;text-align:left}
+.picker-row + .picker-row{margin-top:18px}
+.picker-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-soft)}
+.effect-choices{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.effect-btn{padding:11px 6px;border:1px solid rgba(245,239,227,.18);border-radius:2px;color:var(--mist);font-size:12.5px;font-weight:600;transition:all .2s;background:rgba(245,239,227,.03)}
+.effect-btn:hover{border-color:var(--brass-soft)}
+.effect-btn.active{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+.palette-choices{display:flex;gap:10px;flex-wrap:wrap}
+.palette-btn{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 8px;border:1px solid rgba(245,239,227,.18);border-radius:20px;font-size:12px;font-weight:500;color:var(--mist);transition:all .2s;background:rgba(245,239,227,.03)}
+.palette-btn:hover{border-color:var(--brass-soft)}
+.palette-btn.active{border-color:var(--brass-soft);background:rgba(232,201,160,.12)}
+.swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(245,239,227,.3) inset}
+.picker-cta{margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.picker-fine{font-size:11.5px;color:rgba(245,239,227,.45)}
+@media(max-width:560px){.effect-choices{grid-template-columns:repeat(2,1fr)}}
+
+/* ================= sections ================= */
+.section{padding:92px 32px}
+.section.alt{background:var(--mist-dim)}
+.section.dark{background:var(--ink);color:var(--mist)}
+.inner{max-width:1000px;margin:0 auto}
+.narrow{max-width:620px;margin:0 auto}
 .center{text-align:center}
-.h2{font-family:var(--disp);font-size:clamp(28px,5vw,42px);font-weight:400;line-height:1.2;margin:14px 0 16px}
+.h2{font-family:var(--disp);font-size:clamp(28px,5vw,42px);font-weight:400;line-height:1.18;margin:12px 0 10px}
 .h2 em{font-style:italic;color:var(--brass-deep)}
-.lede{font-size:15.5px;color:var(--ink-3);max-width:520px;margin:0 auto}
+.dark .h2 em{color:var(--brass-soft)}
+.lede{font-size:15px;color:var(--ink-3);max-width:500px;margin:0 auto}
+.dark .lede{color:rgba(245,239,227,.62)}
 
-.diffs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--line-dk);margin-top:54px;border:1px solid var(--line-dk)}
-.diff{background:var(--mist);padding:34px 30px}
-.diff h3{font-family:var(--disp);font-size:22px;font-weight:500;margin-bottom:10px}
-.diff p{font-size:14px;color:var(--ink-3)}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:48px;background:var(--line)}
+@media(max-width:760px){.steps3{grid-template-columns:1fr}}
+.step{background:var(--mist);padding:34px 28px}
+.step .n{font-family:var(--disp);font-size:40px;font-weight:400;color:var(--brass-deep);line-height:1}
+.step h3{font-family:var(--disp);font-size:22px;font-weight:500;margin:14px 0 8px}
+.step p{font-size:13.5px;color:var(--ink-3)}
 
-.teaser{background:var(--ink);color:var(--mist);padding:0;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
-.teaser + .section{margin-top:56px}
-@media(max-width:820px){.teaser{grid-template-columns:1fr}}
-.teaser-visual{position:relative;min-height:340px;overflow:hidden}
-.teaser-visual canvas{position:absolute;inset:0;width:100%;height:100%}
-.teaser-copy{padding:80px 56px;display:flex;flex-direction:column;justify-content:center}
-@media(max-width:640px){.teaser-copy{padding:56px 28px}}
-.teaser-copy h2{font-family:var(--disp);font-size:clamp(26px,4vw,36px);font-weight:400;margin:14px 0 18px;line-height:1.25}
-.teaser-copy p{color:rgba(245,239,227,.68);font-size:14.5px;max-width:400px}
-.teaser-copy .btn{margin-top:28px;margin-bottom:12px;align-self:flex-start}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:48px;text-align:left}
+.feat{background:#fff;border:1px solid var(--line);padding:28px 26px}
+.feat h3{font-family:var(--disp);font-size:21px;font-weight:600;margin-bottom:8px}
+.feat p{font-size:13.5px;color:var(--ink-3)}
 
-.paths{margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-dk);border:1px solid var(--line-dk)}
-@media(max-width:860px){.paths{grid-template-columns:1fr}}
-.path{background:var(--mist);padding:38px 32px;display:flex;flex-direction:column}
-.path .eyebrow{margin-bottom:14px}
-.path h3{font-family:var(--disp);font-size:23px;font-weight:500;margin-bottom:10px;line-height:1.25}
-.path p{font-size:13.5px;color:var(--ink-3);flex:1}
-.path .pick{margin-top:22px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-deep);display:inline-flex;align-items:center;gap:6px}
-.path.featured{background:var(--ink);color:var(--mist)}
-.path.featured .eyebrow{color:var(--brass-soft)}
-.path.featured p{color:rgba(245,239,227,.65)}
-.path.featured .pick{color:var(--brass-soft)}
+.price-card{max-width:440px;margin:48px auto 0;background:#fff;border:1px solid var(--line);padding:44px 38px;text-align:center;position:relative}
+.price-card::before{content:"";position:absolute;inset:8px;border:1px solid var(--line);pointer-events:none}
+.price-card>*{position:relative}
+.price{font-family:var(--disp);font-size:56px;font-weight:400;margin-top:6px}
+.price small{font-size:24px;vertical-align:top;top:8px;position:relative}
+.price-sub{font-size:12px;color:var(--ink-3);letter-spacing:.04em;margin-bottom:24px}
+.plist{text-align:left;margin:22px 0 26px;display:flex;flex-direction:column;gap:11px;font-size:13.5px}
+.plist div{display:flex;gap:9px;align-items:flex-start}
+.price-fine{font-size:11.5px;color:var(--ink-3);margin-top:14px}
 
-.waitlist{background:var(--mist-dim);text-align:center}
-.wl-form{max-width:440px;margin:36px auto 0;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.wl-form input{flex:1;min-width:220px;border:1px solid var(--line-dk);background:var(--mist);padding:15px 16px;outline:none}
-.wl-form input:focus{border-color:var(--brass)}
-.interest-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:30px}
-.ipill{font-size:12px;font-weight:600;letter-spacing:.03em;padding:10px 18px;border:1px solid var(--line-dk);color:var(--ink-3);border-radius:20px;transition:all .2s}
-.ipill:hover{border-color:var(--brass)}
-.ipill.active{background:var(--brass);border-color:var(--brass);color:var(--ink)}
-.wl-note{margin-top:14px;font-size:12.5px;color:var(--ink-3)}
-.wl-success{display:none;font-family:var(--disp);font-size:19px;margin-top:24px;color:var(--brass-deep)}
+.faq{margin-top:40px;text-align:left}
+.fq{border-bottom:1px solid var(--line)}
+.fq button{width:100%;display:flex;justify-content:space-between;align-items:center;padding:18px 2px;font-size:14.5px;font-weight:600;text-align:left}
+.fq .x{font-size:18px;color:var(--brass-deep);transition:transform .2s}
+.fq.open .x{transform:rotate(45deg)}
+.fq .a{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:13.5px;color:var(--ink-3);padding:0 2px}
+.fq.open .a{max-height:200px;padding-bottom:16px}
 
-.foot{text-align:center;padding:48px 24px;color:var(--ink-3);font-size:12px;letter-spacing:.06em;border-top:1px solid var(--line-dk)}
-.up{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s cubic-bezier(.22,1,.36,1)}
+.foot{text-align:center;padding:52px 24px;color:var(--ink-3);font-size:12px}
+.foot .serif{font-family:var(--disp);font-size:19px;font-style:italic;margin-bottom:6px;color:var(--ink)}
+
+.notice{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--mist);font-size:13.5px;text-align:center;padding:14px 20px;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:200}
+.notice.on{transform:none}
+.up{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1)}
 .up.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.up{opacity:1;transform:none}}
 </style>
@@ -116,549 +127,372 @@ input{font-family:var(--body);font-size:15px}
 <body>
 
 <nav class="nav">
-  <a class="word" href="#">Kymella</a>
-  <a class="link" href="#waitlist">Join the waitlist</a>
+  <a class="word" href="/">Kymella</a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+  </div>
 </nav>
 
-<header class="hero">
-  <div class="hero-canvas-wrap" id="heroCanvasWrap"><canvas id="heroCanvas"></canvas></div>
-  <div class="hero-content">
-    <div class="eyebrow on-dark">Cinematic Wedding Sites</div>
-    <h1>The most <em>magical</em><br>invitation your guests<br>will ever open</h1>
-    <p class="sub">Built around how your day actually feels, not a template with your names dropped in.</p>
-    <div class="hero-hint" id="heroHint">touch the water</div>
-    <div class="hero-cta">
-      <a class="btn btn-brass" href="concierge.html">Talk to the concierge</a>
-      <a class="btn btn-line" href="#waitlist">Join the waitlist</a>
-    </div>
+<header class="picker-hero">
+  <canvas id="pickerCanvas"></canvas>
+  <div class="picker-content">
+    <div class="eyebrow on-dark">Touch It Before You Buy It</div>
+    <h1>A wedding site<br><em>your guests will actually touch</em></h1>
+    <p class="sub">Four real, physics-driven effects — not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.</p>
   </div>
-  <div class="switcher">
-    <div class="switcher-pills" id="switcherPills"></div>
+
+  <div class="picker-controls">
+    <div class="picker-row">
+      <div class="picker-label">The effect — touch the canvas above to try it</div>
+      <div class="effect-choices" id="effectChoices"></div>
+    </div>
+    <div class="picker-row">
+      <div class="picker-label">The palette</div>
+      <div class="palette-choices" id="paletteChoices"></div>
+    </div>
+    <div class="picker-cta">
+      <button class="btn btn-brass" style="width:100%" onclick="goToExperience()" id="ctaBtn">Try it with your names</button>
+      <p class="picker-fine">$499 CAD · once · no subscription — you'll set up names, date, and guests next</p>
+    </div>
   </div>
 </header>
 
-<section class="section center">
-  <div class="inner">
-    <div class="eyebrow">What Makes It Different</div>
-    <h2 class="h2">Not a website. <em>An arrival.</em></h2>
-    <p class="lede">Every studio in this space starts from the same template and swaps the colors. We start from how your specific day feels and build the one interaction that captures it.</p>
-    <div class="diffs">
-      <div class="diff"><h3>One touch, one story</h3><p>Every site opens on a single interactive moment: water, light, fabric, or glass, chosen to match your day, not picked from a dropdown.</p></div>
-      <div class="diff"><h3>Real craft, not stock</h3><p>Built with the same interactive techniques used in film and luxury digital work: restrained, deliberate, never gimmicky.</p></div>
-      <div class="diff"><h3>Yours alone</h3><p>No two Kymella sites share a signature moment. What we build for you isn't built for anyone else.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="teaser up">
-  <div class="teaser-visual"><canvas id="teaserCanvas"></canvas></div>
-  <div class="teaser-copy">
-    <div class="eyebrow on-dark">The Flagship Project</div>
-    <h2>Built for one wedding, by water, at dusk.</h2>
-    <p>The site that started Kymella: a single ripple, a chapter-by-chapter story, and a boat guests pull across open water to find the details. See the whole brief, the concept, and the build.</p>
-    <a class="btn btn-line" href="case-study.html">Read the case study</a>
-  </div>
-</section>
-
-<section class="section center">
-  <div class="wide">
-    <div class="eyebrow">Choose Your Path</div>
-    <h2 class="h2">What matters more <em>to you?</em></h2>
-    <p class="lede">Most couples know instinctively whether they want the moment or the machinery. Some want both.</p>
-    <div class="paths">
-      <div class="path featured">
-        <div class="eyebrow">Most Popular</div>
-        <h3>The magical, interactive invite</h3>
-        <p>A cinematic site built around one signature interaction: the thing your guests remember and talk about after the wedding is over.</p>
-        <a class="pick" href="concierge.html">Talk to the concierge →</a>
-      </div>
-      <div class="path">
-        <div class="eyebrow">For the Organized</div>
-        <h3>RSVPs & guest management, handled</h3>
-        <p>A clean, working dashboard for RSVPs, meal counts, and guest questions, without the design being the point.</p>
-        <a class="pick" href="#waitlist" onclick="pickInterest('rsvp')">Join the waitlist →</a>
-      </div>
-      <div class="path">
-        <div class="eyebrow">Both, Together</div>
-        <h3>The full experience</h3>
-        <p>A signature interactive site with real RSVP and guest management underneath: the moment and the machinery, in one build.</p>
-        <a class="pick" href="concierge.html">Talk to the concierge →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section waitlist" id="waitlist">
+<section class="section" id="how">
   <div class="inner center">
-    <div class="eyebrow">Early Access</div>
-    <h2 class="h2">We're taking a <em>small</em> number of weddings.</h2>
-    <p class="lede">Kymella is intentionally limited-capacity. Every site is built by hand. Join the waitlist and we'll reach out as slots open.</p>
-    <div class="interest-pills" id="interestPills">
-      <button type="button" class="ipill" data-v="interactive" onclick="pickInterest('interactive')">The interactive invite</button>
-      <button type="button" class="ipill" data-v="rsvp" onclick="pickInterest('rsvp')">RSVP & guest management</button>
-      <button type="button" class="ipill" data-v="both" onclick="pickInterest('both')">Both</button>
+    <div class="eyebrow">How It Works</div>
+    <h2 class="h2 up">Ten minutes to set up. <em>Yours</em> from the first touch.</h2>
+    <div class="steps3">
+      <div class="step up"><div class="n">1</div><h3>Choose your experience</h3><p>Pick the hero effect and palette above — this is the one your guests will experience, not a description of it.</p></div>
+      <div class="step up"><div class="n">2</div><h3>Tell us your story</h3><p>Names, date, venue, events, dress code, registry, guest list — a short self-serve wizard, nothing technical.</p></div>
+      <div class="step up"><div class="n">3</div><h3>Get your links, immediately</h3><p>Your live invite link and your private RSVP dashboard are ready the moment you finish — send invitations yourself, whenever you're ready.</p></div>
     </div>
-    <form class="wl-form" id="wlForm">
-      <input type="text" id="wlName" placeholder="Your name" required>
-      <input type="email" id="wlEmail" placeholder="Email" required>
-      <input type="date" id="wlDate" placeholder="Wedding date">
-      <button class="btn btn-brass" type="submit">Request access</button>
-    </form>
-    <p class="wl-note">No pricing yet, no obligation. Just early access when we open.</p>
-    <p class="wl-success" id="wlSuccess">You're on the list. We'll be in touch.</p>
   </div>
 </section>
 
-<footer class="foot">Kymella, a small studio building wedding sites with real craft behind them.</footer>
+<section class="section alt" id="features">
+  <div class="inner center">
+    <div class="eyebrow">What's Included</div>
+    <h2 class="h2 up">Everything for <em>one</em> celebration</h2>
+    <div class="feat-grid">
+      <div class="feat up"><h3>The interactive invitation</h3><p>Water, flame, frost, or incense — a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.</p></div>
+      <div class="feat up"><h3>RSVPs that run themselves</h3><p>Attendance, party size, meal choices, allergies, transport, per-event attendance for multi-day celebrations — collected automatically.</p></div>
+      <div class="feat up"><h3>Your private dashboard</h3><p>Every guest, every reply, a kitchen-ready allergy summary, and one-click CSV export — yours for the whole engagement.</p></div>
+      <div class="feat up"><h3>Gentle reminders</h3><p>Guests who haven't replied get a warm nudge. Everyone attending gets final details 48 hours out. You never chase anyone.</p></div>
+      <div class="feat up"><h3>Your registry</h3><p>Funds your guests contribute to, paid directly to you through your own payment link.</p></div>
+      <div class="feat up"><h3>Multi-day, built in</h3><p>Mehndi, sangeet, ceremony, reception, farewell brunch — add as many events as your celebration holds.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="narrow center">
+    <div class="eyebrow">Pricing</div>
+    <h2 class="h2 up">One price. One wedding. <em>Everything.</em></h2>
+    <div class="price-card up">
+      <div class="eyebrow">Kymella</div>
+      <div class="price"><small>$</small>499</div>
+      <div class="price-sub">CAD · once · no subscription</div>
+      <div class="plist">
+        <div>✦ Your chosen hero effect, in your palette</div>
+        <div>✦ Unlimited guests, each with a personal invitation link</div>
+        <div>✦ Full RSVP management, meal counts, and dashboard</div>
+        <div>✦ Automatic reminders & final-details messages</div>
+        <div>✦ Registry funds, paid directly to you</div>
+      </div>
+      <button class="btn btn-brass" style="width:100%" onclick="goToExperience()">Try it with your names</button>
+      <p class="price-fine">Secure checkout · set up in about ten minutes</p>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="narrow center">
+    <div class="eyebrow">Questions</div>
+    <h2 class="h2 up">Asked before</h2>
+    <div class="faq">
+      <div class="fq" id="q0"><button onclick="document.getElementById('q0').classList.toggle('open')"><span>Do my guests need to download anything?</span><span class="x">+</span></button><div class="a">No. Their invitation is a link — it opens in any browser, on any phone. No app, no account, no password.</div></div>
+      <div class="fq" id="q1"><button onclick="document.getElementById('q1').classList.toggle('open')"><span>How do invitations reach my guests?</span><span class="x">+</span></button><div class="a">You send each guest their personal link yourself — over WhatsApp, text, or email. An invitation should come from you, not from a platform. Every link is one tap to copy from your dashboard.</div></div>
+      <div class="fq" id="q2"><button onclick="document.getElementById('q2').classList.toggle('open')"><span>Can I change my experience after I've set up?</span><span class="x">+</span></button><div class="a">Your dashboard is yours for the whole engagement — write to us and we'll update your effect or palette.</div></div>
+      <div class="fq" id="q3"><button onclick="document.getElementById('q3').classList.toggle('open')"><span>How do registry payments work?</span><span class="x">+</span></button><div class="a">Contributions go directly to you through your own payment link — PayPal, Interac, or Stripe. We record the pledges and messages; the money never passes through us.</div></div>
+      <div class="fq" id="q4"><button onclick="document.getElementById('q4').classList.toggle('open')"><span>What about multi-day celebrations?</span><span class="x">+</span></button><div class="a">Built for them. Mehndi, sangeet, welcome dinners, ceremonies, receptions, farewell brunches — add as many events as your celebration holds.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="serif">Kymella</div>
+  <div>Made for the two of you.</div>
+</footer>
+
+<div class="notice" id="notice"></div>
 
 <script>
-function createWaterRipple(canvasEl, opts = {}) {
-  const canvas = canvasEl;
-  const ctx = canvas.getContext("2d");
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// hero-effects.js — Kymella's four live hero effects, extracted from template-invite.html.
+// Shared, unmodified logic used by BOTH the public experience picker and the couple's live invite,
+// so a couple always sees on their invite exactly what they touched during their experience selection.
 
-  // Real discrete wave-equation simulation (coarse grid, upscaled) —
-  // not a sine-wave approximation. Propagates, reflects, and interferes
-  // like an actual water surface.
+/* ================= HERO EFFECT LIBRARY (shared, tested modules) ================= */
+function hexToRgb(hex){ const n=parseInt((hex||"#000000").replace("#",""),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function createWaterRipple(canvas, opts = {}) {
+  const ctx = canvas.getContext("2d");
   const RES_W = 150, RES_H = 84, N = RES_W * RES_H;
   let bufA = new Float32Array(N), bufB = new Float32Array(N), bufC = new Float32Array(N);
   const DAMPING = 0.985;
-
-  const off = document.createElement("canvas");
-  off.width = RES_W; off.height = RES_H;
-  const offCtx = off.getContext("2d");
-  const imgData = offCtx.createImageData(RES_W, RES_H);
-
-  function hexToRgb(hex){ const n=parseInt(hex.replace("#",""),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
-  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C");
-  const BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28");
-  const BRASS = hexToRgb(opts.brass || "#B8874A");
-
-  function splash(gx, gy, strength, radius){
-    for (let dy=-radius; dy<=radius; dy++){
-      for (let dx=-radius; dx<=radius; dx++){
-        const x=gx+dx, y=gy+dy;
-        if (x<1||x>=RES_W-1||y<1||y>=RES_H-1) continue;
-        const dist = Math.sqrt(dx*dx+dy*dy);
-        if (dist>radius) continue;
-        bufA[y*RES_W+x] += strength * (1 - dist/radius);
-      }
+  const off = document.createElement("canvas"); off.width = RES_W; off.height = RES_H;
+  const offCtx = off.getContext("2d"); const imgData = offCtx.createImageData(RES_W, RES_H);
+  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C"), BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28"), BRASS = hexToRgb(opts.brass || "#B8874A");
+  function splash(gx,gy,strength,radius){
+    for (let dy=-radius; dy<=radius; dy++) for (let dx=-radius; dx<=radius; dx++){
+      const x=gx+dx,y=gy+dy; if (x<1||x>=RES_W-1||y<1||y>=RES_H-1) continue;
+      const dist=Math.sqrt(dx*dx+dy*dy); if (dist>radius) continue;
+      bufA[y*RES_W+x] += strength*(1-dist/radius);
     }
   }
   function stepWater(){
-    for (let y=1; y<RES_H-1; y++){
-      const row = y*RES_W;
-      for (let x=1; x<RES_W-1; x++){
-        const i = row+x;
-        bufC[i] = (bufA[i-1]+bufA[i+1]+bufA[i-RES_W]+bufA[i+RES_W])*0.5 - bufB[i];
-        bufC[i] *= DAMPING;
-      }
-    }
+    for (let y=1;y<RES_H-1;y++){ const row=y*RES_W;
+      for (let x=1;x<RES_W-1;x++){ const i=row+x; bufC[i]=(bufA[i-1]+bufA[i+1]+bufA[i-RES_W]+bufA[i+RES_W])*0.5-bufB[i]; bufC[i]*=DAMPING; } }
     const tmp=bufB; bufB=bufA; bufA=bufC; bufC=tmp;
   }
-  const LIGHT_X = 0.72, LIGHT_Y = 0.62;
+  const LIGHT_X=0.72, LIGHT_Y=0.62;
   function renderWater(){
     const data = imgData.data;
-    for (let y=0; y<RES_H; y++){
-      const row = y*RES_W;
-      const vt = y/RES_H;
-      const baseR = BASE_TOP[0] + (BASE_BOTTOM[0]-BASE_TOP[0])*vt;
-      const baseG = BASE_TOP[1] + (BASE_BOTTOM[1]-BASE_TOP[1])*vt;
-      const baseB = BASE_TOP[2] + (BASE_BOTTOM[2]-BASE_TOP[2])*vt;
-      for (let x=0; x<RES_W; x++){
-        const i = row+x;
-        let shade = 0;
-        if (x>0&&x<RES_W-1&&y>0&&y<RES_H-1){
-          const dx = bufA[i+1]-bufA[i-1];
-          const dy = bufA[i+RES_W]-bufA[i-RES_W];
-          shade = (dx*LIGHT_X + dy*LIGHT_Y) * 5.5;
-        }
-        let r=baseR, g=baseG, b=baseB;
-        if (shade>0){
-          const t = Math.min(1, shade/14);
-          r += (BRASS[0]-r)*t; g += (BRASS[1]-g)*t; b += (BRASS[2]-b)*t;
-        } else if (shade<0){
-          const t = Math.min(1, -shade/22)*0.5;
-          r*=(1-t); g*=(1-t); b*=(1-t);
-        }
-        const depth = bufA[i]*0.18;
-        const p = i*4;
-        data[p]=Math.max(0,Math.min(255,r+depth));
-        data[p+1]=Math.max(0,Math.min(255,g+depth));
-        data[p+2]=Math.max(0,Math.min(255,b+depth));
-        data[p+3]=255;
+    for (let y=0;y<RES_H;y++){ const row=y*RES_W; const vt=y/RES_H;
+      const baseR=BASE_TOP[0]+(BASE_BOTTOM[0]-BASE_TOP[0])*vt, baseG=BASE_TOP[1]+(BASE_BOTTOM[1]-BASE_TOP[1])*vt, baseB=BASE_TOP[2]+(BASE_BOTTOM[2]-BASE_TOP[2])*vt;
+      for (let x=0;x<RES_W;x++){ const i=row+x; let shade=0;
+        if (x>0&&x<RES_W-1&&y>0&&y<RES_H-1){ const dx=bufA[i+1]-bufA[i-1], dy=bufA[i+RES_W]-bufA[i-RES_W]; shade=(dx*LIGHT_X+dy*LIGHT_Y)*5.5; }
+        let r=baseR,g=baseG,b=baseB;
+        if (shade>0){ const t=Math.min(1,shade/14); r+=(BRASS[0]-r)*t; g+=(BRASS[1]-g)*t; b+=(BRASS[2]-b)*t; }
+        else if (shade<0){ const t=Math.min(1,-shade/22)*0.5; r*=(1-t); g*=(1-t); b*=(1-t); }
+        const depth=bufA[i]*0.18; const p=i*4;
+        data[p]=Math.max(0,Math.min(255,r+depth)); data[p+1]=Math.max(0,Math.min(255,g+depth)); data[p+2]=Math.max(0,Math.min(255,b+depth)); data[p+3]=255;
       }
     }
     offCtx.putImageData(imgData,0,0);
     ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(off,0,0,RES_W,RES_H,0,0,canvas.width,canvas.height);
-    const vg = ctx.createRadialGradient(canvas.width/2,canvas.height*0.4,canvas.width*0.15,canvas.width/2,canvas.height*0.4,canvas.width*0.75);
-    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)");
-    ctx.fillStyle=vg; ctx.fillRect(0,0,canvas.width,canvas.height);
+    const vg=ctx.createRadialGradient(canvas.width/2,canvas.height*0.4,canvas.width*0.15,canvas.width/2,canvas.height*0.4,canvas.width*0.75);
+    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)"); ctx.fillStyle=vg; ctx.fillRect(0,0,canvas.width,canvas.height);
   }
-
-  function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+  function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; }
   window.addEventListener("resize", resize); resize();
-
-  function toGrid(clientX, clientY){
-    const rect = canvas.getBoundingClientRect();
-    const x = clientX-rect.left, y = clientY-rect.top;
-    return { gx: Math.floor((x/rect.width)*RES_W), gy: Math.floor((y/rect.height)*RES_H) };
-  }
-  function eventXY(e){ if (e.touches && e.touches[0]) return [e.touches[0].clientX, e.touches[0].clientY]; return [e.clientX, e.clientY]; }
-
-  let dragging = false;
+  function toGrid(cx,cy){ const rect=canvas.getBoundingClientRect(); return { gx: Math.floor(((cx-rect.left)/rect.width)*RES_W), gy: Math.floor(((cy-rect.top)/rect.height)*RES_H) }; }
+  function eventXY(e){ if (e.touches&&e.touches[0]) return [e.touches[0].clientX,e.touches[0].clientY]; return [e.clientX,e.clientY]; }
+  let dragging=false;
   function onDown(e){ const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,26,5); dragging=true; }
   function onMove(e){ if(!dragging) return; const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,8,3); }
   function onUp(){ dragging=false; }
-  if (opts.interactive !== false){
-    canvas.addEventListener("pointerdown", onDown);
-    canvas.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    canvas.addEventListener("touchstart", onDown, {passive:true});
-    canvas.addEventListener("touchmove", onMove, {passive:true});
-    window.addEventListener("touchend", onUp);
-  }
-
-  let ambientTimer = null;
-  if (!reduceMotion){
-    ambientTimer = setInterval(() => {
-      const gx = 4+Math.random()*(RES_W-8), gy = 4+Math.random()*(RES_H-8);
-      splash(gx, gy, 9, 3);
-    }, 1800);
-  }
-  if (opts.seed) splash(RES_W/2, RES_H*0.42, 30, 7);
-
-  let raf;
-  function loop(){ stepWater(); renderWater(); if (!reduceMotion) raf = requestAnimationFrame(loop); }
-  if (reduceMotion) renderWater(); else loop();
-
-  return { stop(){
-    if (raf) cancelAnimationFrame(raf);
-    if (ambientTimer) clearInterval(ambientTimer);
-    window.removeEventListener("resize", resize);
-    canvas.removeEventListener("pointerdown", onDown);
-    canvas.removeEventListener("pointermove", onMove);
-    window.removeEventListener("pointerup", onUp);
-    canvas.removeEventListener("touchstart", onDown);
-    canvas.removeEventListener("touchmove", onMove);
-    window.removeEventListener("touchend", onUp);
-  }};
+  canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); window.addEventListener("pointerup", onUp);
+  canvas.addEventListener("touchstart", onDown, {passive:true}); canvas.addEventListener("touchmove", onMove, {passive:true}); window.addEventListener("touchend", onUp);
+  let ambientTimer = setInterval(() => { splash(4+Math.random()*(RES_W-8), 4+Math.random()*(RES_H-8), 9, 3); }, 1800);
+  splash(RES_W/2, RES_H*0.42, 30, 7);
+  let raf; function loop(){ stepWater(); renderWater(); raf=requestAnimationFrame(loop); } loop();
+  return { stop(){ cancelAnimationFrame(raf); clearInterval(ambientTimer); window.removeEventListener("resize",resize); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); } };
 }
 
-function createDiyaLight(canvas){
+function createDiyaLight(canvas, opts = {}) {
   const ctx = canvas.getContext("2d");
   let W,H,DPR,raf;
   function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
   window.addEventListener("resize", size); size();
-  let flame = null;
-  const startClock = performance.now();
+  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28";
+  const [br, bg, bb] = hexToRgb(opts.brass || "#B8874A");
+  const flameMist = opts.mist || "#F5EFE3", flameSoft = opts.brassSoft || "#E8C9A0", flameBrass = opts.brass || "#B8874A";
+  let flame = null; const startClock = performance.now();
   function spawn(x,y){ flame = {x,y,born:(performance.now()-startClock)/1000}; }
   function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
   const onDown = e => spawn(...xy(e));
-  canvas.addEventListener("pointerdown", onDown);
-  canvas.addEventListener("touchstart", onDown, {passive:true});
+  canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("touchstart", onDown, {passive:true});
   function draw(){
-    const t = (performance.now()-startClock)/1000;
-    ctx.clearRect(0,0,W,H);
-    const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
-    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    const t=(performance.now()-startClock)/1000; ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     if (!flame){
-      const pulse = 0.05 + Math.sin(t*0.6)*0.015;
-      const rg = ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.min(W,H)*0.25);
-      rg.addColorStop(0, `rgba(184,135,74,${pulse})`); rg.addColorStop(1,"rgba(184,135,74,0)");
-      ctx.fillStyle = rg; ctx.fillRect(0,0,W,H);
+      const pulse=0.05+Math.sin(t*0.6)*0.015;
+      const rg=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.min(W,H)*0.25);
+      rg.addColorStop(0,`rgba(${br},${bg},${bb},${pulse})`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
     } else {
-      const age = t - flame.born;
-      const flicker = 1 + Math.sin(t*14)*0.06 + Math.sin(t*23)*0.03;
-
-      // large ambient wash: the whole scene gently lit, growing in over ~2.5s
-      const washGrow = Math.min(age/2.5, 1);
-      const washRadius = Math.max(W,H) * (0.55 + washGrow*0.5) * (1 + Math.sin(t*1.2)*0.02);
-      const wash = ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius);
-      wash.addColorStop(0, `rgba(184,135,74,${0.16*washGrow})`);
-      wash.addColorStop(0.45, `rgba(184,135,74,${0.07*washGrow})`);
-      wash.addColorStop(1, "rgba(184,135,74,0)");
-      ctx.fillStyle = wash; ctx.fillRect(0,0,W,H);
-
-      // medium glow around the flame itself, brighter and closer
-      const radius = Math.min(W,H) * (0.32 + Math.min(age*0.04,0.14)) * flicker;
-      const rg = ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,radius);
-      rg.addColorStop(0,"rgba(232,201,160,0.6)"); rg.addColorStop(0.35,"rgba(184,135,74,0.32)"); rg.addColorStop(1,"rgba(184,135,74,0)");
-      ctx.fillStyle = rg; ctx.fillRect(0,0,W,H);
-
-      // subtle unifying warm color grade over the whole scene once lit
-      ctx.fillStyle = `rgba(184,135,74,${0.03*washGrow})`;
-      ctx.fillRect(0,0,W,H);
-
-      const fh = 22*flicker, fw = 9*flicker;
-      ctx.beginPath();
-      ctx.moveTo(flame.x, flame.y+fh*0.5);
+      const age=t-flame.born; const flicker=1+Math.sin(t*14)*0.06+Math.sin(t*23)*0.03;
+      const washGrow=Math.min(age/2.5,1); const washRadius=Math.max(W,H)*(0.55+washGrow*0.5)*(1+Math.sin(t*1.2)*0.02);
+      const wash=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius);
+      wash.addColorStop(0,`rgba(${br},${bg},${bb},${0.16*washGrow})`); wash.addColorStop(0.45,`rgba(${br},${bg},${bb},${0.07*washGrow})`); wash.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
+      ctx.fillStyle=wash; ctx.fillRect(0,0,W,H);
+      const radius=Math.min(W,H)*(0.32+Math.min(age*0.04,0.14))*flicker;
+      const rg=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,radius);
+      rg.addColorStop(0,`rgba(${br},${bg},${bb},0.6)`); rg.addColorStop(0.35,`rgba(${br},${bg},${bb},0.32)`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
+      ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=`rgba(${br},${bg},${bb},${0.03*washGrow})`; ctx.fillRect(0,0,W,H);
+      const fh=22*flicker, fw=9*flicker;
+      ctx.beginPath(); ctx.moveTo(flame.x, flame.y+fh*0.5);
       ctx.quadraticCurveTo(flame.x-fw, flame.y-fh*0.1, flame.x, flame.y-fh);
       ctx.quadraticCurveTo(flame.x+fw, flame.y-fh*0.1, flame.x, flame.y+fh*0.5);
-      const fg = ctx.createLinearGradient(flame.x,flame.y-fh,flame.x,flame.y+fh*0.5);
-      fg.addColorStop(0,"#F5EFE3"); fg.addColorStop(0.5,"#E8C9A0"); fg.addColorStop(1,"#B8874A");
-      ctx.fillStyle = fg; ctx.fill();
+      const fg=ctx.createLinearGradient(flame.x,flame.y-fh,flame.x,flame.y+fh*0.5);
+      fg.addColorStop(0,flameMist); fg.addColorStop(0.5,flameSoft); fg.addColorStop(1,flameBrass); ctx.fillStyle=fg; ctx.fill();
     }
-    raf = requestAnimationFrame(draw);
+    raf=requestAnimationFrame(draw);
   }
   draw();
   return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); } };
 }
 
-function createFrostReveal(canvas, label){
+function createFrostReveal(canvas, label, opts = {}) {
   const ctx = canvas.getContext("2d");
   let W,H,raf;
-  const frostLayer = document.createElement("canvas");
-  const frostCtx = frostLayer.getContext("2d");
-  const maskLayer = document.createElement("canvas");
-  const maskCtx = maskLayer.getContext("2d");
-
+  const frostLayer=document.createElement("canvas"), frostCtx=frostLayer.getContext("2d");
+  const maskLayer=document.createElement("canvas"), maskCtx=maskLayer.getContext("2d");
+  // frostComposite holds the frost texture WITH wipe-holes cut into it, isolated from the
+  // background gradient below — this is what fixes wiped areas showing the palette gradient
+  // instead of punching straight through to transparent/page background.
+  const frostComposite=document.createElement("canvas"), compCtx=frostComposite.getContext("2d");
+  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28", frostTint = opts.mist || "#EDE5D4";
   function buildFrostTexture(){
-    frostLayer.width = W; frostLayer.height = H;
-    frostCtx.clearRect(0,0,W,H);
-    frostCtx.fillStyle = "#EDE5D4";
-    frostCtx.globalAlpha = 0.88;
-    frostCtx.fillRect(0,0,W,H);
-    frostCtx.globalAlpha = 1;
-    // organic condensation clusters, not uniform per-pixel noise
-    frostCtx.filter = "blur(11px)";
-    for (let i=0;i<40;i++){
-      const x=Math.random()*W, y=Math.random()*H, r=22+Math.random()*75;
-      const op = 0.15+Math.random()*0.35;
-      frostCtx.fillStyle = `rgba(255,255,255,${op})`;
-      frostCtx.beginPath(); frostCtx.arc(x,y,r,0,Math.PI*2); frostCtx.fill();
-    }
-    frostCtx.filter = "none";
-    // fine grain layered on top so it still reads as textured glass up close
-    const img = frostCtx.getImageData(0,0,W,H);
-    for (let i=0;i<img.data.length;i+=4){
-      const n = (Math.random()-0.5)*12;
-      img.data[i]=Math.min(255,Math.max(0,img.data[i]+n));
-      img.data[i+1]=Math.min(255,Math.max(0,img.data[i+1]+n));
-      img.data[i+2]=Math.min(255,Math.max(0,img.data[i+2]+n));
-    }
+    frostLayer.width=W; frostLayer.height=H; frostCtx.clearRect(0,0,W,H);
+    frostCtx.fillStyle=frostTint; frostCtx.globalAlpha=0.88; frostCtx.fillRect(0,0,W,H); frostCtx.globalAlpha=1;
+    frostCtx.filter="blur(11px)";
+    for (let i=0;i<40;i++){ const x=Math.random()*W,y=Math.random()*H,r=22+Math.random()*75,op=0.15+Math.random()*0.35;
+      frostCtx.fillStyle=`rgba(255,255,255,${op})`; frostCtx.beginPath(); frostCtx.arc(x,y,r,0,Math.PI*2); frostCtx.fill(); }
+    frostCtx.filter="none";
+    const img=frostCtx.getImageData(0,0,W,H);
+    for (let i=0;i<img.data.length;i+=4){ const n=(Math.random()-0.5)*12; img.data[i]=Math.min(255,Math.max(0,img.data[i]+n)); img.data[i+1]=Math.min(255,Math.max(0,img.data[i+1]+n)); img.data[i+2]=Math.min(255,Math.max(0,img.data[i+2]+n)); }
     frostCtx.putImageData(img,0,0);
   }
-
-  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; buildFrostTexture(); maskCtx.clearRect(0,0,W,H); }
+  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; frostComposite.width=W; frostComposite.height=H; buildFrostTexture(); maskCtx.clearRect(0,0,W,H); }
   window.addEventListener("resize", size);
-
   let holding=false, lastPos=null;
   function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
-  function wipeAt(x,y){
-    maskCtx.filter = "blur(9px)";
-    maskCtx.fillStyle = "rgba(0,0,0,1)";
-    maskCtx.beginPath(); maskCtx.arc(x,y,34,0,Math.PI*2); maskCtx.fill();
-    maskCtx.filter = "none";
-  }
+  function wipeAt(x,y){ maskCtx.filter="blur(9px)"; maskCtx.fillStyle="rgba(0,0,0,1)"; maskCtx.beginPath(); maskCtx.arc(x,y,34,0,Math.PI*2); maskCtx.fill(); maskCtx.filter="none"; }
   const onDown = e => { holding=true; const [x,y]=xy(e); lastPos=[x,y]; wipeAt(x,y); };
-  const onMove = e => {
-    if (!holding) return;
-    const [x,y]=xy(e);
-    if (lastPos){
-      const dx=x-lastPos[0], dy=y-lastPos[1];
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      const steps=Math.max(1, Math.floor(dist/8));
-      for (let s=0;s<=steps;s++) wipeAt(lastPos[0]+dx*(s/steps), lastPos[1]+dy*(s/steps));
-    }
+  const onMove = e => { if (!holding) return; const [x,y]=xy(e);
+    if (lastPos){ const dx=x-lastPos[0],dy=y-lastPos[1],dist=Math.sqrt(dx*dx+dy*dy),steps=Math.max(1,Math.floor(dist/8));
+      for (let s=0;s<=steps;s++) wipeAt(lastPos[0]+dx*(s/steps), lastPos[1]+dy*(s/steps)); }
     lastPos=[x,y];
   };
   const onUp = () => { holding=false; lastPos=null; };
-  canvas.addEventListener("pointerdown", onDown);
-  canvas.addEventListener("pointermove", onMove);
-  window.addEventListener("pointerup", onUp);
-  canvas.addEventListener("touchstart", onDown, {passive:true});
-  canvas.addEventListener("touchmove", onMove, {passive:true});
-  window.addEventListener("touchend", onUp);
-
+  canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); window.addEventListener("pointerup", onUp);
+  canvas.addEventListener("touchstart", onDown, {passive:true}); canvas.addEventListener("touchmove", onMove, {passive:true}); window.addEventListener("touchend", onUp);
   size();
-
   function draw(){
     ctx.clearRect(0,0,W,H);
-    const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
-    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-    ctx.save();
-    ctx.font = "500 28px Fraunces, Georgia, serif";
-    ctx.fillStyle = "rgba(232,201,160,0.85)"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(label || "Kymella", W/2, H/2);
-    ctx.restore();
-
-    ctx.save();
-    ctx.drawImage(frostLayer,0,0);
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.drawImage(maskLayer,0,0);
-    ctx.restore();
-
-    raf = requestAnimationFrame(draw);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.save(); ctx.font="500 28px Fraunces, Georgia, serif"; ctx.fillStyle="rgba(232,201,160,0.85)"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(label || "Kymella", W/2, H/2); ctx.restore();
+    // Build the frost-with-holes on its OWN canvas first, so destination-out only ever
+    // erases the frost texture — never the gradient/label already drawn on the main canvas.
+    compCtx.clearRect(0,0,W,H);
+    compCtx.globalCompositeOperation="source-over"; compCtx.drawImage(frostLayer,0,0);
+    compCtx.globalCompositeOperation="destination-out"; compCtx.drawImage(maskLayer,0,0);
+    ctx.drawImage(frostComposite,0,0);
+    raf=requestAnimationFrame(draw);
   }
   draw();
-  return { stop(){
-    cancelAnimationFrame(raf);
-    window.removeEventListener("resize",size);
-    canvas.removeEventListener("pointerdown",onDown);
-    canvas.removeEventListener("pointermove",onMove);
-    window.removeEventListener("pointerup",onUp);
-    canvas.removeEventListener("touchstart",onDown);
-    canvas.removeEventListener("touchmove",onMove);
-    window.removeEventListener("touchend",onUp);
-  } };
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); } };
 }
 
-function createIncenseDrift(canvas){
+function createIncenseDrift(canvas, opts = {}) {
   const ctx = canvas.getContext("2d");
   let W,H,DPR,raf;
   function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
   window.addEventListener("resize", size); size();
-
+  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28";
+  const [ir, ig, ib] = hexToRgb(opts.brassSoft || opts.brass || "#E8C9A0");
+  const emberColor = opts.brassSoft || opts.brass || "#E8C9A0";
   let mouseX=null, mouseY=null, velocity=0;
-  function updateMouse(e){
-    const r=canvas.getBoundingClientRect();
-    const p=(e.touches&&e.touches[0])?e.touches[0]:e;
-    const nx=p.clientX-r.left, ny=p.clientY-r.top;
-    if (mouseX!==null){ const dx=nx-mouseX, dy=ny-mouseY; velocity=Math.min(60,Math.sqrt(dx*dx+dy*dy)); }
-    mouseX=nx; mouseY=ny;
-  }
-  const onMove = e => updateMouse(e);
-  const onLeave = () => { mouseX=null; mouseY=null; velocity=0; };
-  canvas.addEventListener("pointermove", onMove);
-  canvas.addEventListener("touchmove", onMove, {passive:true});
-  canvas.addEventListener("pointerleave", onLeave);
-
-  const segments = 60;
-  let offsets = new Array(segments+1).fill(0);
-
-  const startClock = performance.now();
+  function updateMouse(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; const nx=p.clientX-r.left, ny=p.clientY-r.top;
+    if (mouseX!==null){ const dx=nx-mouseX,dy=ny-mouseY; velocity=Math.min(60,Math.sqrt(dx*dx+dy*dy)); } mouseX=nx; mouseY=ny; }
+  const onMove = e => updateMouse(e); const onLeave = () => { mouseX=null; mouseY=null; velocity=0; };
+  canvas.addEventListener("pointermove", onMove); canvas.addEventListener("touchmove", onMove, {passive:true}); canvas.addEventListener("pointerleave", onLeave);
+  const segments=60; let offsets=new Array(segments+1).fill(0); const startClock=performance.now();
   function draw(){
-    const t = (performance.now()-startClock)/1000;
-    velocity *= 0.9;
-    ctx.clearRect(0,0,W,H);
-    const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,"#0E1F1C"); g.addColorStop(1,"#152D28");
-    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-    const baseX = W*0.5, baseY = H*0.72;
-
-    for (let i=0;i<=segments;i++){
-      const f = i/segments;
-      const naturalX = baseX + Math.sin(f*6 - t*0.8)*(18+f*30) + Math.sin(f*13+t*1.3)*f*8;
-      const naturalY = baseY - f*H*0.62;
-      let target = 0;
-      if (mouseX !== null){
-        const dx = naturalX-mouseX, dy = naturalY-mouseY;
-        const dist = Math.sqrt(dx*dx+dy*dy);
-        const radius = 140 + f*60;
-        if (dist < radius){
-          const strength = 1 - dist/radius;
-          const dirX = dx/(dist||1);
-          target = dirX*strength*(40+f*70) + dirX*velocity*strength*1.8;
-        }
-      }
-      offsets[i] += (target - offsets[i]) * 0.12;
+    const t=(performance.now()-startClock)/1000; velocity*=0.9; ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    const baseX=W*0.5, baseY=H*0.72;
+    for (let i=0;i<=segments;i++){ const f=i/segments;
+      const naturalX=baseX+Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; const naturalY=baseY-f*H*0.62;
+      let target=0;
+      if (mouseX!==null){ const dx=naturalX-mouseX,dy=naturalY-mouseY,dist=Math.sqrt(dx*dx+dy*dy),radius=140+f*60;
+        if (dist<radius){ const strength=1-dist/radius, dirX=dx/(dist||1); target=dirX*strength*(40+f*70)+dirX*velocity*strength*1.8; } }
+      offsets[i]+=(target-offsets[i])*0.12;
     }
-
-    ctx.beginPath(); ctx.moveTo(baseX, baseY);
-    for (let i=1;i<=segments;i++){
-      const f=i/segments; const y=baseY-f*H*0.62;
-      const drift = Math.sin(f*6-t*0.8)*(18+f*30) + Math.sin(f*13+t*1.3)*f*8;
-      ctx.lineTo(baseX+drift+offsets[i], y);
-    }
-    ctx.strokeStyle = "rgba(232,201,160,0.18)"; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
-
-    ctx.beginPath(); ctx.moveTo(baseX, baseY);
-    for (let i=1;i<=segments;i++){
-      const f=i/segments; const y=baseY-f*H*0.62;
-      const drift2 = Math.sin(f*5-t*0.65+1.4)*(14+f*24);
-      ctx.lineTo(baseX+drift2+offsets[i]*0.75, y);
-    }
-    ctx.strokeStyle = "rgba(232,201,160,0.1)"; ctx.lineWidth=5; ctx.stroke();
-
-    ctx.beginPath(); ctx.arc(baseX,baseY,2.4,0,Math.PI*2); ctx.fillStyle="#E8C9A0"; ctx.fill();
-    raf = requestAnimationFrame(draw);
+    ctx.beginPath(); ctx.moveTo(baseX,baseY);
+    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift=Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; ctx.lineTo(baseX+drift+offsets[i],y); }
+    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.18)`; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(baseX,baseY);
+    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift2=Math.sin(f*5-t*0.65+1.4)*(14+f*24); ctx.lineTo(baseX+drift2+offsets[i]*0.75,y); }
+    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.1)`; ctx.lineWidth=5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(baseX,baseY,2.4,0,Math.PI*2); ctx.fillStyle=emberColor; ctx.fill();
+    raf=requestAnimationFrame(draw);
   }
   draw();
   return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointermove",onMove); canvas.removeEventListener("touchmove",onMove); canvas.removeEventListener("pointerleave",onLeave); } };
 }
 
-const THEMES = [
-  { id:"ripple",  label:"Ripple",   hint:"touch the water",       soon:false, start:c=>createWaterRipple(c,{seed:true}) },
-  { id:"diya",    label:"Diya",     hint:"touch to light",        soon:false, start:c=>createDiyaLight(c) },
-  { id:"frost",   label:"Frost",    hint:"press and hold",        soon:false, start:c=>createFrostReveal(c) },
-  { id:"incense", label:"Incense",  hint:"move gently nearby",    soon:false, start:c=>createIncenseDrift(c) },
-  { id:"silk",    label:"Silk Drape",     soon:true },
-  { id:"doors",   label:"Threshold Doors",soon:true },
-  { id:"ink",     label:"Ink Calligraphy",soon:true },
+/* ================= EXPERIENCE ENGINE: mount the right effect from stored data ================= */
+function mountHero(effectName, canvas, opts, coupleNames){
+  const fns = { ripple: createWaterRipple, diya: createDiyaLight, frost: createFrostReveal, incense: createIncenseDrift };
+  const fn = fns[effectName] || createWaterRipple;
+  if (effectName === "frost") return fn(canvas, coupleNames, opts);
+  return fn(canvas, opts);
+}
+
+</script>
+<script>
+/* ================= PALETTES ================= */
+const PALETTES = [
+  { name:"Brass & Ink", ink:"#171310", ink2:"#221C17", ink3:"#3E342B", mist:"#F5EFE3", mistDim:"#EDE5D4", brass:"#B8874A", brassSoft:"#E8C9A0", brassDeep:"#8E6836" },
+  { name:"Rosewood",    ink:"#2B1518", ink2:"#3A1E22", ink3:"#5C333A", mist:"#F7EDE6", mistDim:"#EFDDD1", brass:"#C08552", brassSoft:"#E8C4A0", brassDeep:"#9C6238" },
+  { name:"Slate & Blue",ink:"#161A21", ink2:"#1F2530", ink3:"#3A4250", mist:"#F0F1F3", mistDim:"#E2E5E9", brass:"#8C97A8", brassSoft:"#C3CBD6", brassDeep:"#5E6A7C" },
+  { name:"Silver",      ink:"#1C1C1C", ink2:"#272727", ink3:"#464646", mist:"#F4F4F2", mistDim:"#E8E8E5", brass:"#A8ACB0", brassSoft:"#D4D7DA", brassDeep:"#7A7D80" },
+  { name:"Emerald",     ink:"#0A2119", ink2:"#123528", ink3:"#255040", mist:"#F2F0E4", mistDim:"#E5E1CE", brass:"#C9A227", brassSoft:"#E8D488", brassDeep:"#9C7D1B" },
 ];
-let currentInstance = null;
-const wrap = document.getElementById("heroCanvasWrap");
-const pillsEl = document.getElementById("switcherPills");
-const hintEl = document.getElementById("heroHint");
+const EFFECTS = [
+  { key:"ripple",  label:"Ripple"  },
+  { key:"diya",    label:"Diya"    },
+  { key:"frost",   label:"Frost"   },
+  { key:"incense", label:"Incense" },
+];
 
-function mountTheme(theme){
-  if (currentInstance && currentInstance.stop) currentInstance.stop();
-  wrap.innerHTML = "";
-  const canvas = document.createElement("canvas");
-  canvas.id = "heroCanvas";
-  wrap.appendChild(canvas);
-  currentInstance = theme.start(canvas);
-  hintEl.textContent = theme.hint;
-  document.querySelectorAll(".pill").forEach(p => p.classList.toggle("active", p.dataset.id === theme.id));
+let effectIdx = 0, paletteIdx = 0, heroInstance = null;
+
+function applyPalette(p){
+  const root = document.documentElement.style;
+  const map = { ink:"--ink", ink2:"--ink-2", ink3:"--ink-3", mist:"--mist", mistDim:"--mist-dim", brass:"--brass", brassSoft:"--brass-soft", brassDeep:"--brass-deep" };
+  Object.entries(map).forEach(([key, cssVar]) => { if (p[key]) root.setProperty(cssVar, p[key]); });
 }
-THEMES.forEach(theme => {
-  const pill = document.createElement("button");
-  pill.className = "pill";
-  pill.dataset.id = theme.id;
-  pill.innerHTML = theme.soon ? `${theme.label}<span class="soon">Soon</span>` : theme.label;
-  if (theme.soon) { pill.disabled = true; }
-  else { pill.addEventListener("click", () => mountTheme(theme)); }
-  pillsEl.appendChild(pill);
-});
-mountTheme(THEMES[0]);
-
-// Bulletproof hero height: some browsers/webviews don't handle vh/dvh/svh
-// correctly and the hero can collapse, making the switcher overlap the next
-// section. Measuring the real viewport height in JS sidesteps that entirely.
-const heroEl = document.querySelector(".hero");
-function setHeroHeight(){
-  const h = Math.max(window.innerHeight, 660);
-  heroEl.style.minHeight = h + "px";
-  heroEl.style.height = "auto";
+function mount(){
+  if (heroInstance && heroInstance.stop) heroInstance.stop();
+  const canvas = document.getElementById("pickerCanvas");
+  const p = PALETTES[paletteIdx];
+  applyPalette(p);
+  const effect = EFFECTS[effectIdx].key;
+  const opts = { colorTop: p.ink, colorBottom: p.ink2, brass: p.brass, brassSoft: p.brassSoft, mist: p.mist };
+  heroInstance = mountHero(effect, canvas, opts, "Priya & Arjun");
 }
-setHeroHeight();
-window.addEventListener("resize", setHeroHeight);
-window.addEventListener("orientationchange", setHeroHeight);
+function renderControls(){
+  document.getElementById("effectChoices").innerHTML = EFFECTS.map((e,i) =>
+    `<button class="effect-btn ${i===effectIdx?'active':''}" onclick="chooseEffect(${i})">${e.label}</button>`).join("");
+  document.getElementById("paletteChoices").innerHTML = PALETTES.map((p,i) =>
+    `<button class="palette-btn ${i===paletteIdx?'active':''}" onclick="choosePalette(${i})"><span class="swatch" style="background:${p.brass}"></span>${p.name}</button>`).join("");
+}
+function chooseEffect(i){ effectIdx = i; renderControls(); mount(); }
+function choosePalette(i){ paletteIdx = i; renderControls(); mount(); }
 
-createWaterRipple(document.getElementById("teaserCanvas"), {interactive:false, autoInterval:140, seed:true});
+renderControls();
+mount();
+
+/* ================= HANDOFF TO THE COMPARE PAGE ================= */
+function notice(m){ const n=document.getElementById("notice"); n.textContent=m; n.classList.add("on"); clearTimeout(n._t); n._t=setTimeout(()=>n.classList.remove("on"),2800); }
+function goToExperience(){
+  // The hero is a quick, no-typing demo — the real decision (with real names) happens on /experience.
+  const p = PALETTES[paletteIdx];
+  sessionStorage.setItem("kymella_experience", JSON.stringify({
+    effect: EFFECTS[effectIdx].key,
+    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep },
+  }));
+  location.href = "/experience";
+}
 
 const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
 document.querySelectorAll(".up").forEach(el=>io.observe(el));
-
-const KYMELLA_API = "https://evarria-backend-production.up.railway.app/api/kymella-waitlist";
-let selectedInterest = "";
-function pickInterest(v){
-  selectedInterest = v;
-  document.querySelectorAll(".ipill").forEach(p => p.classList.toggle("active", p.dataset.v === v));
-}
-document.getElementById("wlForm").addEventListener("submit", async function(e){
-  e.preventDefault();
-  const name = document.getElementById("wlName").value.trim();
-  const email = document.getElementById("wlEmail").value.trim();
-  const wedding_date = document.getElementById("wlDate").value;
-  const btn = this.querySelector("button[type=submit]");
-  btn.disabled = true; btn.textContent = "Sending...";
-  try {
-    const r = await fetch(KYMELLA_API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, wedding_date, interest: selectedInterest }),
-    });
-    if (!r.ok) throw new Error("request failed");
-    this.style.display = "none";
-    document.getElementById("wlSuccess").style.display = "block";
-  } catch (err) {
-    btn.disabled = false; btn.textContent = "Request access";
-    alert("That didn't go through. Please try again in a moment.");
-  }
-});
 </script>
 </body>
 </html>
