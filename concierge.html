@@ -59,7 +59,10 @@ textarea{font-family:var(--body);font-size:15.5px}
 
 <nav class="nav">
   <a class="word" href="index.html">Kymella</a>
-  <a class="link" href="index.html">← Studio</a>
+  <div style="display:flex;gap:18px;align-items:center">
+    <button class="link" id="resetBtn" style="cursor:pointer">Start over</button>
+    <a class="link" href="index.html">← Studio</a>
+  </div>
 </nav>
 
 <div class="wrap">
@@ -93,8 +96,9 @@ function genId(){
     return v.toString(16);
   });
 }
-let sessionId = sessionStorage.getItem("kymella_session_id");
-if (!sessionId){ sessionId = genId(); sessionStorage.setItem("kymella_session_id", sessionId); }
+let sessionId = null;
+const HISTORY_API = "https://evarria-backend-production.up.railway.app/api/kymella-concierge";
+const SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours — long enough to survive an accidental reload, short enough that stale test sessions don't linger for days
 
 const thread = $("thread");
 function addBubble(role, text){
@@ -114,6 +118,39 @@ function addTyping(){
 }
 function removeTyping(){ const t = $("typingIndicator"); if (t) t.remove(); }
 
+function startFresh(){
+  sessionId = genId();
+  sessionStorage.setItem("kymella_session", JSON.stringify({ id: sessionId, savedAt: Date.now() }));
+  thread.innerHTML = "";
+  $("doneBanner").style.display = "none";
+  addBubble("assistant", "Hello — I'm so glad you're here. Tell me a little about the two of you, and when your wedding is.");
+}
+
+async function initSession(){
+  let stored = null;
+  try{ stored = JSON.parse(sessionStorage.getItem("kymella_session") || "null"); }catch(e){}
+  const isFresh = stored && stored.id && (Date.now() - stored.savedAt) < SESSION_MAX_AGE_MS;
+  if (!isFresh){ startFresh(); return; }
+
+  sessionId = stored.id;
+  thread.innerHTML = "";
+  try{
+    const r = await fetch(`${HISTORY_API}/${sessionId}/history`);
+    const data = await r.json();
+    if (!data.transcript || !data.transcript.length){ startFresh(); return; }
+    data.transcript.forEach(m => addBubble(m.role === "user" ? "user" : "assistant", m.content));
+    if (data.complete) $("doneBanner").style.display = "block";
+  }catch(e){
+    startFresh();
+  }
+}
+$("resetBtn").addEventListener("click", startFresh);
+
+// A browser can restore this exact page from back/forward cache without
+// re-running the script at all — rehydrating from the backend here keeps
+// what's on screen truthful either way, instead of trusting stale DOM state.
+window.addEventListener("pageshow", (e) => { if (e.persisted) initSession(); });
+
 async function sendMessage(text){
   addBubble("user", text);
   addTyping();
@@ -125,6 +162,7 @@ async function sendMessage(text){
       body: JSON.stringify({ session_id: sessionId, message: text }),
     });
     const data = await r.json();
+    sessionStorage.setItem("kymella_session", JSON.stringify({ id: sessionId, savedAt: Date.now() }));
     removeTyping();
     addBubble("assistant", data.reply || "Sorry, something went wrong on our end.");
     if (data.complete) $("doneBanner").style.display = "block";
@@ -149,8 +187,7 @@ $("input").addEventListener("input", function(){
   this.style.height = "auto"; this.style.height = Math.min(120, this.scrollHeight) + "px";
 });
 
-// opening line — sent as if from the concierge, no API call needed for this first message
-addBubble("assistant", "Hello — I'm so glad you're here. Tell me a little about the two of you, and when your wedding is.");
+initSession();
 </script>
 </body>
 </html>
