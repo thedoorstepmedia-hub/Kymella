@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Create your wedding — Kymella</title>
+<meta name="description" content="Set up your wedding in about ten minutes.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231C2B23'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='Georgia' font-size='14' fill='%23C6A15B'%3E%26%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1F1C; --ink-2:#152D28; --ink-3:#26433C;
+  --ivory:#F5EFE3; --ivory-2:#EDE5D4; --paper:#FFFFFF;
+  --sage:#6E8880; --sage-soft:#BFCFC9;
+  --gold:#B8874A; --gold-soft:#E8C9A0; --gold-deep:#8E6836;
+  --line:rgba(14,31,28,.12);
+  --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--body);background:var(--ivory);color:var(--ink);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh}
+button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:var(--body);font-size:16px}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
+svg.i{width:17px;height:17px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:-3px}
+
+.label{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-deep);font-weight:600}
+.label.muted{color:var(--sage)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px 32px;font-weight:600;font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;transition:background .25s,border-color .25s,color .25s,opacity .25s;border-radius:2px}
+.btn-solid{background:var(--ink);color:var(--ivory)}
+.btn-solid:hover{background:var(--ink-2)}
+.btn-solid:disabled{opacity:.35;cursor:default}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:hover{background:#C7A55F}
+.btn-quiet{border:1px solid var(--line);color:var(--ink)}
+.btn-quiet:hover{border-color:var(--gold)}
+.btn.sm{padding:11px 20px;font-size:12px}
+.textlink{font-size:13px;font-weight:600;color:var(--gold-deep);border-bottom:1px solid var(--gold-soft);padding-bottom:1px;transition:border-color .2s}
+.textlink:hover{border-color:var(--gold-deep)}
+
+/* ---- wizard frame ---- */
+.topbar{position:sticky;top:0;background:var(--ivory);border-bottom:1px solid var(--line);z-index:50}
+.topbar-in{max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 22px}
+.wordmark{font-family:var(--disp);font-size:19px;font-weight:600}
+.wordmark span{color:var(--gold-deep);font-style:italic}
+.progress{height:2px;background:var(--ivory-2)}
+.progress i{display:block;height:100%;background:var(--gold);transition:width .5s cubic-bezier(.22,1,.36,1);width:0}
+.step-count{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);font-weight:600}
+
+.wrap{max-width:640px;margin:0 auto;padding:52px 22px 120px}
+.screen{animation:fade .5s ease}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.h1{font-family:var(--disp);font-size:clamp(30px,6vw,42px);font-weight:500;line-height:1.15;margin:12px 0 10px}
+.lede{font-size:15px;color:var(--ink-3);max-width:480px}
+.hint{font-size:13px;color:var(--sage);margin-top:8px}
+
+.field{margin:22px 0}
+.field label{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--sage);margin-bottom:9px}
+.field label em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--sage);font-weight:400;font-size:11.5px}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);padding:15px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s;border-radius:0;-webkit-appearance:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}
+.field textarea{resize:vertical;min-height:92px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.two{grid-template-columns:1fr}}
+
+.nav{display:flex;gap:12px;justify-content:space-between;margin-top:40px;align-items:center}
+.nav .right{display:flex;gap:12px;align-items:center}
+
+/* event / hotel / fund / guest rows */
+.rowcard{background:var(--paper);border:1px solid var(--line);padding:18px;margin-bottom:12px;position:relative}
+.rowcard .rm{position:absolute;top:10px;right:10px;width:30px;height:30px;color:var(--sage);font-size:17px;line-height:1;transition:color .2s}
+.rowcard .rm:hover{color:var(--ink)}
+.rowgrid{display:grid;grid-template-columns:110px 110px 1fr;gap:10px}
+.rowgrid input{border:1px solid var(--line);padding:11px 12px;outline:none;width:100%}
+.rowgrid input:focus{border-color:var(--gold)}
+.rowcard .sub{margin-top:10px;display:grid;gap:10px}
+.rowcard .sub input{border:1px solid var(--line);padding:11px 12px;outline:none;width:100%}
+.rowcard .sub input:focus{border-color:var(--gold)}
+@media(max-width:560px){.rowgrid{grid-template-columns:1fr 1fr}.rowgrid input:last-child{grid-column:1/-1}}
+.addrow{width:100%;border:1px dashed var(--sage-soft);padding:15px;color:var(--ink-3);font-weight:600;font-size:13.5px;letter-spacing:.04em;transition:border-color .2s,background .2s;margin-top:2px}
+.addrow:hover{border-color:var(--gold);background:#FDFBF5}
+
+.tglrow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 2px;border-bottom:1px solid var(--line)}
+.tglrow:last-child{border:none}
+.tglrow .t{font-weight:600;font-size:14.5px}
+.tglrow .d{font-size:12.5px;color:var(--ink-3)}
+.tgl{width:40px;height:22px;border-radius:99px;background:var(--line);position:relative;transition:background .25s;flex-shrink:0}
+.tgl::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:var(--paper);top:3px;left:3px;transition:left .25s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tgl.on{background:var(--gold)}
+.tgl.on::after{left:21px}
+
+/* story prompts */
+.prompt{background:var(--paper);border:1px solid var(--line);padding:22px;margin-bottom:14px}
+.prompt .pq{font-family:var(--disp);font-size:20px;font-weight:500;margin-bottom:12px}
+.prompt input{width:90px;border:1px solid var(--line);padding:10px 12px;outline:none;margin-bottom:10px}
+.prompt textarea{width:100%;border:1px solid var(--line);padding:12px;outline:none;min-height:76px;resize:vertical}
+.prompt input:focus,.prompt textarea:focus{border-color:var(--gold)}
+
+/* guests paste */
+.paste{width:100%;border:1px solid var(--line);padding:15px;min-height:150px;outline:none;font-size:14.5px;line-height:1.8;background:var(--paper);resize:vertical}
+.paste:focus{border-color:var(--gold)}
+.parsed{margin-top:16px;border-top:1px solid var(--line)}
+.parsed .g{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+.parsed .g .e{color:var(--ink-3);font-size:13px}
+.parsed .g .x{color:var(--sage);font-size:15px;width:26px;text-align:center}
+.parsed .g .x:hover{color:var(--ink)}
+
+/* finish */
+.saving{text-align:center;padding:60px 0}
+.mono-pulse{width:76px;height:76px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:26px;color:var(--gold-deep);margin:0 auto 24px;animation:breathe 2.2s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.06);opacity:1}}
+.savelog{font-size:13px;color:var(--sage);letter-spacing:.06em;min-height:20px}
+.done-card{background:var(--paper);border:1px solid var(--line);padding:26px;margin-bottom:16px}
+.done-card h3{font-family:var(--disp);font-size:22px;font-weight:600;margin-bottom:8px}
+.done-card p{font-size:14px;color:var(--ink-3)}
+.keybox{display:flex;gap:10px;margin-top:14px}
+.keybox input{flex:1;border:1px solid var(--line);padding:13px;font-size:13px;color:var(--ink-3);background:var(--ivory)}
+.warn{background:#FBF5E6;border:1px solid var(--gold-soft);padding:14px 16px;font-size:13px;color:var(--gold-deep);margin-top:14px}
+.notice{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--ivory);font-size:13.5px;text-align:center;padding:14px 20px;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:200}
+.notice.on{transform:none}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ic-check" viewBox="0 0 24 24"><path d="M4 12.5 9.5 18 20 6.5"/></symbol>
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11"/><path d="M5 15V4h11"/></symbol>
+</svg>
+<div class="topbar">
+  <div class="topbar-in"><div class="wordmark">Kymella</div><div class="step-count" id="stepCount"></div></div>
+  <div class="progress"><i id="prog"></i></div>
+</div>
+<div class="wrap"><div class="screen" id="screen"></div></div>
+<div class="notice" id="notice"></div>
+<script>
+/* ================= wizard state ================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+function notice(m){ const n=$("notice"); n.textContent=m; n.classList.add("on"); clearTimeout(n._t); n._t=setTimeout(()=>n.classList.remove("on"),2800); }
+
+let SESSION_ID = new URLSearchParams(location.search).get("session_id");
+// Set on the Kymella picker page before checkout, and read here once, straight after purchase —
+// this is how the couple's chosen hero effect + palette survives the Stripe round-trip.
+let CHOSEN_EXPERIENCE = null;
+try {
+  const raw = sessionStorage.getItem("kymella_experience");
+  if (raw) CHOSEN_EXPERIENCE = JSON.parse(raw);
+} catch (e) { /* no experience chosen — falls back to the ripple default already set on the backend */ }
+// Names typed once on the experience compare page, so the couple never retypes them here.
+let CHOSEN_NAMES = null;
+try {
+  const raw = sessionStorage.getItem("kymella_names");
+  if (raw) CHOSEN_NAMES = JSON.parse(raw);
+} catch (e) { /* no names carried over — wizard just starts blank, as before */ }
+let step = 0;
+const S = {
+  partner1: CHOSEN_NAMES?.partner1 || "", partner2: CHOSEN_NAMES?.partner2 || "", wedding_date:"", venue:"", venue_address:"",
+  events: [
+    {on:true,  day_label:"", time_label:"4:00 PM",  title:"Ceremony",       location:""},
+    {on:true,  day_label:"", time_label:"6:30 PM",  title:"Reception",      location:""},
+    {on:false, day_label:"", time_label:"6:30 PM",  title:"Welcome Dinner", location:""},
+    {on:false, day_label:"", time_label:"10:30 AM", title:"Farewell Brunch",location:""},
+  ],
+  story: [
+    {q:"How did you meet?",        year:"", text:""},
+    {q:"The proposal",             year:"", text:""},
+    {q:"And today",                year:"", text:""},
+  ],
+  dress_code:"", arrival_info:"", parking_info:"", kids_policy:"", travel_info:"",
+  hotels: [],
+  registry_note:"Your presence is the greatest gift. Should you wish to contribute, we've set aside a few funds below.",
+  funds: [],
+  guests: [],
+};
+
+const STEPS = ["welcome","basics","events","story","practical","registry","guests","finish"];
+const TITLES = ["","The two of you","Your celebration","Your story","The practical details","Your registry","Your guest list",""];
+
+function draw(){
+  const total = STEPS.length - 2; // welcome & finish not counted
+  $("prog").style.width = (step===0?0: step>=STEPS.length-1?100 : Math.round(step/(STEPS.length-1)*100)) + "%";
+  $("stepCount").textContent = (step>0 && step<STEPS.length-1) ? `Step ${step} of ${total}` : "";
+  const sc = $("screen");
+  sc.classList.remove("screen"); void sc.offsetWidth; sc.classList.add("screen");
+  const name = STEPS[step];
+
+  if (name==="welcome"){
+    sc.innerHTML = `
+      <div class="label">Welcome</div>
+      <h1 class="h1">Let's set up your wedding</h1>
+      <p class="lede">Seven short questions — about ten minutes. When you're done, you'll open your own invitation exactly as your guests will, and every detail you share here teaches your concierge how to answer their questions.</p>
+      <p class="hint">You can leave anything blank and return to it later.</p>
+      <div class="nav"><span></span><div class="right"><button class="btn btn-gold" onclick="next()">Begin</button></div></div>`;
+  }
+  else if (name==="basics"){
+    sc.innerHTML = `
+      <div class="label muted">${TITLES[step]}</div>
+      <h1 class="h1">First, the essentials</h1>
+      <div class="two">
+        <div class="field"><label>Partner one</label><input id="f-p1" placeholder="Full name" value="${esc(S.partner1)}"></div>
+        <div class="field"><label>Partner two</label><input id="f-p2" placeholder="Full name" value="${esc(S.partner2)}"></div>
+      </div>
+      <div class="field"><label>Wedding date</label><input id="f-date" type="date" value="${esc(S.wedding_date)}"></div>
+      <div class="field"><label>Venue</label><input id="f-venue" placeholder="e.g. The Rosewood Estate" value="${esc(S.venue)}"></div>
+      <div class="field"><label>Venue address <em>· powers the map & directions</em></label><input id="f-addr" placeholder="Street, city" value="${esc(S.venue_address)}"></div>
+      ${navHtml(true)}`;
+  }
+  else if (name==="events"){
+    sc.innerHTML = `
+      <div class="label muted">${TITLES[step]}</div>
+      <h1 class="h1">What's happening, and when?</h1>
+      <p class="lede">We've started the usual moments for you — switch on what applies, adjust the rest.</p>
+      <div style="margin-top:26px">
+        ${S.events.map((e,i)=>`
+          <div class="tglrow">
+            <div style="flex:1">
+              <div class="t">${esc(e.title)}</div>
+              ${e.on?`<div class="rowgrid" style="margin-top:10px">
+                <input placeholder="Day (e.g. Sat, Aug 15)" value="${esc(e.day_label)}" onchange="S.events[${i}].day_label=this.value">
+                <input placeholder="Time" value="${esc(e.time_label)}" onchange="S.events[${i}].time_label=this.value">
+                <input placeholder="Location" value="${esc(e.location)}" onchange="S.events[${i}].location=this.value">
+              </div>`:""}
+            </div>
+            <button class="tgl ${e.on?"on":""}" onclick="S.events[${i}].on=!S.events[${i}].on;draw()" aria-label="Toggle ${esc(e.title)}"></button>
+          </div>`).join("")}
+      </div>
+      <button class="addrow" onclick="S.events.push({on:true,day_label:'',time_label:'',title:'New event',location:''});draw()">+ Add another event</button>
+      <p class="hint">Mehndi, sangeet, tea ceremony, after-party — add whatever your celebration holds.</p>
+      ${navHtml(true)}`;
+    // make custom event titles editable
+    sc.querySelectorAll(".tglrow .t").forEach((el,i)=>{
+      el.contentEditable = true;
+      el.addEventListener("blur", ()=>{ S.events[i].title = el.textContent.trim() || "Event"; });
+    });
+  }
+  else if (name==="story"){
+    sc.innerHTML = `
+      <div class="label muted">${TITLES[step]}</div>
+      <h1 class="h1">Tell it the way you tell it at dinner</h1>
+      <p class="lede">Three prompts. A few sentences each is plenty — this becomes the story your guests scroll through.</p>
+      <div style="margin-top:26px">
+        ${S.story.map((s,i)=>`<div class="prompt">
+          <div class="pq">${esc(s.q)}</div>
+          <input placeholder="Year" value="${esc(s.year)}" onchange="S.story[${i}].year=this.value">
+          <textarea placeholder="A few sentences…" onchange="S.story[${i}].text=this.value">${esc(s.text)}</textarea>
+        </div>`).join("")}
+      </div>
+      ${navHtml(true, "Continue", true)}`;
+  }
+  else if (name==="practical"){
+    sc.innerHTML = `
+      <div class="label muted">${TITLES[step]}</div>
+      <h1 class="h1">The questions guests always ask</h1>
+      <p class="lede">Each answer here is one less message on your phone — your concierge answers from these, day and night.</p>
+      <div class="field"><label>Dress code</label><input id="f-dress" placeholder="e.g. Formal garden attire — please avoid white" value="${esc(S.dress_code)}"></div>
+      <div class="field"><label>Arrival <em>· what time, and how</em></label><textarea id="f-arrival" placeholder="e.g. Please arrive by 3:30 PM for a 4:00 PM ceremony…">${esc(S.arrival_info)}</textarea></div>
+      <div class="field"><label>Parking</label><textarea id="f-parking" placeholder="Valet? Self-parking? Where?">${esc(S.parking_info)}</textarea></div>
+      <div class="field"><label>Children</label><input id="f-kids" placeholder="Warmly welcome? Adults only? Kids' lounge?" value="${esc(S.kids_policy)}"></div>
+      <div class="field"><label>Travel <em>· for out-of-town guests</em></label><textarea id="f-travel" placeholder="Nearest airport, the drive, shuttles or coaches…">${esc(S.travel_info)}</textarea></div>
+      <div class="field"><label>Hotels <em>· optional</em></label>
+        ${S.hotels.map((h,i)=>`<div class="rowcard"><button class="rm" onclick="S.hotels.splice(${i},1);draw()" aria-label="Remove">×</button>
+          <div class="sub">
+            <input placeholder="Hotel name" value="${esc(h.name)}" onchange="S.hotels[${i}].name=this.value">
+            <input placeholder="Detail (room-block code, rate, distance)" value="${esc(h.detail)}" onchange="S.hotels[${i}].detail=this.value">
+            <input placeholder="Tag (e.g. Room block · Good value)" value="${esc(h.tag)}" onchange="S.hotels[${i}].tag=this.value">
+          </div></div>`).join("")}
+        <button class="addrow" onclick="S.hotels.push({name:'',detail:'',tag:''});draw()">+ Add a hotel</button>
+      </div>
+      ${navHtml(true, "Continue", true)}`;
+  }
+  else if (name==="registry"){
+    sc.innerHTML = `
+      <div class="label muted">${TITLES[step]}</div>
+      <h1 class="h1">Your registry, if you'd like one</h1>
+      <p class="lede">Funds your guests can contribute to — a honeymoon, a home, an experience. Each fund links to your own payment method (PayPal, Interac request link, Stripe), so gifts go straight to you.</p>
+      ${S.funds.map((f,i)=>`<div class="rowcard" style="margin-top:${i===0?"26px":"0"}"><button class="rm" onclick="S.funds.splice(${i},1);draw()" aria-label="Remove">×</button>
+        <div class="sub">
+          <input placeholder="Fund name (e.g. Honeymoon in Kyoto)" value="${esc(f.title)}" onchange="S.funds[${i}].title=this.value">
+          <input placeholder="A line about it" value="${esc(f.description)}" onchange="S.funds[${i}].description=this.value">
+          <input placeholder="Goal in dollars (optional)" type="number" value="${f.goal||""}" onchange="S.funds[${i}].goal=this.value">
+          <input placeholder="Your payment link (paypal.me/…, Interac, Stripe)" value="${esc(f.external_url)}" onchange="S.funds[${i}].external_url=this.value">
+        </div></div>`).join("")}
+      <button class="addrow" style="margin-top:${S.funds.length?0:"26px"}" onclick="S.funds.push({title:'',description:'',goal:'',external_url:''});draw()">+ Add a fund</button>
+      ${navHtml(true, "Continue", true)}`;
+  }
+  else if (name==="guests"){
+    sc.innerHTML = `
+      <div class="label muted">${TITLES[step]}</div>
+      <h1 class="h1">Who's invited?</h1>
+      <p class="lede">Paste from your notes or a spreadsheet — one guest per line, a comma between name and email if you have one. You can always add more later.</p>
+      <div class="field" style="margin-top:24px"><label>Guest list</label>
+        <textarea class="paste" id="f-paste" placeholder="Priya Nair, priya@gmail.com&#10;Marcus Webb&#10;Elena & David Chen, elena@me.com" oninput="parseGuests(this.value)">${esc(S._raw||"")}</textarea>
+      </div>
+      <div class="parsed" id="parsedList">${parsedHtml()}</div>
+      <div class="nav">
+        <button class="btn btn-quiet sm" onclick="prev()">Back</button>
+        <div class="right">
+          <button class="btn btn-solid" id="guestsNextBtn" onclick="next()">${S.guests.length? "Continue" : "Skip for now"}</button>
+        </div>
+      </div>`;
+  }
+  else if (name==="finish"){
+    sc.innerHTML = `<div class="saving"><div class="mono-pulse">${(S.partner1[0]||"")+"&"+(S.partner2[0]||"")}</div>
+      <div class="label muted" style="letter-spacing:.26em">Preparing your wedding</div>
+      <p class="savelog" id="saveLog" style="margin-top:14px"></p></div>`;
+    publish();
+  }
+}
+function navHtml(back, okLabel="Continue", skippable=false){
+  return `<div class="nav">
+    ${back?`<button class="btn btn-quiet sm" onclick="prev()">Back</button>`:"<span></span>"}
+    <div class="right">
+      ${skippable?`<button class="textlink" onclick="next(true)">Skip this step</button>`:""}
+      <button class="btn btn-solid" onclick="next()">${okLabel}</button>
+    </div></div>`;
+}
+function collect(){
+  const g = id => $(id)?.value.trim() ?? null;
+  if (STEPS[step]==="basics"){ S.partner1=g("f-p1"); S.partner2=g("f-p2"); S.wedding_date=g("f-date"); S.venue=g("f-venue"); S.venue_address=g("f-addr"); }
+  if (STEPS[step]==="practical"){ S.dress_code=g("f-dress"); S.arrival_info=g("f-arrival"); S.parking_info=g("f-parking"); S.kids_policy=g("f-kids"); S.travel_info=g("f-travel"); }
+}
+function next(skip){
+  collect();
+  if (STEPS[step]==="basics" && !skip){
+    if (!S.partner1 || !S.partner2 || !S.wedding_date){ notice("Your names and the date are the one thing we truly need."); return; }
+  }
+  step = Math.min(STEPS.length-1, step+1); draw();
+}
+function prev(){ collect(); step = Math.max(0, step-1); draw(); }
+
+/* guests parsing */
+function parseGuests(raw){
+  S._raw = raw;
+  S.guests = raw.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
+    const [name, email] = l.split(",").map(x=>x?.trim());
+    return { name, email: (email && email.includes("@")) ? email : "" };
+  }).filter(g=>g.name);
+  $("parsedList").innerHTML = parsedHtml();
+  const btn = $("guestsNextBtn");
+  if (btn) btn.textContent = S.guests.length ? "Continue" : "Skip for now";
+}
+function parsedHtml(){
+  if (!S.guests.length) return "";
+  return `<p class="hint" style="padding:12px 2px 4px">${S.guests.length} ${S.guests.length===1?"guest":"guests"} recognised — each will receive their own personal invitation link.</p>` +
+    S.guests.map((g,i)=>`<div class="g"><b>${esc(g.name)}</b><span class="e">${esc(g.email)||"—"}</span><button class="x" onclick="removeGuest(${i})" aria-label="Remove">×</button></div>`).join("");
+}
+function removeGuest(i){ S.guests.splice(i,1); S._raw = S.guests.map(g=>g.email?`${g.name}, ${g.email}`:g.name).join("\n"); draw(); }
+
+/* ================= publish: the wizard's API sequence ================= */
+async function api(path, method, body, key){
+  const r = await fetch(path, { method, headers: Object.assign({"Content-Type":"application/json"}, key?{"x-admin-key":key}:{}), body: body?JSON.stringify(body):undefined });
+  const j = await r.json().catch(()=> ({}));
+  if (!r.ok) throw new Error(j.error || "Request failed");
+  return j;
+}
+async function publish(){
+  const log = m => { $("saveLog").textContent = m; };
+  try{
+    log("Creating your wedding…");
+    const created = await api("/api/weddings","POST",{ partner1:S.partner1, partner2:S.partner2, wedding_date:S.wedding_date, venue:S.venue||"", checkout_session:SESSION_ID });
+    const { id, admin_key, slug } = created;
+
+    log("Saving your details…");
+    await api(`/api/weddings/${id}`,"PUT",{
+      venue_address:S.venue_address||"", dress_code:S.dress_code||"", arrival_info:S.arrival_info||"",
+      parking_info:S.parking_info||"", kids_policy:S.kids_policy||"", travel_info:S.travel_info||"",
+      story_json: S.story.filter(s=>s.text).map(s=>({year:s.year||"", title:s.q==="How did you meet?"?"How we met":s.q==="The proposal"?"The proposal":"Today", text:s.text})),
+      hotels_json: S.hotels.filter(h=>h.name),
+      faq_json: buildFaq(),
+      registry_note: S.funds.length ? S.registry_note : "",
+      ...(CHOSEN_EXPERIENCE ? { hero_effect: CHOSEN_EXPERIENCE.effect, palette_json: CHOSEN_EXPERIENCE.palette } : {}),
+    }, admin_key);
+
+    const evs = S.events.filter(e=>e.on && e.title);
+    if (evs.length){ log("Placing your events…");
+      for (let i=0;i<evs.length;i++) await api(`/api/weddings/${id}/events`,"POST",{...evs[i], sort:i}, admin_key);
+    }
+    const funds = S.funds.filter(f=>f.title);
+    if (funds.length){ log("Opening your registry…");
+      for (let i=0;i<funds.length;i++) await api(`/api/weddings/${id}/registry`,"POST",{ title:funds[i].title, description:funds[i].description||"", goal_cents:Math.round((parseFloat(funds[i].goal)||0)*100), external_url:funds[i].external_url||"", sort:i}, admin_key);
+    }
+
+    log("Writing your own invitation…");
+    const preview = await api(`/api/weddings/${id}/guests`,"POST",{ name:`${S.partner1.split(" ")[0]} & ${S.partner2.split(" ")[0]}`, grp:"VIP", max_party:2 }, admin_key);
+    const previewUrl = preview.guests[0].invite_url;
+
+    let guestRows = [];
+    if (S.guests.length){ log(`Preparing ${S.guests.length} invitations…`);
+      const res = await api(`/api/weddings/${id}/guests`,"POST", S.guests.map(g=>({name:g.name,email:g.email})), admin_key);
+      guestRows = res.guests;
+    }
+    finishScreen({ id, admin_key, slug, previewUrl, guestRows });
+  }catch(e){
+    $("screen").innerHTML = `<div class="label muted">A moment</div><h1 class="h1">That didn't save</h1>
+      <p class="lede">${esc(e.message)}. Nothing you typed is lost — please try again.</p>
+      <div class="nav"><button class="btn btn-quiet sm" onclick="step=1;draw()">Review details</button><button class="btn btn-solid" onclick="retryPublish()">Try again</button></div>`;
+  }
+}
+async function retryPublish(){
+  // A prior attempt may have already created the wedding and spent this session.
+  // Mint a fresh one (free in dev mode) before retrying so we don't hit "already used".
+  try{
+    const r = await fetch("/api/checkout", { method: "POST" });
+    const j = await r.json();
+    if (j.url && !j.dev) { location.href = j.url; return; } // live Stripe: must actually pay again
+    if (j.url) { const u = new URL(j.url, location.origin); SESSION_ID = u.searchParams.get("session_id") || SESSION_ID; }
+  } catch(e) { /* fall through and retry with existing session */ }
+  draw();
+}
+function buildFaq(){
+  const f=[];
+  if (S.arrival_info) f.push({q:"What time should I arrive?", a:S.arrival_info});
+  if (S.parking_info) f.push({q:"Is parking available?", a:S.parking_info});
+  if (S.kids_policy)  f.push({q:"Can I bring my children?", a:S.kids_policy});
+  if (S.dress_code)   f.push({q:"What is the dress code?", a:S.dress_code});
+  if (S.travel_info)  f.push({q:"How do I get there?", a:S.travel_info});
+  return f;
+}
+function finishScreen({id, admin_key, previewUrl, guestRows}){
+  const manageUrl = `${location.origin}/manage#w=${id}&k=${admin_key}`;
+  $("prog").style.width="100%"; $("stepCount").textContent="";
+  $("screen").innerHTML = `
+    <div class="label">It's ready</div>
+    <h1 class="h1">Your wedding awaits</h1>
+    <p class="lede">Before anything else — open your own invitation, exactly as your guests will. Touch the seal.</p>
+    <div class="nav" style="margin-top:26px;justify-content:flex-start"><a class="btn btn-gold" href="${previewUrl}" target="_blank" rel="noopener">Open my invitation</a></div>
+
+    <div class="done-card" style="margin-top:40px"><h3>Your private dashboard</h3>
+      <p>RSVPs, meal counts, guest questions, and every invitation link live here. This link is the key to your wedding — save it somewhere safe.</p>
+      <div class="keybox"><input readonly value="${manageUrl}" id="mUrl"><button class="btn btn-quiet sm" onclick="copy('mUrl')"><svg class="i"><use href="#ic-copy"/></svg> Copy</button></div>
+      <div class="warn">Anyone with this link can manage your wedding. Treat it like a password — we can't recover it if lost.</div>
+    </div>
+
+    ${guestRows.length?`<div class="done-card"><h3>${guestRows.length} invitations, ready to send</h3>
+      <p>Each guest has their own personal link. Send them yourself over WhatsApp or text — an invitation should come from you, not from a platform. They're all in your dashboard too.</p>
+      <div style="margin-top:14px">${guestRows.slice(0,5).map(g=>`
+        <div class="keybox" style="margin-top:8px"><input readonly value="${g.invite_url}" id="g${g.id}"><button class="btn btn-quiet sm" onclick="copy('g${g.id}','${esc(g.name)}')">Copy</button></div>
+        <p class="hint" style="margin:2px 0 0 2px">${esc(g.name)}</p>`).join("")}
+      ${guestRows.length>5?`<p class="hint" style="margin-top:12px">…and ${guestRows.length-5} more in your dashboard.</p>`:""}</div>
+    </div>`:""}
+    <div class="nav" style="justify-content:flex-start"><a class="btn btn-solid" href="${manageUrl}">Go to my dashboard</a></div>`;
+}
+function copy(id, name){
+  $(id).select(); document.execCommand("copy");
+  try{ navigator.clipboard?.writeText($(id).value); }catch(e){}
+  notice(name ? `${name}'s invitation link copied.` : "Copied.");
+}
+async function gate(){
+  try{
+    const r = await fetch(`/api/checkout/verify?session_id=${encodeURIComponent(SESSION_ID||"")}`);
+    const v = await r.json();
+    if (v.ok){ draw(); return; }
+    $("screen").innerHTML = `
+      <div class="label muted">One step first</div>
+      <h1 class="h1">${v.reason==="used" ? "This purchase was already used" : "Your wedding starts here"}</h1>
+      <p class="lede">${v.reason==="used"
+        ? "Each purchase creates one wedding. If this is a mistake, write to us and we will make it right."
+        : "Kymella is a single purchase — one wedding, every feature, no subscription. Complete checkout and you will land right back here."}</p>
+      <div class="nav" style="justify-content:flex-start;gap:14px">
+        <button class="btn btn-gold" onclick="startCheckout()">Continue to checkout</button>
+        <a class="textlink" href="/" target="_blank" rel="noopener">Try the live experience first</a>
+      </div>`;
+  }catch(e){ draw(); } // network hiccup: let the API gate enforce
+}
+async function startCheckout(){
+  try{ const r=await fetch("/api/checkout",{method:"POST"}); const j=await r.json();
+    if (j.url) location.href=j.url; else notice("Checkout is unavailable right now.");
+  }catch(e){ notice("Checkout is unavailable right now."); }
+}
+gate();
+</script>
+</body>
+</html>
