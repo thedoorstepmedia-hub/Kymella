@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Kymella</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1F1C; --ink-2:#152D28; --ink-3:#26433C;
+  --mist:#F5EFE3; --mist-dim:#EDE5D4;
+  --brass:#B8874A; --brass-soft:#E8C9A0; --brass-deep:#8E6836;
+  --line:rgba(14,31,28,.12);
+  --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font-family:var(--body);cursor:pointer;border:none;background:none}
+input{font-family:var(--body);font-size:15px}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:var(--brass-deep)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:1px}
+.btn-brass{background:var(--brass);color:var(--ink)}
+.btn-quiet{border:1px solid var(--line);color:var(--ink)}
+.btn-quiet:hover{border-color:var(--brass)}
+.btn.xs{padding:8px 14px;font-size:11px}
+
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.gate-box{max-width:380px;width:100%;text-align:center}
+.gate h1{font-family:var(--disp);font-size:28px;font-weight:500;margin:12px 0 22px}
+.gate input{width:100%;border:1px solid var(--line);padding:14px 16px;outline:none;margin-bottom:14px;background:#fff}
+.gate-error{color:#A4523F;font-size:13px;margin-top:12px;display:none}
+
+.app{display:none}
+.topbar{background:var(--ink);color:var(--mist);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.topbar .word{font-family:var(--disp);font-size:19px;font-style:italic}
+.tabs{display:flex;gap:4px;background:var(--ink-2);padding:4px;border-radius:2px}
+.tab{padding:9px 18px;font-size:12.5px;font-weight:600;letter-spacing:.03em;color:rgba(245,239,227,.55);border-radius:1px;transition:all .2s}
+.tab.active{background:var(--brass);color:var(--ink)}
+.tab:hover:not(.active){color:var(--mist)}
+
+.wrap{max-width:960px;margin:0 auto;padding:34px 22px 90px}
+.panel{display:none}
+.panel.active{display:block}
+.top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:26px}
+.top h2{font-family:var(--disp);font-size:26px;font-weight:500}
+.count{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+
+/* weddings */
+.wcard{background:#fff;border:1px solid var(--line);display:grid;grid-template-columns:1fr auto auto auto;gap:16px;align-items:center;padding:20px 22px;margin-bottom:12px}
+@media(max-width:680px){.wcard{grid-template-columns:1fr;text-align:left}}
+.wcard .names{font-family:var(--disp);font-size:20px;font-weight:600}
+.wcard .sub{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.wcard .stat{text-align:center}
+.wcard .stat b{font-family:var(--disp);font-size:22px;font-weight:600;display:block}
+.wcard .stat span{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+
+/* inquiries */
+.card{background:#fff;border:1px solid var(--line);margin-bottom:14px}
+.card-head{display:grid;grid-template-columns:1fr auto auto auto;gap:14px;align-items:center;padding:18px 20px;cursor:pointer}
+.card-head .names{font-family:var(--disp);font-size:19px;font-weight:600}
+.card-head .sub{font-size:12px;color:var(--ink-3);margin-top:3px}
+.tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:12px}
+.tag.complete{background:#DCEFDF;color:#2D6A3E}
+.tag.progress{background:var(--mist-dim);color:var(--ink-3)}
+.tag.interactive{background:#EDE0C8;color:var(--brass-deep)}
+.tag.rsvp{background:#DCE7E2;color:var(--ink-3)}
+.tag.both{background:var(--ink);color:var(--mist)}
+.chev{color:var(--ink-3);transition:transform .2s}
+.card.open .chev{transform:rotate(180deg)}
+.detail{display:none;padding:0 20px 20px;border-top:1px solid var(--line)}
+.card.open .detail{display:block}
+.dl{display:grid;grid-template-columns:110px 1fr;gap:6px 14px;font-size:13px;padding:16px 0}
+.dl dt{color:var(--ink-3);font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding-top:2px}
+.dl dd{color:var(--ink)}
+.transcript{background:var(--mist-dim);padding:14px 16px;max-height:340px;overflow-y:auto;font-size:13px}
+.tmsg{margin-bottom:10px}
+.tmsg b{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-deep);display:block;margin-bottom:2px}
+.tmsg.assistant b{color:var(--ink-3)}
+.convert-msg{font-size:12.5px;margin-top:8px}
+
+/* waitlist */
+.row{display:grid;grid-template-columns:1fr 1fr auto auto auto auto;gap:14px;align-items:center;padding:16px 4px;border-bottom:1px solid var(--line)}
+.row.head{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--ink)}
+.row .name{font-weight:600}
+.row .email{color:var(--ink-3);font-size:13.5px}
+.row .date{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.row .wdate{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+@media(max-width:640px){.row{grid-template-columns:1fr;gap:4px;padding:16px 4px}.row.head{display:none}}
+
+.empty{text-align:center;padding:60px 20px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="eyebrow">Kymella</div>
+    <h1>Admin</h1>
+    <input type="password" id="keyInput" placeholder="Your setup bypass key" autocomplete="off">
+    <button class="btn btn-brass" style="width:100%" id="unlockBtn">Unlock</button>
+    <p class="gate-error" id="gateError">That key didn't work.</p>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="word">Kymella Admin</div>
+    <div class="tabs">
+      <button class="tab active" data-tab="weddings" onclick="switchTab('weddings')">Weddings</button>
+      <button class="tab" data-tab="inquiries" onclick="switchTab('inquiries')">Inquiries</button>
+      <button class="tab" data-tab="waitlist" onclick="switchTab('waitlist')">Waitlist</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="panel active" id="panel-weddings">
+      <div class="top"><h2>All weddings</h2><div class="count" id="countWeddings"></div></div>
+      <div id="listWeddings"></div>
+    </div>
+    <div class="panel" id="panel-inquiries">
+      <div class="top"><h2>Concierge inquiries</h2><div class="count" id="countInquiries"></div></div>
+      <div id="listInquiries"></div>
+    </div>
+    <div class="panel" id="panel-waitlist">
+      <div class="top"><h2>Waitlist signups</h2><div class="count" id="countWaitlist"></div></div>
+      <div id="listWaitlist"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "https://evarria-backend-production.up.railway.app";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+let ADMIN_KEY = sessionStorage.getItem("kymella_admin_key") || "";
+
+function switchTab(name){
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === `panel-${name}`));
+}
+
+async function fetchJson(path, key){
+  const r = await fetch(`${API}${path}`, { headers: { "x-setup-key": key } });
+  if (!r.ok) return { ok:false, status:r.status };
+  return { ok:true, data: await r.json() };
+}
+
+async function unlock(key){
+  const [w, i, wl] = await Promise.all([
+    fetchJson("/api/admin/weddings", key),
+    fetchJson("/api/kymella-inquiries", key),
+    fetchJson("/api/kymella-waitlist", key),
+  ]);
+  if (!w.ok || !i.ok || !wl.ok){
+    $("gateError").style.display = "block";
+    $("gateError").textContent = (w.status===401||i.status===401||wl.status===401) ? "That key didn't work." : "Couldn't reach the server.";
+    return;
+  }
+  sessionStorage.setItem("kymella_admin_key", key);
+  ADMIN_KEY = key;
+  $("gate").style.display = "none";
+  $("app").style.display = "block";
+  renderWeddings(w.data);
+  renderInquiries(i.data);
+  renderWaitlist(wl.data);
+}
+$("unlockBtn").addEventListener("click", () => { const k=$("keyInput").value.trim(); if(k) unlock(k); });
+$("keyInput").addEventListener("keydown", e => { if (e.key==="Enter") $("unlockBtn").click(); });
+
+/* ---------------- WEDDINGS ---------------- */
+function renderWeddings(data){
+  $("countWeddings").textContent = `${data.count} ${data.count===1?"wedding":"weddings"}`;
+  if (!data.weddings.length){ $("listWeddings").innerHTML = `<div class="empty">No weddings yet.</div>`; return; }
+  $("listWeddings").innerHTML = data.weddings.map(w => {
+    const names = `${w.partner1} & ${w.partner2}`;
+    const sub = [w.wedding_date, w.venue].filter(Boolean).join(" · ");
+    const manageUrl = `${API}/manage#w=${w.id}&k=${encodeURIComponent(ADMIN_KEY)}`;
+    return `<a class="wcard" href="${manageUrl}" target="_blank">
+      <div><div class="names">${esc(names)}</div><div class="sub">${esc(sub)}</div></div>
+      <div class="stat"><b>${w.guest_count}</b><span>Invited</span></div>
+      <div class="stat"><b>${w.accepted_count}</b><span>Accepted</span></div>
+      <div class="btn btn-quiet xs">Open dashboard</div>
+    </a>`;
+  }).join("");
+}
+
+/* ---------------- INQUIRIES ---------------- */
+function renderInquiries(data){
+  $("countInquiries").textContent = `${data.count} ${data.count===1?"inquiry":"inquiries"}`;
+  if (!data.inquiries.length){ $("listInquiries").innerHTML = `<div class="empty">No inquiries yet.</div>`; return; }
+  const interestLabel = { interactive:"Interactive", rsvp:"RSVP", both:"Both", "":"—" };
+  $("listInquiries").innerHTML = data.inquiries.map((inq, i) => {
+    const names = [inq.partner1, inq.partner2].filter(Boolean).join(" & ") || "Unnamed inquiry";
+    const sub = [inq.email, inq.wedding_date, inq.location].filter(Boolean).join(" · ");
+    const transcriptHtml = inq.transcript.map(m => `<div class="tmsg ${m.role}"><b>${m.role==="user"?names:"Concierge"}</b>${esc(m.content)}</div>`).join("");
+    const manageUrl = inq.converted_wedding_id ? `${API}/manage#w=${inq.converted_wedding_id}&k=${encodeURIComponent(ADMIN_KEY)}` : "";
+    const convertAction = inq.converted_wedding_id
+      ? `<p style="font-size:12.5px;color:#2D6A3E;margin-top:4px">Wedding created — <a href="${manageUrl}" target="_blank" style="color:var(--brass-deep);border-bottom:1px solid var(--brass-deep)">open its dashboard</a></p>`
+      : `<button class="btn btn-brass xs" onclick="convertInquiry(${inq.id}, this)">Create wedding from this</button>
+         <p class="convert-msg" id="convert-msg-${inq.id}" style="display:none"></p>`;
+    return `<div class="card" id="inq-card-${i}">
+      <div class="card-head" onclick="document.getElementById('inq-card-${i}').classList.toggle('open')">
+        <div><div class="names">${esc(names)}</div><div class="sub">${esc(sub)}</div></div>
+        <span class="tag ${inq.interest||'none'}">${interestLabel[inq.interest]||"—"}</span>
+        <span class="tag ${inq.complete?'complete':'progress'}">${inq.complete?"Complete":"In progress"}</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="detail">
+        <div class="dl">
+          <dt>Guests</dt><dd>${esc(inq.guest_count)||"—"}</dd>
+          <dt>Vibe</dt><dd>${esc(inq.vibe_description)||"—"}</dd>
+          <dt>Notes</dt><dd>${esc(inq.notes)||"—"}</dd>
+          <dt>Updated</dt><dd>${esc(inq.updated_at)}</dd>
+        </div>
+        <div style="padding:4px 0 16px">${convertAction}</div>
+        <div class="transcript">${transcriptHtml || "<em>No messages yet.</em>"}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+async function convertInquiry(id, btn){
+  btn.disabled = true; btn.textContent = "Creating…";
+  const msgEl = $(`convert-msg-${id}`);
+  try{
+    const r = await fetch(`${API}/api/kymella-inquiries/${id}/convert`, { method:"POST", headers:{"x-setup-key":ADMIN_KEY} });
+    const data = await r.json();
+    msgEl.style.display = "block";
+    if (!r.ok){
+      msgEl.style.color = "#A4523F"; msgEl.textContent = data.error;
+      btn.disabled = false; btn.textContent = "Create wedding from this";
+      return;
+    }
+    const manageUrl = `${API}/manage#w=${data.id}&k=${encodeURIComponent(data.admin_key)}`;
+    msgEl.style.color = "#2D6A3E";
+    msgEl.innerHTML = `Wedding created. <a href="${manageUrl}" target="_blank" style="color:#2D6A3E;border-bottom:1px solid #2D6A3E">Open its dashboard</a><br>${esc(data.setup_note)}`;
+    btn.style.display = "none";
+  }catch(e){
+    msgEl.style.display = "block"; msgEl.style.color = "#A4523F"; msgEl.textContent = "Couldn't reach the server.";
+    btn.disabled = false; btn.textContent = "Create wedding from this";
+  }
+}
+
+/* ---------------- WAITLIST ---------------- */
+function renderWaitlist(data){
+  $("countWaitlist").textContent = `${data.count} ${data.count===1?"signup":"signups"}`;
+  if (!data.signups.length){ $("listWaitlist").innerHTML = `<div class="empty">No signups yet.</div>`; return; }
+  const interestLabel = { interactive:"Interactive", rsvp:"RSVP", both:"Both", "":"—" };
+  $("listWaitlist").innerHTML = `<div class="row head"><div>Name</div><div>Email</div><div>Wedding date</div><div>Interest</div><div>Joined</div><div></div></div>` +
+    data.signups.map(s => `<div class="row">
+      <div class="name">${esc(s.name)}</div>
+      <div class="email">${esc(s.email)}</div>
+      <div class="wdate">${s.wedding_date ? esc(s.wedding_date) : "—"}</div>
+      <span class="tag ${s.interest||'none'}">${interestLabel[s.interest]||"—"}</span>
+      <div class="date">${esc(s.created_at)}</div>
+      <button class="btn btn-quiet xs" onclick="navigator.clipboard.writeText('${esc(s.email)}')">Copy email</button>
+    </div>`).join("");
+}
+
+if (ADMIN_KEY) unlock(ADMIN_KEY);
+</script>
+</body>
+</html>
