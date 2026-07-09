@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title id="pageTitle">Kymella Invitation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1F1C; --ink-2:#152D28; --ink-3:#26433C;
+  --mist:#F5EFE3; --mist-dim:#EDE5D4;
+  --brass:#B8874A; --brass-soft:#E8C9A0; --brass-deep:#8E6836;
+  --line:rgba(14,31,28,.12); --line-dk:rgba(245,239,227,.16);
+  --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--body);cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:var(--body);font-size:15px}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;color:var(--brass-deep)}
+.eyebrow.on-dark{color:var(--brass-soft)}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:24px 32px;mix-blend-mode:difference}
+.nav .word{color:var(--mist);font-family:var(--disp);font-size:18px;font-style:italic}
+
+.hero{position:relative;min-height:660px;height:100svh;background:var(--ink);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.hero-content{position:relative;z-index:2;pointer-events:none;color:var(--mist)}
+.hero .eyebrow{margin-bottom:20px}
+.hero h1{font-family:var(--disp);font-size:clamp(30px,6vw,54px);font-weight:400;line-height:1.18;max-width:720px}
+.hero h1 em{font-style:italic;color:var(--brass-soft)}
+.hero .sub{margin-top:18px;font-size:15px;color:rgba(245,239,227,.65);max-width:420px;margin-left:auto;margin-right:auto}
+.hero .date{margin-top:26px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--brass-soft)}
+.hero-cta{margin-top:28px;pointer-events:auto}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:15px 30px;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;transition:background .2s,color .2s,border-color .2s}
+.btn-brass{background:var(--brass);color:var(--ink)}
+.btn-brass:hover{background:var(--brass-soft)}
+.btn-solid{background:var(--ink);color:var(--mist)}
+.btn-solid:hover{background:var(--ink-2)}
+.btn-quiet{border:1px solid var(--line);color:var(--ink)}
+.btn-quiet:hover{border-color:var(--brass)}
+
+.section{padding:92px 32px}
+.inner{max-width:680px;margin:0 auto}
+@media(max-width:680px){.section{padding:60px 22px}}
+.center{text-align:center}
+.h2{font-family:var(--disp);font-size:clamp(26px,4.5vw,36px);font-weight:400;line-height:1.2;margin:12px 0 14px}
+.h2 em{font-style:italic;color:var(--brass-deep)}
+.lede{font-size:15px;color:var(--ink-3);max-width:460px;margin:0 auto}
+
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);margin-top:40px;border:1px solid var(--line)}
+@media(max-width:560px){.details-grid{grid-template-columns:1fr}}
+.dcard{background:var(--mist);padding:26px 24px}
+.dcard .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-deep)}
+.dcard h3{font-family:var(--disp);font-size:19px;font-weight:500;margin:8px 0 6px}
+.dcard p{font-size:13.5px;color:var(--ink-3)}
+
+.rsvp-card{max-width:460px;margin:36px auto 0;background:#fff;border:1px solid var(--line);border-radius:2px;padding:32px 28px;text-align:left}
+.rsvp-row{margin-bottom:17px}
+.rsvp-row label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-deep);margin-bottom:7px}
+.rsvp-row input,.rsvp-row select,.rsvp-row textarea{width:100%;border:1px solid var(--line);padding:11px 13px;outline:none;background:var(--mist);border-radius:1px}
+.rsvp-row input:focus,.rsvp-row select:focus,.rsvp-row textarea:focus{border-color:var(--brass)}
+.rc-choice{display:flex;gap:9px}
+.rc-btn{flex:1;padding:12px 8px;border:1px solid var(--line);border-radius:1px;background:var(--mist);font-weight:500;font-size:13px;transition:all .2s}
+.rc-btn.active{background:var(--ink);border-color:var(--ink);color:var(--mist)}
+.ev-check{display:flex;align-items:center;gap:9px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:13px}
+.ev-check:last-child{border:none}
+.ev-check input{width:16px;height:16px;accent-color:var(--brass-deep)}
+.rsvp-msg{font-size:12px;text-align:center;margin-top:9px;display:none}
+
+.reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:36px}
+@media(max-width:560px){.reg-grid{grid-template-columns:1fr}}
+.reg-card{background:#fff;border:1px solid var(--line);padding:24px}
+.reg-card .em{font-size:24px}
+.reg-card h3{font-family:var(--disp);font-size:18px;font-weight:600;margin:9px 0 5px}
+.reg-card p{font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
+.reg-bar{height:5px;background:var(--mist-dim);border-radius:3px;overflow:hidden;margin-bottom:7px}
+.reg-bar i{display:block;height:100%;background:var(--brass-deep)}
+.reg-amt{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+
+.foot{text-align:center;padding:40px 24px;color:var(--ink-3);font-size:11.5px;letter-spacing:.05em;border-top:1px solid var(--line)}
+.state-msg{text-align:center;padding:60px 20px;color:var(--ink-3);font-size:14px}
+.up{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1)}
+.up.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.up{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="word" id="navWord">Kymella</div></nav>
+
+<header class="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-content">
+    <div class="eyebrow on-dark">You Are Invited</div>
+    <h1 id="heroGreeting">Loading your invitation…</h1>
+    <p class="sub" id="heroSub"></p>
+    <div class="date" id="heroDate"></div>
+    <div class="hero-cta"><a class="btn btn-brass" href="#rsvp">RSVP</a></div>
+  </div>
+</header>
+
+<section class="section center">
+  <div class="inner">
+    <div class="eyebrow">The Essentials</div>
+    <h2 class="h2">When & <em>where</em></h2>
+    <div class="details-grid" id="detailsGrid"><div class="state-msg" style="grid-column:1/-1">Loading…</div></div>
+  </div>
+</section>
+
+<section class="section center" id="rsvp">
+  <div class="inner">
+    <div class="eyebrow">Please Respond</div>
+    <h2 class="h2">Will you <em>be there?</em></h2>
+    <p class="lede">We'd love to know — and which moments we'll see you at.</p>
+    <div class="rsvp-card">
+      <div id="rsvpLoading" style="text-align:center;opacity:.6;font-size:13.5px">Loading…</div>
+      <form id="rsvpForm" style="display:none">
+        <div class="rsvp-row"><label>Will you be attending?</label>
+          <div class="rc-choice">
+            <button type="button" class="rc-btn" id="rYes">Joyfully accept</button>
+            <button type="button" class="rc-btn" id="rNo">Regretfully decline</button>
+          </div>
+        </div>
+        <div id="rFields" style="display:none">
+          <div class="rsvp-row"><label>Party size</label><input type="number" id="rParty" min="1" value="1"></div>
+          <div class="rsvp-row"><label>Meal preference</label>
+            <select id="rMeal"><option>Standard</option><option>Vegetarian</option><option>Vegan</option><option>Gluten-free</option></select>
+          </div>
+          <div class="rsvp-row"><label>Allergies or dietary needs</label><input type="text" id="rAllergies" placeholder="Optional"></div>
+          <div class="rsvp-row"><label>Getting there</label><input type="text" id="rTransport" placeholder="Optional"></div>
+          <div class="rsvp-row" id="rEventsRow"><label>Which moments will we see you at?</label><div id="rEventsList"></div></div>
+        </div>
+        <div class="rsvp-row"><label>A note for the couple</label><textarea id="rNote" rows="3" placeholder="Optional"></textarea></div>
+        <button type="submit" class="btn btn-solid" id="rSubmit" style="width:100%">Send reply</button>
+        <p class="rsvp-msg" id="rMsg"></p>
+      </form>
+      <div id="rsvpDone" style="display:none;text-align:center;padding:10px 0">
+        <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're on the list ✦</p>
+        <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you — we can't wait to celebrate with you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section center" id="registrySection">
+  <div class="inner">
+    <div class="eyebrow">If You're Asking</div>
+    <h2 class="h2">Registry</h2>
+    <p class="lede">Your presence is the real gift. If you'd still like to give something, here's where to look.</p>
+    <div class="reg-grid" id="regGrid"></div>
+  </div>
+</section>
+
+<footer class="foot" id="footText">KYMELLA</footer>
+
+<script>
+// hero-effects.js — Kymella's four live hero effects, extracted from template-invite.html.
+// Shared, unmodified logic used by BOTH the public experience picker and the couple's live invite,
+// so a couple always sees on their invite exactly what they touched during their experience selection.
+
+/* ================= HERO EFFECT LIBRARY (shared, tested modules) ================= */
+function hexToRgb(hex){ const n=parseInt((hex||"#000000").replace("#",""),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function createWaterRipple(canvas, opts = {}) {
+  const ctx = canvas.getContext("2d");
+  const RES_W = 150, RES_H = 84, N = RES_W * RES_H;
+  let bufA = new Float32Array(N), bufB = new Float32Array(N), bufC = new Float32Array(N);
+  const DAMPING = 0.985;
+  const off = document.createElement("canvas"); off.width = RES_W; off.height = RES_H;
+  const offCtx = off.getContext("2d"); const imgData = offCtx.createImageData(RES_W, RES_H);
+  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C"), BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28"), BRASS = hexToRgb(opts.brass || "#B8874A");
+  function splash(gx,gy,strength,radius){
+    for (let dy=-radius; dy<=radius; dy++) for (let dx=-radius; dx<=radius; dx++){
+      const x=gx+dx,y=gy+dy; if (x<1||x>=RES_W-1||y<1||y>=RES_H-1) continue;
+      const dist=Math.sqrt(dx*dx+dy*dy); if (dist>radius) continue;
+      bufA[y*RES_W+x] += strength*(1-dist/radius);
+    }
+  }
+  function stepWater(){
+    for (let y=1;y<RES_H-1;y++){ const row=y*RES_W;
+      for (let x=1;x<RES_W-1;x++){ const i=row+x; bufC[i]=(bufA[i-1]+bufA[i+1]+bufA[i-RES_W]+bufA[i+RES_W])*0.5-bufB[i]; bufC[i]*=DAMPING; } }
+    const tmp=bufB; bufB=bufA; bufA=bufC; bufC=tmp;
+  }
+  const LIGHT_X=0.72, LIGHT_Y=0.62;
+  function renderWater(){
+    const data = imgData.data;
+    for (let y=0;y<RES_H;y++){ const row=y*RES_W; const vt=y/RES_H;
+      const baseR=BASE_TOP[0]+(BASE_BOTTOM[0]-BASE_TOP[0])*vt, baseG=BASE_TOP[1]+(BASE_BOTTOM[1]-BASE_TOP[1])*vt, baseB=BASE_TOP[2]+(BASE_BOTTOM[2]-BASE_TOP[2])*vt;
+      for (let x=0;x<RES_W;x++){ const i=row+x; let shade=0;
+        if (x>0&&x<RES_W-1&&y>0&&y<RES_H-1){ const dx=bufA[i+1]-bufA[i-1], dy=bufA[i+RES_W]-bufA[i-RES_W]; shade=(dx*LIGHT_X+dy*LIGHT_Y)*5.5; }
+        let r=baseR,g=baseG,b=baseB;
+        if (shade>0){ const t=Math.min(1,shade/14); r+=(BRASS[0]-r)*t; g+=(BRASS[1]-g)*t; b+=(BRASS[2]-b)*t; }
+        else if (shade<0){ const t=Math.min(1,-shade/22)*0.5; r*=(1-t); g*=(1-t); b*=(1-t); }
+        const depth=bufA[i]*0.18; const p=i*4;
+        data[p]=Math.max(0,Math.min(255,r+depth)); data[p+1]=Math.max(0,Math.min(255,g+depth)); data[p+2]=Math.max(0,Math.min(255,b+depth)); data[p+3]=255;
+      }
+    }
+    offCtx.putImageData(imgData,0,0);
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(off,0,0,RES_W,RES_H,0,0,canvas.width,canvas.height);
+    const vg=ctx.createRadialGradient(canvas.width/2,canvas.height*0.4,canvas.width*0.15,canvas.width/2,canvas.height*0.4,canvas.width*0.75);
+    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)"); ctx.fillStyle=vg; ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+  function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; }
+  window.addEventListener("resize", resize); resize();
+  function toGrid(cx,cy){ const rect=canvas.getBoundingClientRect(); return { gx: Math.floor(((cx-rect.left)/rect.width)*RES_W), gy: Math.floor(((cy-rect.top)/rect.height)*RES_H) }; }
+  function eventXY(e){ if (e.touches&&e.touches[0]) return [e.touches[0].clientX,e.touches[0].clientY]; return [e.clientX,e.clientY]; }
+  let dragging=false;
+  function onDown(e){ const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,26,5); dragging=true; }
+  function onMove(e){ if(!dragging) return; const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,8,3); }
+  function onUp(){ dragging=false; }
+  canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); window.addEventListener("pointerup", onUp);
+  canvas.addEventListener("touchstart", onDown, {passive:true}); canvas.addEventListener("touchmove", onMove, {passive:true}); window.addEventListener("touchend", onUp);
+  let ambientTimer = setInterval(() => { splash(4+Math.random()*(RES_W-8), 4+Math.random()*(RES_H-8), 9, 3); }, 1800);
+  splash(RES_W/2, RES_H*0.42, 30, 7);
+  let raf; function loop(){ stepWater(); renderWater(); raf=requestAnimationFrame(loop); } loop();
+  return { stop(){ cancelAnimationFrame(raf); clearInterval(ambientTimer); window.removeEventListener("resize",resize); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); } };
+}
+
+function createDiyaLight(canvas, opts = {}) {
+  const ctx = canvas.getContext("2d");
+  let W,H,DPR,raf;
+  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  window.addEventListener("resize", size); size();
+  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28";
+  const [br, bg, bb] = hexToRgb(opts.brass || "#B8874A");
+  const flameMist = opts.mist || "#F5EFE3", flameSoft = opts.brassSoft || "#E8C9A0", flameBrass = opts.brass || "#B8874A";
+  let flame = null; const startClock = performance.now();
+  function spawn(x,y){ flame = {x,y,born:(performance.now()-startClock)/1000}; }
+  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
+  const onDown = e => spawn(...xy(e));
+  canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("touchstart", onDown, {passive:true});
+  function draw(){
+    const t=(performance.now()-startClock)/1000; ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    if (!flame){
+      const pulse=0.05+Math.sin(t*0.6)*0.015;
+      const rg=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.min(W,H)*0.25);
+      rg.addColorStop(0,`rgba(${br},${bg},${bb},${pulse})`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+    } else {
+      const age=t-flame.born; const flicker=1+Math.sin(t*14)*0.06+Math.sin(t*23)*0.03;
+      const washGrow=Math.min(age/2.5,1); const washRadius=Math.max(W,H)*(0.55+washGrow*0.5)*(1+Math.sin(t*1.2)*0.02);
+      const wash=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius);
+      wash.addColorStop(0,`rgba(${br},${bg},${bb},${0.16*washGrow})`); wash.addColorStop(0.45,`rgba(${br},${bg},${bb},${0.07*washGrow})`); wash.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
+      ctx.fillStyle=wash; ctx.fillRect(0,0,W,H);
+      const radius=Math.min(W,H)*(0.32+Math.min(age*0.04,0.14))*flicker;
+      const rg=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,radius);
+      rg.addColorStop(0,`rgba(${br},${bg},${bb},0.6)`); rg.addColorStop(0.35,`rgba(${br},${bg},${bb},0.32)`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
+      ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=`rgba(${br},${bg},${bb},${0.03*washGrow})`; ctx.fillRect(0,0,W,H);
+      const fh=22*flicker, fw=9*flicker;
+      ctx.beginPath(); ctx.moveTo(flame.x, flame.y+fh*0.5);
+      ctx.quadraticCurveTo(flame.x-fw, flame.y-fh*0.1, flame.x, flame.y-fh);
+      ctx.quadraticCurveTo(flame.x+fw, flame.y-fh*0.1, flame.x, flame.y+fh*0.5);
+      const fg=ctx.createLinearGradient(flame.x,flame.y-fh,flame.x,flame.y+fh*0.5);
+      fg.addColorStop(0,flameMist); fg.addColorStop(0.5,flameSoft); fg.addColorStop(1,flameBrass); ctx.fillStyle=fg; ctx.fill();
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  draw();
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); } };
+}
+
+function createFrostReveal(canvas, label, opts = {}) {
+  const ctx = canvas.getContext("2d");
+  let W,H,raf;
+  const frostLayer=document.createElement("canvas"), frostCtx=frostLayer.getContext("2d");
+  const maskLayer=document.createElement("canvas"), maskCtx=maskLayer.getContext("2d");
+  // frostComposite holds the frost texture WITH wipe-holes cut into it, isolated from the
+  // background gradient below — this is what fixes wiped areas showing the palette gradient
+  // instead of punching straight through to transparent/page background.
+  const frostComposite=document.createElement("canvas"), compCtx=frostComposite.getContext("2d");
+  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28", frostTint = opts.mist || "#EDE5D4";
+  function buildFrostTexture(){
+    frostLayer.width=W; frostLayer.height=H; frostCtx.clearRect(0,0,W,H);
+    frostCtx.fillStyle=frostTint; frostCtx.globalAlpha=0.88; frostCtx.fillRect(0,0,W,H); frostCtx.globalAlpha=1;
+    frostCtx.filter="blur(11px)";
+    for (let i=0;i<40;i++){ const x=Math.random()*W,y=Math.random()*H,r=22+Math.random()*75,op=0.15+Math.random()*0.35;
+      frostCtx.fillStyle=`rgba(255,255,255,${op})`; frostCtx.beginPath(); frostCtx.arc(x,y,r,0,Math.PI*2); frostCtx.fill(); }
+    frostCtx.filter="none";
+    const img=frostCtx.getImageData(0,0,W,H);
+    for (let i=0;i<img.data.length;i+=4){ const n=(Math.random()-0.5)*12; img.data[i]=Math.min(255,Math.max(0,img.data[i]+n)); img.data[i+1]=Math.min(255,Math.max(0,img.data[i+1]+n)); img.data[i+2]=Math.min(255,Math.max(0,img.data[i+2]+n)); }
+    frostCtx.putImageData(img,0,0);
+  }
+  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; frostComposite.width=W; frostComposite.height=H; buildFrostTexture(); maskCtx.clearRect(0,0,W,H); }
+  window.addEventListener("resize", size);
+  let holding=false, lastPos=null;
+  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
+  function wipeAt(x,y){ maskCtx.filter="blur(9px)"; maskCtx.fillStyle="rgba(0,0,0,1)"; maskCtx.beginPath(); maskCtx.arc(x,y,34,0,Math.PI*2); maskCtx.fill(); maskCtx.filter="none"; }
+  const onDown = e => { holding=true; const [x,y]=xy(e); lastPos=[x,y]; wipeAt(x,y); };
+  const onMove = e => { if (!holding) return; const [x,y]=xy(e);
+    if (lastPos){ const dx=x-lastPos[0],dy=y-lastPos[1],dist=Math.sqrt(dx*dx+dy*dy),steps=Math.max(1,Math.floor(dist/8));
+      for (let s=0;s<=steps;s++) wipeAt(lastPos[0]+dx*(s/steps), lastPos[1]+dy*(s/steps)); }
+    lastPos=[x,y];
+  };
+  const onUp = () => { holding=false; lastPos=null; };
+  canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); window.addEventListener("pointerup", onUp);
+  canvas.addEventListener("touchstart", onDown, {passive:true}); canvas.addEventListener("touchmove", onMove, {passive:true}); window.addEventListener("touchend", onUp);
+  size();
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.save(); ctx.font="500 28px Fraunces, Georgia, serif"; ctx.fillStyle="rgba(232,201,160,0.85)"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(label || "Kymella", W/2, H/2); ctx.restore();
+    // Build the frost-with-holes on its OWN canvas first, so destination-out only ever
+    // erases the frost texture — never the gradient/label already drawn on the main canvas.
+    compCtx.clearRect(0,0,W,H);
+    compCtx.globalCompositeOperation="source-over"; compCtx.drawImage(frostLayer,0,0);
+    compCtx.globalCompositeOperation="destination-out"; compCtx.drawImage(maskLayer,0,0);
+    ctx.drawImage(frostComposite,0,0);
+    raf=requestAnimationFrame(draw);
+  }
+  draw();
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); } };
+}
+
+function createIncenseDrift(canvas, opts = {}) {
+  const ctx = canvas.getContext("2d");
+  let W,H,DPR,raf;
+  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  window.addEventListener("resize", size); size();
+  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28";
+  const [ir, ig, ib] = hexToRgb(opts.brassSoft || opts.brass || "#E8C9A0");
+  const emberColor = opts.brassSoft || opts.brass || "#E8C9A0";
+  let mouseX=null, mouseY=null, velocity=0;
+  function updateMouse(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; const nx=p.clientX-r.left, ny=p.clientY-r.top;
+    if (mouseX!==null){ const dx=nx-mouseX,dy=ny-mouseY; velocity=Math.min(60,Math.sqrt(dx*dx+dy*dy)); } mouseX=nx; mouseY=ny; }
+  const onMove = e => updateMouse(e); const onLeave = () => { mouseX=null; mouseY=null; velocity=0; };
+  canvas.addEventListener("pointermove", onMove); canvas.addEventListener("touchmove", onMove, {passive:true}); canvas.addEventListener("pointerleave", onLeave);
+  const segments=60; let offsets=new Array(segments+1).fill(0); const startClock=performance.now();
+  function draw(){
+    const t=(performance.now()-startClock)/1000; velocity*=0.9; ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    const baseX=W*0.5, baseY=H*0.72;
+    for (let i=0;i<=segments;i++){ const f=i/segments;
+      const naturalX=baseX+Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; const naturalY=baseY-f*H*0.62;
+      let target=0;
+      if (mouseX!==null){ const dx=naturalX-mouseX,dy=naturalY-mouseY,dist=Math.sqrt(dx*dx+dy*dy),radius=140+f*60;
+        if (dist<radius){ const strength=1-dist/radius, dirX=dx/(dist||1); target=dirX*strength*(40+f*70)+dirX*velocity*strength*1.8; } }
+      offsets[i]+=(target-offsets[i])*0.12;
+    }
+    ctx.beginPath(); ctx.moveTo(baseX,baseY);
+    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift=Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; ctx.lineTo(baseX+drift+offsets[i],y); }
+    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.18)`; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(baseX,baseY);
+    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift2=Math.sin(f*5-t*0.65+1.4)*(14+f*24); ctx.lineTo(baseX+drift2+offsets[i]*0.75,y); }
+    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.1)`; ctx.lineWidth=5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(baseX,baseY,2.4,0,Math.PI*2); ctx.fillStyle=emberColor; ctx.fill();
+    raf=requestAnimationFrame(draw);
+  }
+  draw();
+  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointermove",onMove); canvas.removeEventListener("touchmove",onMove); canvas.removeEventListener("pointerleave",onLeave); } };
+}
+
+/* ================= EXPERIENCE ENGINE: mount the right effect from stored data ================= */
+function mountHero(effectName, canvas, opts, coupleNames){
+  const fns = { ripple: createWaterRipple, diya: createDiyaLight, frost: createFrostReveal, incense: createIncenseDrift };
+  const fn = fns[effectName] || createWaterRipple;
+  if (effectName === "frost") return fn(canvas, coupleNames, opts);
+  return fn(canvas, opts);
+}
+
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+// This page is served by the Kymella/Evarria backend itself at /i/:token, so API calls are same-origin.
+const API_BASE = "";
+// Token comes from the path (/i/:token), matching how server.js signs invite links — not a query string.
+const TOKEN = (location.pathname.match(/\/i\/([\w-]+)/) || [])[1] || "";
+
+/* ================= HERO EFFECT LIBRARY: loaded from hero-effects.js, see below ================= */
+
+/* ================= LOAD INVITE & APPLY PALETTE ================= */
+let INVITE_DATA = null, heroInstance = null;
+async function loadInvite(){
+  if (!TOKEN){
+    $("heroGreeting").textContent = "No invitation found";
+    $("heroSub").textContent = "Check your personal link and try again.";
+    $("detailsGrid").innerHTML = `<div class="state-msg" style="grid-column:1/-1">This page needs a personal invite link to load.</div>`;
+    $("rsvpLoading").textContent = "This page needs a personal invite link.";
+    return;
+  }
+  try{
+    const r = await fetch(`${API_BASE}/api/invite/${TOKEN}`);
+    if (!r.ok) throw new Error("not found");
+    INVITE_DATA = await r.json();
+    applyPalette(INVITE_DATA.wedding.palette || {});
+    renderInvite();
+  }catch(e){
+    $("heroGreeting").textContent = "We couldn't find that invitation";
+    $("detailsGrid").innerHTML = `<div class="state-msg" style="grid-column:1/-1">Please check your link, or reach out to the couple directly.</div>`;
+    $("rsvpLoading").textContent = "Couldn't load your invitation.";
+  }
+}
+function applyPalette(p){
+  const root = document.documentElement.style;
+  const map = { ink:"--ink", ink2:"--ink-2", ink3:"--ink-3", mist:"--mist", mistDim:"--mist-dim", brass:"--brass", brassSoft:"--brass-soft", brassDeep:"--brass-deep" };
+  Object.entries(map).forEach(([key, cssVar]) => { if (p[key]) root.setProperty(cssVar, p[key]); });
+}
+function renderInvite(){
+  const d = INVITE_DATA;
+  const first = d.guest.name.split(" ")[0];
+  const couple = d.wedding.couple;
+  document.title = `${d.wedding.partner1} & ${d.wedding.partner2}`;
+  $("navWord").textContent = couple;
+  $("footText").textContent = `${couple.toUpperCase()} · ${esc(d.wedding.wedding_date)}`;
+  $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>will you join us?</em>`;
+  $("heroSub").textContent = `${couple} are tying the knot, and we'd love for you to be there.`;
+  $("heroDate").textContent = new Date(d.wedding.wedding_date).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}).toUpperCase();
+
+  const effect = d.wedding.hero_effect || "ripple";
+  const canvas = $("heroCanvas");
+  const palette = d.wedding.palette || {};
+  heroInstance = mountHero(effect, canvas, { colorTop: palette.ink, colorBottom: palette.ink2, brass: palette.brass, brassSoft: palette.brassSoft, mist: palette.mist }, couple);
+
+  const detailCards = d.events.map(e => `<div class="dcard"><span class="tag">${esc(e.day_label)}</span><h3>${esc(e.title)}</h3><p>${esc(e.time_label)} — ${esc(e.location)}</p></div>`).join("");
+  const extra = [
+    d.wedding.dress_code ? `<div class="dcard"><span class="tag">Dress Code</span><h3>What to Wear</h3><p>${esc(d.wedding.dress_code)}</p></div>` : "",
+    d.wedding.parking_info ? `<div class="dcard"><span class="tag">Parking</span><h3>Getting There</h3><p>${esc(d.wedding.parking_info)}</p></div>` : "",
+    d.wedding.kids_policy ? `<div class="dcard"><span class="tag">Children</span><h3>Little Ones</h3><p>${esc(d.wedding.kids_policy)}</p></div>` : "",
+  ].join("");
+  $("detailsGrid").innerHTML = detailCards + extra || `<div class="state-msg" style="grid-column:1/-1">Details coming soon.</div>`;
+
+  if (d.registry.length){
+    $("regGrid").innerHTML = d.registry.map(f => {
+      const pct = f.goal_cents ? Math.min(100, Math.round(f.raised_cents/f.goal_cents*100)) : 0;
+      return `<div class="reg-card"><div class="em">${esc(f.emoji)}</div><h3>${esc(f.title)}</h3><p>${esc(f.description)}</p>
+        <div class="reg-bar"><i style="width:${pct}%"></i></div>
+        <div class="reg-amt">$${Math.round(f.raised_cents/100)} raised${f.goal_cents?` of $${Math.round(f.goal_cents/100)} goal`:""}</div>
+        <button class="btn btn-quiet" style="width:100%;margin-top:12px" onclick="pledge(${f.id})">Contribute</button></div>`;
+    }).join("");
+  } else {
+    $("registrySection").style.display = "none";
+  }
+
+  renderRsvpEvents();
+  $("rParty").max = d.guest.max_party;
+  $("rsvpLoading").style.display = "none";
+  $("rsvpForm").style.display = "block";
+}
+function renderRsvpEvents(){
+  const events = INVITE_DATA.events;
+  if (events.length < 2){ $("rEventsRow").style.display="none"; return; }
+  $("rEventsList").innerHTML = events.map(e => `<label class="ev-check"><input type="checkbox" data-ev="${e.id}" checked><span><b>${esc(e.title)}</b> — ${esc(e.time_label)}</span></label>`).join("");
+}
+
+let attending = null;
+$("rYes").addEventListener("click", () => { attending=true; $("rYes").classList.add("active"); $("rNo").classList.remove("active"); $("rFields").style.display="block"; });
+$("rNo").addEventListener("click", () => { attending=false; $("rNo").classList.add("active"); $("rYes").classList.remove("active"); $("rFields").style.display="none"; });
+$("rsvpForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const msg = $("rMsg"); msg.style.display="none";
+  if (attending === null){ msg.textContent="Please let us know if you can join us."; msg.style.color="#A4523F"; msg.style.display="block"; return; }
+  const btn = $("rSubmit"); btn.disabled=true; btn.textContent="Sending…";
+  const event_ids = Array.from(document.querySelectorAll('#rEventsList input[data-ev]:checked')).map(el => Number(el.dataset.ev));
+  try{
+    const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/rsvp`, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ attending, party_size:Number($("rParty").value)||1, meal:$("rMeal").value, allergies:$("rAllergies").value.trim(), transport:$("rTransport").value.trim(), note:$("rNote").value.trim(), event_ids }) });
+    if (!r.ok) throw new Error();
+    $("rsvpForm").style.display="none"; $("rsvpDone").style.display="block";
+  }catch(e){ msg.textContent="That didn't go through — please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; }
+});
+async function pledge(fundId){
+  const amt = prompt("How much would you like to contribute?");
+  if (!amt || isNaN(amt) || Number(amt) < 5) return;
+  try{
+    const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/registry/${fundId}/contribute`, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ amount_cents: Math.round(Number(amt)*100) }) });
+    const data = await r.json();
+    if (data.pay_at) window.open(data.pay_at, "_blank");
+    const fresh = await fetch(`${API_BASE}/api/invite/${TOKEN}`); INVITE_DATA = await fresh.json(); renderInvite();
+  }catch(e){ alert("That didn't go through — please try again."); }
+}
+
+const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll(".up").forEach(el=>io.observe(el));
+
+loadInvite();
+</script>
+</body>
+</html>
