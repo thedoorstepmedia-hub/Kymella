@@ -59,24 +59,40 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .dcard h3{font-family:var(--disp);font-size:19px;font-weight:500;margin:8px 0 6px}
 .dcard p{font-size:13.5px;color:var(--ink-3)}
 
+.big-date{font-family:var(--disp);font-weight:400;font-size:clamp(52px,11vw,110px);letter-spacing:.02em;color:var(--ink);line-height:1;margin:0 0 8px;white-space:nowrap}
+.big-date em{font-style:normal;color:var(--brass)}
+.big-date-sub{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:36px}
+
+.divider{width:64px;height:2px;background:var(--brass);margin:22px auto;border:none}
+
 .rsvp-card{max-width:460px;margin:36px auto 0;background:#fff;border:1px solid var(--line);border-radius:2px;padding:32px 28px;text-align:left}
-.rsvp-row{margin-bottom:17px}
+.rsvp-row{margin-bottom:22px}
 .rsvp-row label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-deep);margin-bottom:7px}
-.rsvp-row input,.rsvp-row select,.rsvp-row textarea{width:100%;border:1px solid var(--line);padding:11px 13px;outline:none;background:var(--mist);border-radius:1px}
-.rsvp-row input:focus,.rsvp-row select:focus,.rsvp-row textarea:focus{border-color:var(--brass)}
+.rsvp-row input,.rsvp-row select,.rsvp-row textarea{width:100%;border:none;border-bottom:1.5px solid var(--line);padding:10px 2px;outline:none;background:transparent;border-radius:0;font-size:14.5px;transition:border-color .2s}
+.rsvp-row input:focus,.rsvp-row select:focus,.rsvp-row textarea:focus{border-bottom-color:var(--brass)}
+.rsvp-row input::placeholder,.rsvp-row textarea::placeholder{color:var(--ink-3);opacity:.55}
 .rc-choice{display:flex;gap:9px}
 .rc-btn{flex:1;padding:12px 8px;border:1px solid var(--line);border-radius:1px;background:var(--mist);font-weight:500;font-size:13px;transition:all .2s}
 .rc-btn.active{background:var(--ink);border-color:var(--ink);color:var(--mist)}
-.ev-check{display:flex;align-items:center;gap:9px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:13px}
+#rYes.active{background:var(--brass);border-color:var(--brass);color:var(--ink)}
+.ev-check{display:flex;align-items:center;gap:16px;padding:12px 10px;border-bottom:1px solid var(--line);font-size:13px;border-radius:2px;transition:background .2s}
 .ev-check:last-child{border:none}
-.ev-check input{width:16px;height:16px;accent-color:var(--brass-deep)}
+.ev-check:has(input:checked){background:color-mix(in srgb, var(--brass) 10%, transparent)}
+.ev-check input{position:absolute;opacity:0;width:1px;height:1px}
+.ev-check .box{width:20px;height:20px;flex-shrink:0;border:1.5px solid var(--ink-3);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ev-check input:checked + .box{background:var(--brass);border-color:var(--brass)}
+.ev-check .box svg{width:12px;height:12px;opacity:0;transform:scale(.6);transition:all .15s}
+.ev-check input:checked + .box svg{opacity:1;transform:scale(1)}
 .rsvp-msg{font-size:12px;text-align:center;margin-top:9px;display:none}
+
+.confirm-stage{display:none;height:170px;position:relative;overflow:hidden;border-radius:2px;background:var(--ink)}
+#confirmCanvas{width:100%;height:100%;display:block}
+.confirm-caption{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,227,.55);pointer-events:none}
 
 .reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:36px}
 @media(max-width:560px){.reg-grid{grid-template-columns:1fr}}
 .reg-card{background:#fff;border:1px solid var(--line);padding:24px}
-.reg-card .em{font-size:24px}
-.reg-card h3{font-family:var(--disp);font-size:18px;font-weight:600;margin:9px 0 5px}
+.reg-card h3{font-family:var(--disp);font-size:18px;font-weight:600;margin:0 0 5px}
 .reg-card p{font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
 .reg-bar{height:5px;background:var(--mist-dim);border-radius:3px;overflow:hidden;margin-bottom:7px}
 .reg-bar i{display:block;height:100%;background:var(--brass-deep)}
@@ -108,6 +124,9 @@ input,select,textarea{font-family:var(--body);font-size:15px}
   <div class="inner">
     <div class="eyebrow">The Essentials</div>
     <h2 class="h2">When & <em>where</em></h2>
+    <hr class="divider">
+    <div class="big-date" id="bigDate"></div>
+    <div class="big-date-sub" id="bigDateSub"></div>
     <div class="details-grid" id="detailsGrid"><div class="state-msg" style="grid-column:1/-1">Loading…</div></div>
   </div>
 </section>
@@ -116,6 +135,7 @@ input,select,textarea{font-family:var(--body);font-size:15px}
   <div class="inner">
     <div class="eyebrow">Please Respond</div>
     <h2 class="h2">Will you <em>be there?</em></h2>
+    <hr class="divider">
     <p class="lede">We'd love to know — and which moments we'll see you at.</p>
     <div class="rsvp-card">
       <div id="rsvpLoading" style="text-align:center;opacity:.6;font-size:13.5px">Loading…</div>
@@ -136,9 +156,13 @@ input,select,textarea{font-family:var(--body);font-size:15px}
           <div class="rsvp-row" id="rEventsRow"><label>Which moments will we see you at?</label><div id="rEventsList"></div></div>
         </div>
         <div class="rsvp-row"><label>A note for the couple</label><textarea id="rNote" rows="3" placeholder="Optional"></textarea></div>
-        <button type="submit" class="btn btn-solid" id="rSubmit" style="width:100%">Send reply</button>
+        <button type="submit" class="btn btn-brass" id="rSubmit" style="width:100%">Send reply</button>
         <p class="rsvp-msg" id="rMsg"></p>
       </form>
+      <div class="confirm-stage" id="confirmStage">
+        <canvas id="confirmCanvas"></canvas>
+        <div class="confirm-caption" id="confirmCaption"></div>
+      </div>
       <div id="rsvpDone" style="display:none;text-align:center;padding:10px 0">
         <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're on the list ✦</p>
         <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you — we can't wait to celebrate with you.</p>
@@ -151,6 +175,7 @@ input,select,textarea{font-family:var(--body);font-size:15px}
   <div class="inner">
     <div class="eyebrow">If You're Asking</div>
     <h2 class="h2">Registry</h2>
+    <hr class="divider">
     <p class="lede">Your presence is the real gift. If you'd still like to give something, here's where to look.</p>
     <div class="reg-grid" id="regGrid"></div>
   </div>
@@ -413,6 +438,10 @@ function renderInvite(){
   $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>will you join us?</em>`;
   $("heroSub").textContent = `${couple} are tying the knot, and we'd love for you to be there.`;
   $("heroDate").textContent = new Date(d.wedding.wedding_date).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}).toUpperCase();
+  const dt = new Date(d.wedding.wedding_date);
+  const mm = String(dt.getMonth()+1).padStart(2,"0"), dd = String(dt.getDate()).padStart(2,"0"), yy = dt.getFullYear();
+  $("bigDate").innerHTML = `${mm} <em>·</em> ${dd} <em>·</em> ${yy}`;
+  $("bigDateSub").textContent = dt.toLocaleDateString("en-US",{weekday:"long"}).toUpperCase() + (d.wedding.venue ? ` · ${d.wedding.venue}` : "");
 
   const effect = d.wedding.hero_effect || "ripple";
   const canvas = $("heroCanvas");
@@ -430,7 +459,7 @@ function renderInvite(){
   if (d.registry.length){
     $("regGrid").innerHTML = d.registry.map(f => {
       const pct = f.goal_cents ? Math.min(100, Math.round(f.raised_cents/f.goal_cents*100)) : 0;
-      return `<div class="reg-card"><div class="em">${esc(f.emoji)}</div><h3>${esc(f.title)}</h3><p>${esc(f.description)}</p>
+      return `<div class="reg-card"><h3>${esc(f.title)}</h3><p>${esc(f.description)}</p>
         <div class="reg-bar"><i style="width:${pct}%"></i></div>
         <div class="reg-amt">$${Math.round(f.raised_cents/100)} raised${f.goal_cents?` of $${Math.round(f.goal_cents/100)} goal`:""}</div>
         <button class="btn btn-quiet" style="width:100%;margin-top:12px" onclick="pledge(${f.id})">Contribute</button></div>`;
@@ -447,12 +476,159 @@ function renderInvite(){
 function renderRsvpEvents(){
   const events = INVITE_DATA.events;
   if (events.length < 2){ $("rEventsRow").style.display="none"; return; }
-  $("rEventsList").innerHTML = events.map(e => `<label class="ev-check"><input type="checkbox" data-ev="${e.id}" checked><span><b>${esc(e.title)}</b> — ${esc(e.time_label)}</span></label>`).join("");
+  $("rEventsList").innerHTML = events.map(e => `<label class="ev-check"><input type="checkbox" data-ev="${e.id}" checked><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink)"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>${esc(e.title)}</b> — ${esc(e.time_label)}</span></label>`).join("");
 }
 
 let attending = null;
 $("rYes").addEventListener("click", () => { attending=true; $("rYes").classList.add("active"); $("rNo").classList.remove("active"); $("rFields").style.display="block"; });
 $("rNo").addEventListener("click", () => { attending=false; $("rNo").classList.add("active"); $("rYes").classList.remove("active"); $("rFields").style.display="none"; });
+/* ================= RSVP CONFIRM ANIMATIONS (one per effect, never mixed) ================= */
+function setupConfirmCanvas(canvas){
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  const ctx = canvas.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return { ctx, w, h };
+}
+function bgGradient(ctx, w, h, top, bottom){
+  const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,top); g.addColorStop(1,bottom);
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+}
+function confirmRipple(canvas, palette, caption, done){
+  const { ctx, w, h } = setupConfirmCanvas(canvas);
+  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", brass = palette.brass||"#B8874A";
+  const cx = w/2, cy = h/2;
+  const DURATION = 1500, DROP_END = 260;
+  const start = performance.now();
+  caption.textContent = "A stone finds the water…";
+  function frame(now){
+    const t = now - start;
+    bgGradient(ctx, w, h, top, bottom);
+    if (t < DROP_END){
+      // the stone falling
+      const p = t/DROP_END;
+      const stoneY = cy - (1-p)*40;
+      const r = 6*(1-p*0.3);
+      ctx.beginPath(); ctx.arc(cx, stoneY, r, 0, Math.PI*2); ctx.fillStyle = "rgba(20,16,12,0.85)"; ctx.fill();
+    } else {
+      // rings expanding outward from the point of impact, fading as they grow
+      const rt = t - DROP_END;
+      caption.textContent = "Settling…";
+      for (let i=0;i<3;i++){
+        const ringT = rt - i*180;
+        if (ringT < 0) continue;
+        const p = Math.min(1, ringT/900);
+        const radius = p * Math.max(w,h) * 0.55;
+        const alpha = (1-p) * 0.55;
+        if (alpha <= 0) continue;
+        ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI*2);
+        ctx.strokeStyle = hexWithAlpha(brass, alpha); ctx.lineWidth = 1.6; ctx.stroke();
+      }
+    }
+    if (t < DURATION) requestAnimationFrame(frame); else { caption.textContent = "Accepted."; setTimeout(done, 400); }
+  }
+  requestAnimationFrame(frame);
+}
+function confirmDiya(canvas, palette, caption, done){
+  const { ctx, w, h } = setupConfirmCanvas(canvas);
+  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", brass = palette.brass||"#B8874A", brassSoft = palette.brassSoft||"#E8C9A0";
+  const cx = w/2, cy = h/2;
+  const FLARE_END = 550, DURATION = 1500;
+  const start = performance.now();
+  caption.textContent = "The flame rises…";
+  function frame(now){
+    const t = now - start;
+    bgGradient(ctx, w, h, top, bottom);
+    if (t < FLARE_END){
+      const p = t/FLARE_END;
+      const flicker = 1 + Math.sin(t*0.03)*0.08;
+      const radius = (18 + p*34) * flicker;
+      const rg = ctx.createRadialGradient(cx,cy,0,cx,cy,radius);
+      rg.addColorStop(0, hexWithAlpha(brassSoft,0.9)); rg.addColorStop(0.5, hexWithAlpha(brass,0.5)); rg.addColorStop(1, hexWithAlpha(brass,0));
+      ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
+    } else {
+      caption.textContent = "Sealed.";
+      const st = t - FLARE_END;
+      const p = Math.min(1, st/500);
+      // overshoot-then-settle scale for the "stamp"
+      const scale = p < 0.6 ? (p/0.6)*1.08 : 1.08 - ((p-0.6)/0.4)*0.08;
+      const radius = 30*scale;
+      const rg = ctx.createRadialGradient(cx,cy,0,cx,cy,radius);
+      rg.addColorStop(0, brassSoft); rg.addColorStop(0.7, brass); rg.addColorStop(1, palette.brassDeep||"#8E6836");
+      ctx.beginPath(); ctx.arc(cx,cy,radius,0,Math.PI*2); ctx.fillStyle = rg; ctx.fill();
+    }
+    if (t < DURATION) requestAnimationFrame(frame); else setTimeout(done, 350);
+  }
+  requestAnimationFrame(frame);
+}
+function confirmFrost(canvas, palette, caption, done){
+  const { ctx, w, h } = setupConfirmCanvas(canvas);
+  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", mist = palette.mist||"#F5EFE3";
+  const cx = w/2, cy = h/2;
+  const HOLD = 350, CLEAR_DURATION = 900, DURATION = HOLD + CLEAR_DURATION + 250;
+  const start = performance.now();
+  caption.textContent = "Fogged with breath…";
+  const frostLayer = document.createElement("canvas"), frostCtx = frostLayer.getContext("2d");
+  frostLayer.width = w; frostLayer.height = h;
+  frostCtx.fillStyle = mist; frostCtx.globalAlpha = 0.9; frostCtx.fillRect(0,0,w,h); frostCtx.globalAlpha = 1;
+  function frame(now){
+    const t = now - start;
+    bgGradient(ctx, w, h, top, bottom);
+    if (t < HOLD){
+      ctx.drawImage(frostLayer, 0, 0);
+    } else {
+      caption.textContent = "Cleared.";
+      const p = Math.min(1, (t-HOLD)/CLEAR_DURATION);
+      const radius = p * Math.max(w,h) * 0.8;
+      const comp = document.createElement("canvas"); comp.width=w; comp.height=h;
+      const compCtx = comp.getContext("2d");
+      compCtx.drawImage(frostLayer, 0, 0);
+      compCtx.globalCompositeOperation = "destination-out";
+      compCtx.beginPath(); compCtx.arc(cx, cy, radius, 0, Math.PI*2); compCtx.fill();
+      ctx.drawImage(comp, 0, 0);
+    }
+    if (t < DURATION) requestAnimationFrame(frame); else setTimeout(done, 300);
+  }
+  requestAnimationFrame(frame);
+}
+function confirmIncense(canvas, palette, caption, done){
+  const { ctx, w, h } = setupConfirmCanvas(canvas);
+  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", brassSoft = palette.brassSoft||palette.brass||"#E8C9A0";
+  const baseX = w/2, baseY = h*0.92;
+  const RISE_DURATION = 1100, DURATION = 1500;
+  const start = performance.now();
+  caption.textContent = "A wisp curls upward…";
+  function frame(now){
+    const t = now - start;
+    bgGradient(ctx, w, h, top, bottom);
+    const p = Math.min(1, t/RISE_DURATION);
+    const segments = Math.floor(60*p);
+    ctx.beginPath(); ctx.moveTo(baseX, baseY);
+    for (let i=1;i<=segments;i++){
+      const f = i/60;
+      const riseY = baseY - f*h*0.82;
+      // curls into a small loop near the top as it approaches full height
+      const knot = f > 0.7 ? Math.sin((f-0.7)/0.3 * Math.PI*2) * (f-0.7)*40 : 0;
+      const drift = Math.sin(f*6 - t*0.002)*(10+f*22) + knot;
+      ctx.lineTo(baseX+drift, riseY);
+    }
+    ctx.strokeStyle = hexWithAlpha(brassSoft, 0.5*(1-Math.max(0,p-0.75)/0.25)); ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.stroke();
+    if (t < DURATION){ requestAnimationFrame(frame); } else { caption.textContent = "Carried."; setTimeout(done, 300); }
+  }
+  requestAnimationFrame(frame);
+}
+function hexWithAlpha(hex, alpha){
+  const n = parseInt((hex||"#000000").replace("#",""),16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`;
+}
+function playConfirmAnimation(effect, done){
+  const canvas = $("confirmCanvas"), caption = $("confirmCaption");
+  const palette = (INVITE_DATA && INVITE_DATA.wedding.palette) || {};
+  const fns = { ripple: confirmRipple, diya: confirmDiya, frost: confirmFrost, incense: confirmIncense };
+  const fn = fns[effect] || confirmRipple;
+  fn(canvas, palette, caption, done);
+}
+
 $("rsvpForm").addEventListener("submit", async e => {
   e.preventDefault();
   const msg = $("rMsg"); msg.style.display="none";
@@ -463,7 +639,13 @@ $("rsvpForm").addEventListener("submit", async e => {
     const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/rsvp`, { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ attending, party_size:Number($("rParty").value)||1, meal:$("rMeal").value, allergies:$("rAllergies").value.trim(), transport:$("rTransport").value.trim(), note:$("rNote").value.trim(), event_ids }) });
     if (!r.ok) throw new Error();
-    $("rsvpForm").style.display="none"; $("rsvpDone").style.display="block";
+    $("rsvpForm").style.display="none";
+    $("confirmStage").style.display="block";
+    const effect = (INVITE_DATA.wedding.hero_effect) || "ripple";
+    playConfirmAnimation(effect, () => {
+      $("confirmStage").style.display="none";
+      $("rsvpDone").style.display="block";
+    });
   }catch(e){ msg.textContent="That didn't go through — please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; }
 });
 async function pledge(fundId){
