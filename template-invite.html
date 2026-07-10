@@ -80,9 +80,19 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .rsvp-summary .sfield:last-of-type{border-bottom:none}
 .rsvp-summary .sfield b{font-weight:600}
 
+.song-form{max-width:460px;margin:36px auto 0;display:flex;gap:10px}
+.song-form input{flex:1;border:none;border-bottom:1.5px solid var(--line);padding:10px 2px;outline:none;background:transparent;font-size:14.5px;transition:border-color .2s}
+.song-form input:focus{border-bottom-color:var(--brass)}
+.song-msg{font-size:12px;text-align:center;margin-top:12px;color:var(--brass-deep);display:none}
+
 .big-date{font-family:var(--disp);font-weight:400;font-size:clamp(52px,11vw,110px);letter-spacing:.02em;color:var(--ink);line-height:1;margin:0 0 8px;white-space:nowrap}
 .big-date em{font-style:normal;color:var(--brass)}
 .big-date-sub{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:36px}
+
+.countdown{display:flex;justify-content:center;gap:32px;margin-bottom:44px}
+.cd-unit{text-align:center}
+.cd-num{font-family:var(--disp);font-size:clamp(28px,5vw,40px);font-weight:400;color:var(--brass-deep);line-height:1}
+.cd-label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
 
 .divider{width:64px;height:2px;background:var(--brass);margin:22px auto;border:none}
 
@@ -106,10 +116,6 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .ev-check .box svg{width:12px;height:12px;opacity:0;transform:scale(.6);transition:all .15s}
 .ev-check input:checked + .box svg{opacity:1;transform:scale(1)}
 .rsvp-msg{font-size:12px;text-align:center;margin-top:9px;display:none}
-
-.confirm-stage{display:none;height:170px;position:relative;overflow:hidden;border-radius:2px;background:var(--ink)}
-#confirmCanvas{width:100%;height:100%;display:block}
-.confirm-caption{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,227,.55);pointer-events:none}
 
 .reg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:36px;justify-content:center}
 .reg-card{max-width:320px;margin:0 auto;width:100%;background:#fff;border:1px solid var(--line);padding:24px}
@@ -149,6 +155,7 @@ input,select,textarea{font-family:var(--body);font-size:15px}
     <hr class="divider">
     <div class="big-date" id="bigDate"></div>
     <div class="big-date-sub" id="bigDateSub"></div>
+    <div class="countdown" id="countdown"></div>
     <div class="details-grid" id="detailsGrid"><div class="state-msg" style="grid-column:1/-1">Loading…</div></div>
 
     <div class="eyebrow" style="margin-top:64px">The Itinerary</div>
@@ -197,10 +204,6 @@ input,select,textarea{font-family:var(--body);font-size:15px}
         <button type="submit" class="btn btn-brass" id="rSubmit" style="width:100%">Send reply</button>
         <p class="rsvp-msg" id="rMsg"></p>
       </form>
-      <div class="confirm-stage" id="confirmStage">
-        <canvas id="confirmCanvas"></canvas>
-        <div class="confirm-caption" id="confirmCaption"></div>
-      </div>
       <div id="rsvpDone" style="display:none;text-align:center;padding:10px 0">
         <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're on the list ✦</p>
         <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you — we can't wait to celebrate with you.</p>
@@ -216,6 +219,19 @@ input,select,textarea{font-family:var(--body);font-size:15px}
     <hr class="divider">
     <p class="lede">Your presence is the real gift. If you'd still like to give something, here's where to look.</p>
     <div class="reg-grid" id="regGrid"></div>
+  </div>
+</section>
+
+<section class="section center" id="songSection">
+  <div class="inner">
+    <div class="eyebrow">One More Thing</div>
+    <h2 class="h2">Build our <em>playlist</em></h2>
+    <p class="lede">Tell us a song that has to be played, and we'll do our best to make it happen.</p>
+    <form class="song-form" id="songForm">
+      <input type="text" id="songInput" placeholder="Song — Artist" maxlength="120" required>
+      <button type="submit" class="btn btn-brass">Add</button>
+    </form>
+    <p class="song-msg" id="songMsg">Added — thank you!</p>
   </div>
 </section>
 
@@ -431,6 +447,22 @@ function mountHero(effectName, canvas, opts, coupleNames){
 </script>
 <script>
 const $ = id => document.getElementById(id);
+let countdownInterval = null;
+function startCountdown(targetDate){
+  const el = $("countdown");
+  function tick(){
+    const diff = targetDate.getTime() - Date.now();
+    if (diff <= 0){ el.style.display = "none"; clearInterval(countdownInterval); return; }
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    el.innerHTML = [[days,"Days"],[hours,"Hours"],[mins,"Minutes"]]
+      .map(([n,label]) => `<div class="cd-unit"><div class="cd-num">${n}</div><div class="cd-label">${label}</div></div>`).join("");
+  }
+  tick();
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(tick, 30000);
+}
 const navEl = document.querySelector(".nav");
 function updateNavScrolled(){ navEl.classList.toggle("scrolled", window.scrollY > window.innerHeight * 0.75); }
 window.addEventListener("scroll", updateNavScrolled, { passive:true });
@@ -496,6 +528,7 @@ function renderInvite(){
   const mm = String(dt.getMonth()+1).padStart(2,"0"), dd = String(dt.getDate()).padStart(2,"0"), yy = dt.getFullYear();
   $("bigDate").innerHTML = `${mm} <em>·</em> ${dd} <em>·</em> ${yy}`;
   $("bigDateSub").textContent = dt.toLocaleDateString("en-US",{weekday:"long"}).toUpperCase() + (d.wedding.venue ? ` · ${d.wedding.venue}` : "");
+  startCountdown(dt);
 
   const effect = d.wedding.hero_effect || "ripple";
   const canvas = $("heroCanvas");
@@ -590,153 +623,6 @@ function renderRsvpEvents(priorSet){
 let attending = null;
 $("rYes").addEventListener("click", () => { attending=true; $("rYes").classList.add("active"); $("rNo").classList.remove("active"); $("rFields").style.display="block"; });
 $("rNo").addEventListener("click", () => { attending=false; $("rNo").classList.add("active"); $("rYes").classList.remove("active"); $("rFields").style.display="none"; });
-/* ================= RSVP CONFIRM ANIMATIONS (one per effect, never mixed) ================= */
-function setupConfirmCanvas(canvas){
-  const dpr = Math.min(window.devicePixelRatio||1, 2);
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  canvas.width = w*dpr; canvas.height = h*dpr;
-  const ctx = canvas.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
-  return { ctx, w, h };
-}
-function bgGradient(ctx, w, h, top, bottom){
-  const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,top); g.addColorStop(1,bottom);
-  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-}
-function confirmRipple(canvas, palette, caption, done){
-  const { ctx, w, h } = setupConfirmCanvas(canvas);
-  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", brass = palette.brass||"#B8874A";
-  const cx = w/2, cy = h/2;
-  const DURATION = 1500, DROP_END = 260;
-  const start = performance.now();
-  caption.textContent = "A stone finds the water…";
-  function frame(now){
-    const t = now - start;
-    bgGradient(ctx, w, h, top, bottom);
-    if (t < DROP_END){
-      // the stone falling
-      const p = t/DROP_END;
-      const stoneY = cy - (1-p)*40;
-      const r = 6*(1-p*0.3);
-      ctx.beginPath(); ctx.arc(cx, stoneY, r, 0, Math.PI*2); ctx.fillStyle = "rgba(20,16,12,0.85)"; ctx.fill();
-    } else {
-      // rings expanding outward from the point of impact, fading as they grow
-      const rt = t - DROP_END;
-      caption.textContent = "Settling…";
-      for (let i=0;i<3;i++){
-        const ringT = rt - i*180;
-        if (ringT < 0) continue;
-        const p = Math.min(1, ringT/900);
-        const radius = p * Math.max(w,h) * 0.55;
-        const alpha = (1-p) * 0.55;
-        if (alpha <= 0) continue;
-        ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI*2);
-        ctx.strokeStyle = hexWithAlpha(brass, alpha); ctx.lineWidth = 1.6; ctx.stroke();
-      }
-    }
-    if (t < DURATION) requestAnimationFrame(frame); else { caption.textContent = "Accepted."; setTimeout(done, 400); }
-  }
-  requestAnimationFrame(frame);
-}
-function confirmDiya(canvas, palette, caption, done){
-  const { ctx, w, h } = setupConfirmCanvas(canvas);
-  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", brass = palette.brass||"#B8874A", brassSoft = palette.brassSoft||"#E8C9A0";
-  const cx = w/2, cy = h/2;
-  const FLARE_END = 550, DURATION = 1500;
-  const start = performance.now();
-  caption.textContent = "The flame rises…";
-  function frame(now){
-    const t = now - start;
-    bgGradient(ctx, w, h, top, bottom);
-    if (t < FLARE_END){
-      const p = t/FLARE_END;
-      const flicker = 1 + Math.sin(t*0.03)*0.08;
-      const radius = (18 + p*34) * flicker;
-      const rg = ctx.createRadialGradient(cx,cy,0,cx,cy,radius);
-      rg.addColorStop(0, hexWithAlpha(brassSoft,0.9)); rg.addColorStop(0.5, hexWithAlpha(brass,0.5)); rg.addColorStop(1, hexWithAlpha(brass,0));
-      ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
-    } else {
-      caption.textContent = "Sealed.";
-      const st = t - FLARE_END;
-      const p = Math.min(1, st/500);
-      // overshoot-then-settle scale for the "stamp"
-      const scale = p < 0.6 ? (p/0.6)*1.08 : 1.08 - ((p-0.6)/0.4)*0.08;
-      const radius = 30*scale;
-      const rg = ctx.createRadialGradient(cx,cy,0,cx,cy,radius);
-      rg.addColorStop(0, brassSoft); rg.addColorStop(0.7, brass); rg.addColorStop(1, palette.brassDeep||"#8E6836");
-      ctx.beginPath(); ctx.arc(cx,cy,radius,0,Math.PI*2); ctx.fillStyle = rg; ctx.fill();
-    }
-    if (t < DURATION) requestAnimationFrame(frame); else setTimeout(done, 350);
-  }
-  requestAnimationFrame(frame);
-}
-function confirmFrost(canvas, palette, caption, done){
-  const { ctx, w, h } = setupConfirmCanvas(canvas);
-  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", mist = palette.mist||"#F5EFE3";
-  const cx = w/2, cy = h/2;
-  const HOLD = 350, CLEAR_DURATION = 900, DURATION = HOLD + CLEAR_DURATION + 250;
-  const start = performance.now();
-  caption.textContent = "Fogged with breath…";
-  const frostLayer = document.createElement("canvas"), frostCtx = frostLayer.getContext("2d");
-  frostLayer.width = w; frostLayer.height = h;
-  frostCtx.fillStyle = mist; frostCtx.globalAlpha = 0.9; frostCtx.fillRect(0,0,w,h); frostCtx.globalAlpha = 1;
-  function frame(now){
-    const t = now - start;
-    bgGradient(ctx, w, h, top, bottom);
-    if (t < HOLD){
-      ctx.drawImage(frostLayer, 0, 0);
-    } else {
-      caption.textContent = "Cleared.";
-      const p = Math.min(1, (t-HOLD)/CLEAR_DURATION);
-      const radius = p * Math.max(w,h) * 0.8;
-      const comp = document.createElement("canvas"); comp.width=w; comp.height=h;
-      const compCtx = comp.getContext("2d");
-      compCtx.drawImage(frostLayer, 0, 0);
-      compCtx.globalCompositeOperation = "destination-out";
-      compCtx.beginPath(); compCtx.arc(cx, cy, radius, 0, Math.PI*2); compCtx.fill();
-      ctx.drawImage(comp, 0, 0);
-    }
-    if (t < DURATION) requestAnimationFrame(frame); else setTimeout(done, 300);
-  }
-  requestAnimationFrame(frame);
-}
-function confirmIncense(canvas, palette, caption, done){
-  const { ctx, w, h } = setupConfirmCanvas(canvas);
-  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17", brassSoft = palette.brassSoft||palette.brass||"#E8C9A0";
-  const baseX = w/2, baseY = h*0.92;
-  const RISE_DURATION = 1100, DURATION = 1500;
-  const start = performance.now();
-  caption.textContent = "A wisp curls upward…";
-  function frame(now){
-    const t = now - start;
-    bgGradient(ctx, w, h, top, bottom);
-    const p = Math.min(1, t/RISE_DURATION);
-    const segments = Math.floor(60*p);
-    ctx.beginPath(); ctx.moveTo(baseX, baseY);
-    for (let i=1;i<=segments;i++){
-      const f = i/60;
-      const riseY = baseY - f*h*0.82;
-      // curls into a small loop near the top as it approaches full height
-      const knot = f > 0.7 ? Math.sin((f-0.7)/0.3 * Math.PI*2) * (f-0.7)*40 : 0;
-      const drift = Math.sin(f*6 - t*0.002)*(10+f*22) + knot;
-      ctx.lineTo(baseX+drift, riseY);
-    }
-    ctx.strokeStyle = hexWithAlpha(brassSoft, 0.5*(1-Math.max(0,p-0.75)/0.25)); ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.stroke();
-    if (t < DURATION){ requestAnimationFrame(frame); } else { caption.textContent = "Carried."; setTimeout(done, 300); }
-  }
-  requestAnimationFrame(frame);
-}
-function hexWithAlpha(hex, alpha){
-  const n = parseInt((hex||"#000000").replace("#",""),16);
-  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`;
-}
-function playConfirmAnimation(effect, done){
-  const canvas = $("confirmCanvas"), caption = $("confirmCaption");
-  const palette = (INVITE_DATA && INVITE_DATA.wedding.palette) || {};
-  const fns = { ripple: confirmRipple, diya: confirmDiya, frost: confirmFrost, incense: confirmIncense };
-  const fn = fns[effect] || confirmRipple;
-  fn(canvas, palette, caption, done);
-}
-
 $("rsvpForm").addEventListener("submit", async e => {
   e.preventDefault();
   const msg = $("rMsg"); msg.style.display="none";
@@ -747,14 +633,26 @@ $("rsvpForm").addEventListener("submit", async e => {
     const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/rsvp`, { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ attending, party_size:Number($("rParty").value)||1, meal:$("rMeal").value, allergies:$("rAllergies").value.trim(), transport:$("rTransport").value.trim(), note:$("rNote").value.trim(), event_ids }) });
     if (!r.ok) throw new Error();
-    $("rsvpForm").style.display="none";
-    $("confirmStage").style.display="block";
-    const effect = (INVITE_DATA.wedding.hero_effect) || "ripple";
-    playConfirmAnimation(effect, () => {
-      $("confirmStage").style.display="none";
+    btn.textContent = "Confirmed ✦"; btn.classList.remove("pulsing");
+    setTimeout(() => {
+      $("rsvpForm").style.display="none";
       $("rsvpDone").style.display="block";
-    });
+    }, 500);
   }catch(e){ msg.textContent="That didn't go through — please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; btn.classList.remove("pulsing"); }
+});
+$("songForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const input = $("songInput"), msg = $("songMsg");
+  const text = input.value.trim();
+  if (!text) return;
+  try{
+    const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/memories`, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ kind:"song", text }) });
+    if (!r.ok) throw new Error();
+    input.value = "";
+    msg.style.display = "block";
+    setTimeout(() => { msg.style.display = "none"; }, 3000);
+  }catch(e){ alert("That didn't go through — please try again."); }
 });
 async function pledge(fundId){
   const amt = prompt("How much would you like to contribute?");
