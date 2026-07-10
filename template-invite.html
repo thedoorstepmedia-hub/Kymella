@@ -18,13 +18,13 @@
 html{scroll-behavior:smooth}
 body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-button{font-family:var(--body);cursor:pointer;border:none;background:none}
+button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font-family:var(--body);font-size:15px}
 :focus-visible{outline:2px solid var(--brass);outline-offset:3px}
 .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;color:var(--brass-deep)}
 .eyebrow.on-dark{color:var(--brass-soft)}
 
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:24px 32px;mix-blend-mode:difference}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 32px;background:rgba(14,31,28,.28);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .nav .word{color:var(--mist);font-family:var(--disp);font-size:18px;font-style:italic}
 
 .hero{position:relative;min-height:660px;height:100svh;background:var(--ink);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
@@ -39,14 +39,16 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .btn{display:inline-flex;align-items:center;gap:9px;padding:15px 30px;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;transition:background .2s,color .2s,border-color .2s}
 .btn-brass{background:var(--brass);color:var(--ink)}
 .btn-brass:hover{background:var(--brass-soft)}
+@keyframes softPulse{0%,100%{opacity:1}50%{opacity:.62}}
+.btn.pulsing{animation:softPulse 1.3s ease-in-out infinite;cursor:default}
 .btn-solid{background:var(--ink);color:var(--mist)}
 .btn-solid:hover{background:var(--ink-2)}
 .btn-quiet{border:1px solid var(--line);color:var(--ink)}
 .btn-quiet:hover{border-color:var(--brass)}
 
-.section{padding:92px 32px}
+.section{padding:132px 32px 92px}
 .inner{max-width:680px;margin:0 auto}
-@media(max-width:680px){.section{padding:60px 22px}}
+@media(max-width:680px){.section{padding:112px 22px 60px}}
 .center{text-align:center}
 .h2{font-family:var(--disp);font-size:clamp(26px,4.5vw,36px);font-weight:400;line-height:1.2;margin:12px 0 14px}
 .h2 em{font-style:italic;color:var(--brass-deep)}
@@ -69,10 +71,11 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .rsvp-row{margin-bottom:22px}
 .rsvp-row label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-deep);margin-bottom:7px}
 .rsvp-row input,.rsvp-row select,.rsvp-row textarea{width:100%;border:none;border-bottom:1.5px solid var(--line);padding:10px 2px;outline:none;background:transparent;border-radius:0;font-size:14.5px;transition:border-color .2s}
+.rsvp-row select{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2326433C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 2px center;background-size:16px;padding-right:24px;cursor:pointer}
 .rsvp-row input:focus,.rsvp-row select:focus,.rsvp-row textarea:focus{border-bottom-color:var(--brass)}
 .rsvp-row input::placeholder,.rsvp-row textarea::placeholder{color:var(--ink-3);opacity:.55}
 .rc-choice{display:flex;gap:9px}
-.rc-btn{flex:1;padding:12px 8px;border:1px solid var(--line);border-radius:1px;background:var(--mist);font-weight:500;font-size:13px;transition:all .2s}
+.rc-btn{flex:1;padding:12px 8px;border:1px solid var(--line);border-radius:1px;background:var(--mist);color:var(--ink);font-weight:500;font-size:13px;transition:all .2s}
 .rc-btn.active{background:var(--ink);border-color:var(--ink);color:var(--mist)}
 #rYes.active{background:var(--brass);border-color:var(--brass);color:var(--ink)}
 .ev-check{display:flex;align-items:center;gap:16px;padding:12px 10px;border-bottom:1px solid var(--line);font-size:13px;border-radius:2px;transition:background .2s}
@@ -94,8 +97,9 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .reg-card{background:#fff;border:1px solid var(--line);padding:24px}
 .reg-card h3{font-family:var(--disp);font-size:18px;font-weight:600;margin:0 0 5px}
 .reg-card p{font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
-.reg-bar{height:5px;background:var(--mist-dim);border-radius:3px;overflow:hidden;margin-bottom:7px}
-.reg-bar i{display:block;height:100%;background:var(--brass-deep)}
+.reg-bar{height:2px;background:var(--line);overflow:hidden;margin-bottom:9px}
+.reg-bar i{display:block;height:100%;background:var(--brass);position:relative;transition:width 1s cubic-bezier(.22,1,.36,1)}
+.reg-bar i::after{content:"";position:absolute;right:0;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--brass);box-shadow:0 0 6px 1px var(--brass-soft)}
 .reg-amt{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
 
 .foot{text-align:center;padding:40px 24px;color:var(--ink-3);font-size:11.5px;letter-spacing:.05em;border-top:1px solid var(--line)}
@@ -106,12 +110,6 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="rippleDistort" x="-20%" y="-20%" width="140%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.0105" numOctaves="1" seed="7" result="noise"/>
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
 
 <nav class="nav"><div class="word" id="navWord">Kymella</div></nav>
 
@@ -635,60 +633,24 @@ function playConfirmAnimation(effect, done){
   fn(canvas, palette, caption, done);
 }
 
-function rippleOutForm(formEl, done){
-  const displaceEl = document.querySelector("#rippleDistort feDisplacementMap");
-  const turbEl = document.querySelector("#rippleDistort feTurbulence");
-  formEl.style.filter = "url(#rippleDistort)";
-  formEl.style.transition = "none";
-  const DURATION = 2800;
-  const start = performance.now();
-  function frame(now){
-    const t = now - start;
-    const p = Math.min(1, t/DURATION);
-    // a single smooth rise-and-fall (sine hump) instead of two straight lines meeting at a
-    // sharp peak — that peak was the "jolt"/vibration; this reads as one slow wave instead
-    const bumpP = Math.min(1, t/(DURATION*0.8));
-    const scale = 46 * Math.sin(Math.PI*bumpP);
-    displaceEl.setAttribute("scale", Math.max(0,scale).toFixed(1));
-    // broader, slower noise (lower baseFrequency) reads as a real wave rather than static;
-    // the drift itself is also slowed down so it doesn't add its own fast wobble on top
-    const freq = 0.0035 + Math.sin(t*0.0009)*0.0015;
-    turbEl.setAttribute("baseFrequency", `${freq.toFixed(4)} ${(freq*3).toFixed(4)}`);
-    // fade + rise starts later, giving the ripple time to actually read before it dissolves
-    const fadeP = Math.max(0, (p-0.5)/0.5);
-    formEl.style.opacity = String(1-fadeP);
-    formEl.style.transform = `translateY(${-fadeP*40}px)`;
-    if (p < 1) requestAnimationFrame(frame);
-    else { formEl.style.filter=""; formEl.style.opacity=""; formEl.style.transform=""; done(); }
-  }
-  requestAnimationFrame(frame);
-}
-
 $("rsvpForm").addEventListener("submit", async e => {
   e.preventDefault();
   const msg = $("rMsg"); msg.style.display="none";
   if (attending === null){ msg.textContent="Please let us know if you can join us."; msg.style.color="#A4523F"; msg.style.display="block"; return; }
-  const btn = $("rSubmit"); btn.disabled=true; btn.textContent="Sending…";
+  const btn = $("rSubmit"); btn.disabled=true; btn.textContent="Sharing your response…"; btn.classList.add("pulsing");
   const event_ids = Array.from(document.querySelectorAll('#rEventsList input[data-ev]:checked')).map(el => Number(el.dataset.ev));
   try{
     const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/rsvp`, { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ attending, party_size:Number($("rParty").value)||1, meal:$("rMeal").value, allergies:$("rAllergies").value.trim(), transport:$("rTransport").value.trim(), note:$("rNote").value.trim(), event_ids }) });
     if (!r.ok) throw new Error();
+    $("rsvpForm").style.display="none";
+    $("confirmStage").style.display="block";
     const effect = (INVITE_DATA.wedding.hero_effect) || "ripple";
-    if (effect === "ripple"){
-      rippleOutForm($("rsvpForm"), () => {
-        $("rsvpForm").style.display="none";
-        $("rsvpDone").style.display="block";
-      });
-    } else {
-      $("rsvpForm").style.display="none";
-      $("confirmStage").style.display="block";
-      playConfirmAnimation(effect, () => {
-        $("confirmStage").style.display="none";
-        $("rsvpDone").style.display="block";
-      });
-    }
-  }catch(e){ msg.textContent="That didn't go through — please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; }
+    playConfirmAnimation(effect, () => {
+      $("confirmStage").style.display="none";
+      $("rsvpDone").style.display="block";
+    });
+  }catch(e){ msg.textContent="That didn't go through — please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; btn.classList.remove("pulsing"); }
 });
 async function pledge(fundId){
   const amt = prompt("How much would you like to contribute?");
