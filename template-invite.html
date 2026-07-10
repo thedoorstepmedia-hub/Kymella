@@ -70,6 +70,11 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .itin-loc{font-size:13px;color:var(--ink-3);margin-bottom:6px}
 .itin-desc{font-size:13.5px;color:var(--ink-3);line-height:1.6;max-width:440px}
 
+.itin-veil-wrap{position:relative;max-width:440px;margin-top:2px}
+.itin-veil{position:absolute;inset:-6px;border-radius:3px;overflow:hidden;cursor:pointer;touch-action:none}
+.itin-veil canvas{width:100%;height:100%;display:block}
+.itin-veil-hint{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,227,.6);pointer-events:none}
+
 .map-wrap{margin-top:36px;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--mist-dim)}
 .map-wrap iframe{display:block;width:100%;height:230px;border:0;filter:grayscale(.15) contrast(1.02)}
 
@@ -444,6 +449,152 @@ function mountHero(effectName, canvas, opts, coupleNames){
   return fn(canvas, opts);
 }
 
+/* ================= ITINERARY CARD REVEALS ================= */
+/* Same visual language as the hero effects, but bounded and one-shot: each card veil
+   reveals once, then fades and stops, rather than animating forever underneath content
+   the guest has already read. Kept as separate lightweight functions rather than reusing
+   the ambient hero versions directly, since a page with several events shouldn't be running
+   several continuous full-hero animation loops at once. */
+function fadeVeilAndStop(canvas, raf, cleanup, onReveal){
+  canvas.style.transition = "opacity .6s ease";
+  canvas.style.opacity = "0";
+  setTimeout(() => { cancelAnimationFrame(raf); cleanup(); canvas.style.pointerEvents = "none"; onReveal && onReveal(); }, 620);
+}
+function frostCardReveal(canvas, palette, onReveal){
+  const ctx = canvas.getContext("2d");
+  let W,H,raf,revealed=false;
+  const maskLayer=document.createElement("canvas"), maskCtx=maskLayer.getContext("2d");
+  const frostLayer=document.createElement("canvas"), frostCtx=frostLayer.getContext("2d");
+  const composite=document.createElement("canvas"), compCtx=composite.getContext("2d");
+  const mist = palette.mist || "#F5EFE3";
+  function buildTexture(){
+    frostLayer.width=W; frostLayer.height=H; frostCtx.fillStyle=mist; frostCtx.globalAlpha=.92; frostCtx.fillRect(0,0,W,H); frostCtx.globalAlpha=1;
+    frostCtx.filter="blur(6px)";
+    for (let i=0;i<14;i++){ const x=Math.random()*W,y=Math.random()*H,r=8+Math.random()*26,op=.15+Math.random()*.3;
+      frostCtx.fillStyle=`rgba(255,255,255,${op})`; frostCtx.beginPath(); frostCtx.arc(x,y,r,0,Math.PI*2); frostCtx.fill(); }
+    frostCtx.filter="none";
+  }
+  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; composite.width=W; composite.height=H; buildTexture(); maskCtx.clearRect(0,0,W,H); }
+  size();
+  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
+  function wipeAt(x,y){ maskCtx.filter="blur(6px)"; maskCtx.fillStyle="#000"; maskCtx.beginPath(); maskCtx.arc(x,y,20,0,Math.PI*2); maskCtx.fill(); maskCtx.filter="none"; }
+  let holding=false, last=null;
+  const onDown = e => { holding=true; const [x,y]=xy(e); last=[x,y]; wipeAt(x,y); };
+  const onMove = e => { if (!holding) return; const [x,y]=xy(e);
+    if (last){ const dx=x-last[0],dy=y-last[1],d=Math.hypot(dx,dy),steps=Math.max(1,Math.floor(d/6));
+      for (let s=0;s<=steps;s++) wipeAt(last[0]+dx*(s/steps), last[1]+dy*(s/steps)); }
+    last=[x,y]; checkProgress();
+  };
+  const onUp = () => { holding=false; last=null; };
+  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("pointermove",onMove); window.addEventListener("pointerup",onUp);
+  canvas.addEventListener("touchstart",onDown,{passive:true}); canvas.addEventListener("touchmove",onMove,{passive:true}); window.addEventListener("touchend",onUp);
+  function checkProgress(){
+    if (revealed) return;
+    const data = maskCtx.getImageData(0,0,W,H).data;
+    let filled=0, total=0;
+    for (let i=3;i<data.length;i+=4*23){ total++; if (data[i]>40) filled++; }
+    if (total && filled/total > 0.42){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
+  }
+  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    compCtx.clearRect(0,0,W,H);
+    compCtx.globalCompositeOperation="source-over"; compCtx.drawImage(frostLayer,0,0);
+    compCtx.globalCompositeOperation="destination-out"; compCtx.drawImage(maskLayer,0,0);
+    ctx.drawImage(composite,0,0);
+    if (!revealed) raf=requestAnimationFrame(draw);
+  }
+  draw();
+  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
+}
+function diyaCardReveal(canvas, palette, onReveal){
+  const ctx = canvas.getContext("2d");
+  let W,H,raf,revealed=false;
+  const [br,bg,bb] = hexToRgb(palette.brass || "#B8874A");
+  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; }
+  size();
+  let lit=false, litAt=0;
+  const onDown = () => { if (lit) return; lit=true; litAt=performance.now(); };
+  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("touchstart",onDown,{passive:true});
+  function draw(now){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle="rgba(18,14,10,0.9)"; ctx.fillRect(0,0,W,H);
+    if (lit){
+      const age=(now-litAt)/1000;
+      const flicker=1+Math.sin(now*0.014)*0.08;
+      const radius=Math.min(W,H)*Math.min(1.1,age*0.75)*flicker;
+      const rg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,radius);
+      rg.addColorStop(0,`rgba(${br},${bg},${bb},0.9)`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
+      ctx.globalCompositeOperation="destination-out"; ctx.fillStyle=rg; ctx.fillRect(0,0,W,H); ctx.globalCompositeOperation="source-over";
+      if (age>1.3 && !revealed){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
+    }
+    if (!revealed) raf=requestAnimationFrame(draw);
+  }
+  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); }
+  raf=requestAnimationFrame(draw);
+  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
+}
+function rippleCardReveal(canvas, palette, onReveal){
+  const ctx = canvas.getContext("2d");
+  let W,H,raf,revealed=false;
+  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17";
+  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; }
+  size();
+  const splashes = [];
+  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
+  const onDown = e => { if (revealed) return; const [x,y]=xy(e); splashes.push({x,y,born:performance.now()}); };
+  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("touchstart",onDown,{passive:true});
+  function draw(now){
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    let maxAge=0;
+    for (const s of splashes){
+      const age=(now-s.born)/1000; maxAge=Math.max(maxAge,age);
+      const radius=age*Math.max(W,H)*0.95;
+      const alpha=Math.max(0,0.92-age*0.55);
+      if (alpha<=0) continue;
+      ctx.globalCompositeOperation="destination-out";
+      ctx.beginPath(); ctx.arc(s.x,s.y,radius,0,Math.PI*2); ctx.fillStyle=`rgba(0,0,0,${alpha})`; ctx.fill();
+      ctx.globalCompositeOperation="source-over";
+    }
+    if (splashes.length && maxAge>1.6 && !revealed){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
+    if (!revealed) raf=requestAnimationFrame(draw);
+  }
+  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); }
+  raf=requestAnimationFrame(draw);
+  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
+}
+function incenseCardReveal(canvas, palette, onReveal){
+  const ctx = canvas.getContext("2d");
+  let W,H,raf,revealed=false;
+  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17";
+  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; }
+  size();
+  let fanned=0, lastPos=null, dragging=false;
+  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
+  const onDown = e => { dragging=true; lastPos=xy(e); };
+  const onMove = e => { if (!dragging) return; const p=xy(e); if (lastPos) fanned += Math.hypot(p[0]-lastPos[0], p[1]-lastPos[1]); lastPos=p; };
+  const onUp = () => { dragging=false; lastPos=null; };
+  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("pointermove",onMove); window.addEventListener("pointerup",onUp);
+  canvas.addEventListener("touchstart",onDown,{passive:true}); canvas.addEventListener("touchmove",onMove,{passive:true}); window.addEventListener("touchend",onUp);
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    const clearedPct = Math.min(1, fanned/650);
+    ctx.fillStyle = `rgba(18,14,10,${0.88*(1-clearedPct)})`; ctx.fillRect(0,0,W,H);
+    if (clearedPct>=1 && !revealed){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
+    if (!revealed) raf=requestAnimationFrame(draw);
+  }
+  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); }
+  raf=requestAnimationFrame(draw);
+  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
+}
+function mountCardVeil(effectName, canvas, palette, onReveal){
+  const fns = { ripple: rippleCardReveal, diya: diyaCardReveal, frost: frostCardReveal, incense: incenseCardReveal };
+  const fn = fns[effectName] || rippleCardReveal;
+  return fn(canvas, palette, onReveal);
+}
+
 </script>
 <script>
 const $ = id => document.getElementById(id);
@@ -535,7 +686,15 @@ function renderInvite(){
   const palette = d.wedding.palette || {};
   heroInstance = mountHero(effect, canvas, { colorTop: palette.ink, colorBottom: palette.ink2, brass: palette.brass, brassSoft: palette.brassSoft, mist: palette.mist }, couple);
 
-  $("itinerary").innerHTML = d.events.map(e => `<div class="itin-item"><div class="itin-dot"></div><div class="itin-tag">${esc(e.day_label)} · ${esc(e.time_label)}</div><h3>${esc(e.title)}</h3>${e.location?`<div class="itin-loc">${esc(e.location)}</div>`:""}${e.description?`<div class="itin-desc">${esc(e.description)}</div>`:""}</div>`).join("");
+  $("itinerary").innerHTML = d.events.map((e,i) => `<div class="itin-item"><div class="itin-dot"></div><div class="itin-tag">${esc(e.day_label)} · ${esc(e.time_label)}</div><h3>${esc(e.title)}</h3>${e.location?`<div class="itin-loc">${esc(e.location)}</div>`:""}${e.description?`<div class="itin-veil-wrap"><div class="itin-desc">${esc(e.description)}</div><div class="itin-veil" id="itinVeil${i}"><canvas></canvas><div class="itin-veil-hint" id="itinHint${i}"></div></div></div>`:""}</div>`).join("");
+  const veilHints = { ripple:"touch the water", diya:"tap to light", frost:"wipe to reveal", incense:"drag to fan away" };
+  d.events.forEach((e,i) => {
+    if (!e.description) return;
+    const veil = document.getElementById(`itinVeil${i}`);
+    const canvas = veil.querySelector("canvas");
+    document.getElementById(`itinHint${i}`).textContent = veilHints[effect] || veilHints.ripple;
+    mountCardVeil(effect, canvas, palette, () => { document.getElementById(`itinHint${i}`).style.display = "none"; });
+  });
 
   const extra = [
     d.wedding.dress_code ? `<div class="dcard"><span class="tag">Dress Code</span><h3>What to Wear</h3><p>${esc(d.wedding.dress_code)}</p></div>` : "",
