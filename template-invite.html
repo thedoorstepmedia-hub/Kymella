@@ -106,6 +106,12 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="rippleDistort" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" seed="7" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
 <nav class="nav"><div class="word" id="navWord">Kymella</div></nav>
 
@@ -629,6 +635,31 @@ function playConfirmAnimation(effect, done){
   fn(canvas, palette, caption, done);
 }
 
+function rippleOutForm(formEl, done){
+  const displaceEl = document.querySelector("#rippleDistort feDisplacementMap");
+  const turbEl = document.querySelector("#rippleDistort feTurbulence");
+  formEl.style.filter = "url(#rippleDistort)";
+  formEl.style.transition = "none";
+  const DURATION = 1400;
+  const start = performance.now();
+  function frame(now){
+    const t = now - start;
+    const p = Math.min(1, t/DURATION);
+    // scale ramps up fast (the stone lands) then eases back down as the form dissolves away
+    const scale = p < 0.32 ? (p/0.32)*58 : 58 * (1 - (p-0.32)/0.68);
+    displaceEl.setAttribute("scale", scale.toFixed(1));
+    const freq = 0.009 + Math.sin(t*0.005)*0.004;
+    turbEl.setAttribute("baseFrequency", `${freq.toFixed(4)} ${(freq*4).toFixed(4)}`);
+    // fade + rise starts a beat after the ripple begins, so the distortion reads before the dissolve
+    const fadeP = Math.max(0, (p-0.22)/0.78);
+    formEl.style.opacity = String(1-fadeP);
+    formEl.style.transform = `translateY(${-fadeP*40}px)`;
+    if (p < 1) requestAnimationFrame(frame);
+    else { formEl.style.filter=""; formEl.style.opacity=""; formEl.style.transform=""; done(); }
+  }
+  requestAnimationFrame(frame);
+}
+
 $("rsvpForm").addEventListener("submit", async e => {
   e.preventDefault();
   const msg = $("rMsg"); msg.style.display="none";
@@ -639,13 +670,20 @@ $("rsvpForm").addEventListener("submit", async e => {
     const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/rsvp`, { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ attending, party_size:Number($("rParty").value)||1, meal:$("rMeal").value, allergies:$("rAllergies").value.trim(), transport:$("rTransport").value.trim(), note:$("rNote").value.trim(), event_ids }) });
     if (!r.ok) throw new Error();
-    $("rsvpForm").style.display="none";
-    $("confirmStage").style.display="block";
     const effect = (INVITE_DATA.wedding.hero_effect) || "ripple";
-    playConfirmAnimation(effect, () => {
-      $("confirmStage").style.display="none";
-      $("rsvpDone").style.display="block";
-    });
+    if (effect === "ripple"){
+      rippleOutForm($("rsvpForm"), () => {
+        $("rsvpForm").style.display="none";
+        $("rsvpDone").style.display="block";
+      });
+    } else {
+      $("rsvpForm").style.display="none";
+      $("confirmStage").style.display="block";
+      playConfirmAnimation(effect, () => {
+        $("confirmStage").style.display="none";
+        $("rsvpDone").style.display="block";
+      });
+    }
   }catch(e){ msg.textContent="That didn't go through — please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; }
 });
 async function pledge(fundId){
