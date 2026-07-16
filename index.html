@@ -71,9 +71,18 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 .picker-fine{font-size:11.5px;color:rgba(245,239,227,.45)}
 .picker-examples{margin-top:16px;padding-top:16px;border-top:1px solid rgba(245,239,227,.14);display:flex;flex-direction:column;align-items:center;gap:8px}
 .example-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.example-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft);border:1px solid rgba(245,239,227,.2);border-radius:2px;padding:8px 14px;transition:border-color .2s,color .2s}
+.example-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft);border:1px solid rgba(245,239,227,.2);border-radius:2px;padding:8px 14px;transition:border-color .2s,color .2s;cursor:pointer}
 .example-links a:hover{border-color:var(--brass-soft);color:var(--mist)}
 @media(max-width:560px){.effect-choices{grid-template-columns:repeat(2,1fr)}}
+
+/* ================= demo preview overlay ================= */
+.demo-overlay{position:fixed;inset:0;z-index:1000;background:#000;display:none}
+.demo-overlay.open{display:block}
+.demo-overlay iframe{width:100%;height:100%;border:0;display:block}
+.demo-close{position:fixed;top:16px;right:16px;z-index:1002;width:42px;height:42px;border-radius:50%;background:rgba(14,31,28,.7);backdrop-filter:blur(6px);color:var(--mist);font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid rgba(245,239,227,.25);transition:background .2s}
+.demo-close:hover{background:rgba(14,31,28,.9)}
+.demo-cta{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1002;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+@media(max-width:560px){.demo-cta{bottom:16px;padding:14px 22px;font-size:12px}}
 
 /* ================= sections ================= */
 .section{padding:92px 32px}
@@ -163,15 +172,17 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <p class="picker-fine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
     </div>
     <div class="picker-examples">
-      <p class="picker-fine">Or open a real invite on your phone, exactly as your guests would see it</p>
-      <div class="example-links">
-        <a href="https://kymella.com/i/112-42-cF2j4Xo68b-510La" target="_blank" rel="noopener">Ripple — Elena &amp; Marcus</a>
-        <a href="https://kymella.com/i/113-43-wOcYorAaIJpo4_HY" target="_blank" rel="noopener">Diya — Ananya &amp; Vikram</a>
-        <a href="https://kymella.com/i/114-44-aSlUTZUzdUfBHhz5" target="_blank" rel="noopener">Frost — Sofia &amp; Daniel</a>
-      </div>
+      <p class="picker-fine">Or open a real invite right here, exactly as your guests would see it</p>
+      <div class="example-links" id="exampleLinks"></div>
     </div>
   </div>
 </header>
+
+<div class="demo-overlay" id="demoOverlay">
+  <button class="demo-close" onclick="closeDemo()" aria-label="Close preview">&times;</button>
+  <button class="demo-cta btn btn-brass" id="demoCta" onclick="goToExperienceFromDemo()">Make Your Own — $499 CAD</button>
+  <iframe id="demoIframe" src="about:blank" title="Wedding invite preview"></iframe>
+</div>
 
 <section class="section" id="how">
   <div class="inner center">
@@ -484,6 +495,45 @@ function goToExperience(){
   }));
   location.href = "/experience";
 }
+
+/* ================= real example previews ================= */
+// Full, real weddings created through the same pipeline paying couples use — so what a
+// prospect sees here is the actual product, not a mockup. See each wedding's own dashboard
+// to swap in different photos/copy; this list just needs to stay in sync with those links.
+const DEMOS = [
+  { effect: "ripple", palette: "Emerald",     label: "Ripple — Elena & Marcus",  url: "https://kymella.com/i/112-42-cF2j4Xo68b-510La" },
+  { effect: "diya",   palette: "Brass & Ink", label: "Diya — Ananya & Vikram",   url: "https://kymella.com/i/113-43-wOcYorAaIJpo4_HY" },
+  { effect: "frost",  palette: "Slate & Blue", label: "Frost — Sofia & Daniel",  url: "https://kymella.com/i/114-44-aSlUTZUzdUfBHhz5" },
+];
+let activeDemo = null;
+
+function renderExamples(){
+  document.getElementById("exampleLinks").innerHTML = DEMOS.map((d,i) =>
+    `<a onclick="openDemo(${i})">${d.label}</a>`).join("");
+}
+function openDemo(i){
+  activeDemo = DEMOS[i];
+  document.getElementById("demoIframe").src = activeDemo.url;
+  document.getElementById("demoOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeDemo(){
+  document.getElementById("demoOverlay").classList.remove("open");
+  document.getElementById("demoIframe").src = "about:blank";
+  document.body.style.overflow = "";
+  activeDemo = null;
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && activeDemo) closeDemo(); });
+function goToExperienceFromDemo(){
+  if (!activeDemo) return goToExperience();
+  const p = PALETTES.find(x => x.name === activeDemo.palette) || PALETTES[0];
+  sessionStorage.setItem("kymella_experience", JSON.stringify({
+    effect: activeDemo.effect,
+    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep },
+  }));
+  location.href = "/experience";
+}
+renderExamples();
 
 const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
 document.querySelectorAll(".up").forEach(el=>io.observe(el));
