@@ -365,6 +365,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
         <button type="button" class="btn btn-quiet" style="width:100%;margin-top:18px" id="sumEditBtn">Edit my response</button>
       </div>
       <form id="rsvpForm" style="display:none">
+        <div class="rsvp-row" id="rNameRow" style="display:none"><label>Your name</label><input type="text" id="rName" placeholder="So the couple knows who's joining"></div>
         <div class="rsvp-row"><label>Will you be attending?</label>
           <div class="rc-choice">
             <button type="button" class="rc-btn" id="rYes">Joyfully accept</button>
@@ -844,7 +845,15 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 // This page is served by the Kymella/Evarria backend itself at /i/:token, so API calls are same-origin.
 const API_BASE = "";
 // Token comes from the path (/i/:token), matching how server.js signs invite links — not a query string.
-const TOKEN = (location.pathname.match(/\/i\/([\w-]+)/) || [])[1] || "";
+const RAW_TOKEN = (location.pathname.match(/\/i\/([\w-]+)/) || [])[1] || "";
+// A "G-<weddingId>-<sig>" token is the general/QR link printed on a physical card, not
+// addressed to anyone. The wedding id sits in plain sight in the token itself, so once a
+// visitor has RSVPed once from this device we can remember their own personal link and use it
+// instead -- otherwise every future scan on the same phone would look like a brand-new guest.
+const GENERAL_MATCH = /^G-(\d+)-/.exec(RAW_TOKEN);
+const GENERAL_WEDDING_ID = GENERAL_MATCH ? GENERAL_MATCH[1] : null;
+const REMEMBERED_TOKEN = GENERAL_WEDDING_ID ? localStorage.getItem(`kymella_myinvite_${GENERAL_WEDDING_ID}`) : null;
+const TOKEN = REMEMBERED_TOKEN || RAW_TOKEN;
 
 /* ================= HERO EFFECT LIBRARY: loaded from hero-effects.js, see below ================= */
 
@@ -877,12 +886,15 @@ function applyPalette(p){
 }
 function renderInvite(){
   const d = INVITE_DATA;
-  const first = d.guest.name.split(" ")[0];
+  // A general/QR invite (printed on a card, not addressed to anyone) has no guest name at all
+  // until someone actually RSVPs -- greet them the same way regardless of any stale rsvp_status.
+  const general = !!d.guest.general;
+  const first = general ? "" : d.guest.name.split(" ")[0];
   const couple = d.wedding.couple;
   document.title = `${d.wedding.partner1} & ${d.wedding.partner2}`;
   $("navWord").textContent = couple;
   $("footText").textContent = `${couple.toUpperCase()} · ${esc(d.wedding.wedding_date)}`;
-  const status = d.guest.rsvp_status;
+  const status = general ? "Pending" : d.guest.rsvp_status;
   if (status === "Accepted"){
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>we can't wait</em>`;
     $("heroSub").textContent = `You're on the list. We're so glad you'll be there.`;
@@ -891,6 +903,10 @@ function renderInvite(){
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>you'll be missed</em>`;
     $("heroSub").textContent = `Thank you for letting us know. We'll be thinking of you.`;
     $("heroCta").textContent = "View my response";
+  } else if (general){
+    $("heroGreeting").innerHTML = `<em>Will you join us?</em>`;
+    $("heroSub").textContent = `${couple} are tying the knot, and we'd love for you to be there.`;
+    $("heroCta").textContent = "RSVP";
   } else {
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>will you join us?</em>`;
     $("heroSub").textContent = `${couple} are tying the knot, and we'd love for you to be there.`;
@@ -1062,10 +1078,13 @@ function renderInvite(){
   }
   $("rsvpLoading").style.display = "none";
 
-  if (d.guest.rsvp_status && d.guest.rsvp_status !== "Pending"){
+  if (!general && d.guest.rsvp_status && d.guest.rsvp_status !== "Pending"){
     renderRsvpSummary();
     $("rsvpSummary").style.display = "block";
   } else {
+    // Only a fresh general-link visit (no remembered personal token yet) needs to ask for a
+    // name -- once RSVPed once, TOKEN gets swapped to their own and this never shows again.
+    $("rNameRow").style.display = general ? "block" : "none";
     renderRsvpEvents();
     $("rsvpForm").style.display = "block";
   }
@@ -1138,13 +1157,27 @@ $("rsvpForm").addEventListener("submit", async e => {
   e.preventDefault();
   const msg = $("rMsg"); msg.style.display="none";
   if (attending === null){ msg.textContent="Please let us know if you can join us."; msg.style.color="#A4523F"; msg.style.display="block"; return; }
+  const generalNow = !!INVITE_DATA.guest.general;
+  const nameInput = $("rName");
+  if (generalNow && !nameInput.value.trim()){ msg.textContent="Please add your name so the couple knows who's joining."; msg.style.color="#A4523F"; msg.style.display="block"; nameInput.focus(); return; }
   const btn = $("rSubmit"); btn.disabled=true; btn.textContent="Sharing your response…"; btn.classList.add("pulsing");
   const event_ids = Array.from(document.querySelectorAll('#rEventsList input[data-ev]:checked')).map(el => Number(el.dataset.ev));
   try{
     const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/rsvp`, { method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ attending, party_size:Number($("rParty").value)||1, meal:$("rMeal").value, allergies:$("rAllergies").value.trim(), transport:$("rTransport").value.trim(), note:$("rNote").value.trim(), event_ids }) });
+      body: JSON.stringify({ attending, party_size:Number($("rParty").value)||1, meal:$("rMeal").value, allergies:$("rAllergies").value.trim(), transport:$("rTransport").value.trim(), note:$("rNote").value.trim(), event_ids, name: generalNow ? nameInput.value.trim() : undefined }) });
     if (!r.ok) throw new Error();
+    const out = await r.json();
     btn.textContent = "Confirmed ✦"; btn.classList.remove("pulsing");
+    if (out.invite_token && GENERAL_WEDDING_ID){
+      // General link only: remember this device's own personal invite so a repeat scan of the
+      // same card goes straight to their existing RSVP, then hand the page over to that
+      // personal link right away -- TOKEN is a const pointing at the general link for the rest
+      // of this page load, so without this hand-off, editing the RSVP again in the same visit
+      // would silently create a second, duplicate guest record instead of updating this one.
+      localStorage.setItem(`kymella_myinvite_${GENERAL_WEDDING_ID}`, out.invite_token);
+      setTimeout(() => { location.replace(`/i/${out.invite_token}`); }, 500);
+      return;
+    }
     setTimeout(() => {
       $("rsvpForm").style.display="none";
       $("rsvpDone").style.display="block";
@@ -1156,6 +1189,10 @@ $("songForm").addEventListener("submit", async e => {
   const input = $("songInput"), msg = $("songMsg");
   const text = input.value.trim();
   if (!text) return;
+  // A general-link visitor who hasn't RSVPed yet has no guest row for this to attach to --
+  // memories.guest_id is nullable, so it would save but then never show up for the couple
+  // (their memories list is an inner join on guest_id). RSVP first creates that row.
+  if (INVITE_DATA.guest.general){ msg.textContent = "Please RSVP first, so we know it's from you."; msg.style.display = "block"; return; }
   try{
     const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/memories`, { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ kind:"song", text }) });
