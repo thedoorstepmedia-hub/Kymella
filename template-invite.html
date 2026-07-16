@@ -653,15 +653,15 @@ function createFrostReveal(canvas, label, opts = {}) {
     maskCtx.filter="blur(9px)"; maskCtx.fillStyle="rgba(0,0,0,1)"; maskCtx.beginPath(); maskCtx.arc(x,y,34,0,Math.PI*2); maskCtx.fill(); maskCtx.filter="none";
   }
   // A single quick touch used to be enough to melt the whole page -- reads as broken, not
-  // magical, since there's nothing that felt like "clearing frost" about it. Two swipes'
-  // worth (700px) still read as too quick to feel deliberate, so the threshold is doubled --
-  // roughly a good 4 seconds of real wiping, not a two-flick blip. Now the global dissolve
+  // magical, since there's nothing that felt like "clearing frost" about it. 700px still read
+  // as too quick, and 1400px still landed at roughly 2s in practice rather than the ~4s a
+  // deliberate reveal calls for, so the threshold is doubled again. Now the global dissolve
   // only fires once the guest has actually wiped that much, tracked as cumulative drag
   // distance across the gesture (and across multiple separate wipes, if they lift and wipe
   // again). Local wipeAt still fires on every move for immediate tactile feedback; only the
   // big page-wide payoff waits.
   let totalWipeDist=0;
-  const CLEAR_DIST_THRESHOLD=1400;
+  const CLEAR_DIST_THRESHOLD=2800;
   // Wiping and scrolling are the same physical gesture (a drag), so on touch we never claim
   // it on contact -- we wait a short beat. A fast swipe (scrolling) blows past the movement
   // threshold before the hold delay elapses and gets abandoned entirely, leaving the browser's
