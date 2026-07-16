@@ -5,36 +5,108 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title id="pageTitle">Kymella Invitation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#0E1F1C; --ink-2:#152D28; --ink-3:#26433C;
   --mist:#F5EFE3; --mist-dim:#EDE5D4;
   --brass:#B8874A; --brass-soft:#E8C9A0; --brass-deep:#8E6836;
   --line:rgba(14,31,28,.12); --line-dk:rgba(245,239,227,.16);
-  --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+  --text:var(--mist); --text-dim:rgba(245,239,227,.68); --text-dim2:rgba(245,239,227,.5);
+  --surface:rgba(255,255,255,.055); --surface-strong:rgba(255,255,255,.09);
+  --disp:'Playfair Display',Georgia,serif; --body:'EB Garamond',Georgia,serif; --mono:'IBM Plex Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--ink);color:var(--text);font-size:17.5px;line-height:1.7;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
-input,select,textarea{font-family:var(--body);font-size:15px}
+input,select,textarea{font-family:var(--body);font-size:16.5px}
 :focus-visible{outline:2px solid var(--brass);outline-offset:3px}
-.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;color:var(--brass-deep)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;color:var(--brass-soft)}
 .eyebrow.on-dark{color:var(--brass-soft)}
 
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 32px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;transition:background .35s ease,backdrop-filter .35s ease}
 .nav.scrolled{background:rgba(14,31,28,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .nav .word{color:var(--mist);font-family:var(--disp);font-size:18px;font-style:italic}
 
-.hero{position:relative;min-height:660px;height:100svh;background:var(--ink);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
-#heroCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+/* The magic lives in the hero only: one full-bleed photo with the theme effect playing over
+   it. Everything below scrolls as a calm, static page -- no fixed ambient canvas behind the
+   whole document anymore. */
+.hero{position:relative;min-height:660px;height:100svh;background:linear-gradient(180deg,var(--ink),var(--ink-2));overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+/* The reveal is a slow camera push toward the wax seal itself -- not a new element growing
+   from nothing. transform-origin gets set from JS to the seal's actual rendered position right
+   before the zoom starts, so everything in frame (the seal, the flap, the names) converges
+   toward that one real object rather than the whole layer scaling from its own center. That's
+   what keeps this from reading as a generic full-screen zoom/slide transition. */
+#sealGate{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:1000;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:none;transition:transform 1.2s cubic-bezier(.45,0,.2,1),opacity .2s ease}
+#sealGate.zooming{transform:scale(7)}
+/* Added later than .zooming, once the push-in is well underway -- opacity and transform run
+   on independent transitions, so this overlaps the tail of the zoom as one continuous, graceful
+   handoff rather than a hard stop-then-fade. */
+#sealGate.opened{pointer-events:none;opacity:0}
+.envelope-scene{position:absolute;inset:0;background:var(--seal-ink,#0E1F1C);display:flex;align-items:center;justify-content:center;padding:24px;perspective:1800px}
+.envelope-group{display:flex;flex-direction:column;align-items:center;gap:30px;max-width:520px;width:100%}
+.envelope-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,239,227,.5);text-align:center}
+.envelope-names{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(24px,6.5vw,36px);color:#F5EFE3;text-align:center;line-height:1.2}
+/* Sized to dominate the scene (was 300px/72vw) and given its own perspective + a static
+   resting tilt so it reads as an object sitting in 3D space even before it opens. */
+.envelope-card{position:relative;width:min(460px,90vw);aspect-ratio:1.42/1;perspective:1800px;transform:rotateX(6deg);transform-style:preserve-3d}
+.envelope-body-card{
+  position:absolute;inset:0;border-radius:4px;
+  background:linear-gradient(155deg,#fbf7ed,#eee3cc 58%,#e2d1ae);
+  box-shadow:0 2px 4px rgba(0,0,0,.35),0 16px 32px rgba(0,0,0,.42),0 50px 90px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.6);
+}
+.envelope-flap{
+  position:absolute;top:0;left:0;right:0;height:62%;
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  transform-origin:top center;transform-style:preserve-3d;
+  transition:transform 1.05s cubic-bezier(.6,.08,.3,1);
+  filter:drop-shadow(0px 12px 22px rgba(0,0,0,.4));
+  z-index:2;
+}
+.envelope-flap.open{transform:rotateX(-172deg) translateZ(8px)}
+/* Two faces instead of one flat gradient, so the flap shows a genuine underside -- the
+   brand's own ink/brass lining -- as it lifts, rather than the same paper color flipping
+   through itself. */
+.envelope-flap-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.envelope-flap-front{background:linear-gradient(160deg,#ffffff,#e9e0cf)}
+.envelope-flap-back{background:linear-gradient(200deg,var(--seal-brass-deep,#8E6836),var(--seal-ink,#0E1F1C));transform:rotateX(180deg)}
+/* A real cast shadow beneath the flap, distinct from the flap's own drop-shadow filter --
+   this one deliberately GROWS as the flap actually lifts off the surface, rather than staying
+   fixed, so the opening motion reads as physical depth increasing rather than a flat rotation. */
+.flap-cast-shadow{
+  position:absolute;top:62%;left:0;right:0;height:34%;z-index:1;
+  background:radial-gradient(ellipse at 50% 0%, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 72%);
+  opacity:0;transition:opacity 1.05s cubic-bezier(.6,.08,.3,1);pointer-events:none;
+}
+.envelope-flap.open ~ .flap-cast-shadow{opacity:1}
+.wax-seal{
+  position:absolute;top:62%;left:50%;transform:translate(-50%,-50%);
+  width:64px;height:64px;border-radius:50%;
+  background:radial-gradient(circle,#dfba73 0%,#c5a059 100%);
+  box-shadow:inset 2px 2px 4px rgba(255,255,255,.4),inset -2px -2px 4px rgba(0,0,0,.4),0px 6px 16px rgba(0,0,0,.55);
+  border:1px solid #b38f4b;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .4s ease;z-index:3;
+}
+#sealInitials{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:500;font-size:19px;color:#3d2b12}
+.seal-hint{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,239,227,.5);animation:sealPulse 2.6s ease-in-out infinite}
+@keyframes sealPulse{0%,100%{opacity:.55}50%{opacity:.15}}
 .hero-content{position:relative;z-index:2;pointer-events:none;color:var(--mist)}
+.hero-photo{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block}
+.hero-photo canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;touch-action:pan-y;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(14,31,28,.55) 0%, rgba(14,31,28,.25) 35%, rgba(14,31,28,.55) 75%, rgba(14,31,28,.85) 100%);pointer-events:none;z-index:1}
+/* First-time affordance for frost's hold-and-wipe gesture -- without it a guest who's never
+   seen the theme has no way to guess a deliberate hold (not a quick swipe) is what clears it.
+   Sits above the veil canvas and the darkening overlay; fades out the moment a real wipe lands. */
+.frost-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass-soft);opacity:.85;text-align:center;pointer-events:none;text-shadow:0 2px 10px rgba(0,0,0,.6);transition:opacity .5s ease;animation:frostHintPulse 2.4s ease-in-out infinite}
+@keyframes frostHintPulse{0%,100%{opacity:.85}50%{opacity:.4}}
 .hero .eyebrow{margin-bottom:20px}
-.hero h1{font-family:var(--disp);font-size:clamp(30px,6vw,54px);font-weight:400;line-height:1.18;max-width:720px}
+.hero h1{font-family:var(--disp);font-style:italic;font-size:clamp(30px,6vw,54px);font-weight:500;line-height:1.18;max-width:720px;text-shadow:0 2px 24px rgba(0,0,0,.4)}
 .hero h1 em{font-style:italic;color:var(--brass-soft)}
-.hero .sub{margin-top:18px;font-size:15px;color:rgba(245,239,227,.65);max-width:420px;margin-left:auto;margin-right:auto}
+.hero .sub{margin-top:18px;font-size:17px;color:rgba(245,239,227,.7);max-width:440px;margin-left:auto;margin-right:auto;text-shadow:0 1px 12px rgba(0,0,0,.45)}
 .hero .date{margin-top:26px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--brass-soft)}
 .hero-cta{margin-top:28px;pointer-events:auto}
 .btn{display:inline-flex;align-items:center;gap:9px;padding:15px 30px;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;transition:background .2s,color .2s,border-color .2s}
@@ -44,95 +116,150 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 .btn.pulsing{animation:softPulse 1.3s ease-in-out infinite;cursor:default}
 .btn-solid{background:var(--ink);color:var(--mist)}
 .btn-solid:hover{background:var(--ink-2)}
-.btn-quiet{border:1px solid var(--line);color:var(--ink)}
+.btn-quiet{border:1px solid var(--line-dk);color:var(--text)}
 .btn-quiet:hover{border-color:var(--brass)}
 
-.section{padding:132px 32px 92px}
-.inner{max-width:680px;margin:0 auto}
-@media(max-width:680px){.section{padding:112px 22px 60px}}
+/* Sections are plain, static ink below the hero -- the old pointer-events pass-through (which
+   let touches reach the fixed ambient canvas behind the page) went away with that canvas. */
+.section{padding:64px 16px;position:relative;z-index:1;background:transparent}
+.inner{max-width:680px;margin:0 auto;position:relative}
+.hero{z-index:1}
+@media(max-width:680px){.section{padding:44px 14px}.inner{padding:40px 24px}}
 .center{text-align:center}
-.h2{font-family:var(--disp);font-size:clamp(26px,4.5vw,36px);font-weight:400;line-height:1.2;margin:12px 0 14px}
+.h2{font-family:var(--disp);font-style:italic;font-size:clamp(26px,4.5vw,36px);font-weight:500;line-height:1.2;margin:12px 0 14px}
 .h2 em{font-style:italic;color:var(--brass-deep)}
-.lede{font-size:15px;color:var(--ink-3);max-width:460px;margin:0 auto}
+.lede{font-size:16.5px;color:var(--text-dim);max-width:460px;margin:0 auto}
 
-.details-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--line);margin-top:40px;border:1px solid var(--line)}
-.dcard{background:var(--mist);padding:26px 24px}
-.dcard .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-deep)}
-.dcard h3{font-family:var(--disp);font-size:19px;font-weight:500;margin:8px 0 6px}
-.dcard p{font-size:13.5px;color:var(--ink-3)}
+/* Flexbox, not grid -- there are 1-4 cards here depending on which fields the couple filled
+   in, and CSS grid's column tracks are shared across every row: when the last row has fewer
+   cards than the row above it, the leftover tracks stay reserved and show this container's
+   own background as empty boxes (only ever visible on wide viewports, since mobile always
+   collapses to one card per row and never has a partial row to begin with). Flexbox sizes
+   each wrapped line independently, so a partially-filled last row just stretches to fill
+   itself -- there's no shared track for a "leftover" cell to exist in. */
+.details-grid{display:flex;flex-wrap:wrap;gap:1px;background:var(--line-dk);margin-top:40px;border:1px solid var(--line-dk)}
+.dcard{flex:1 1 220px;background:var(--surface);padding:26px 24px}
+.dcard .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft)}
+.dcard h3{font-family:var(--disp);font-style:italic;font-size:20px;font-weight:500;margin:8px 0 6px}
+.dcard p{font-size:15px;color:var(--text-dim)}
 
 .itinerary{margin-top:44px;text-align:left}
-.itin-item{position:relative;padding:0 0 34px 34px;border-left:1.5px solid var(--line)}
+.itin-item{position:relative;padding:0 0 34px 34px;border-left:1.5px solid var(--line-dk)}
 .itin-item:last-child{border-color:transparent;padding-bottom:0}
-.itin-dot{position:absolute;left:-6.5px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 4px var(--mist)}
-.itin-tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass-deep)}
-.itin-item h3{font-family:var(--disp);font-size:21px;font-weight:500;margin:6px 0 4px}
-.itin-loc{font-size:13px;color:var(--ink-3);margin-bottom:6px}
-.itin-desc{font-size:13.5px;color:var(--ink-3);line-height:1.6;max-width:440px}
+.itin-dot{position:absolute;left:-6.5px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 4px var(--ink)}
+.itin-tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass-soft)}
+.itin-item h3{font-family:var(--disp);font-style:italic;font-size:22px;font-weight:500;margin:6px 0 4px}
+.itin-loc{font-size:14.5px;color:var(--text-dim);margin-bottom:6px}
+.itin-desc{font-size:15px;color:var(--text-dim);line-height:1.6;max-width:440px}
 
-.itin-veil-wrap{position:relative;max-width:440px;margin-top:2px}
-.itin-veil{position:absolute;inset:-6px;border-radius:3px;overflow:hidden;cursor:pointer;touch-action:none}
-.itin-veil canvas{width:100%;height:100%;display:block}
-.itin-veil-hint{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,227,.6);pointer-events:none}
-
-.map-wrap{margin-top:36px;border:1px solid var(--line);border-radius:2px;overflow:hidden;background:var(--mist-dim)}
-.map-wrap iframe{display:block;width:100%;height:230px;border:0;filter:grayscale(.15) contrast(1.02)}
-
+/* An embedded map reads like a form, not an invitation -- a plain link button is what most
+   premium printed-style invites do instead, and it's what guests actually want (their own
+   Maps app with real directions), not a small fixed iframe. */
+.map-btn{margin-top:32px;display:inline-flex;align-items:center;gap:10px}
+.map-btn svg{width:16px;height:16px;flex-shrink:0}
 .rsvp-summary{text-align:left}
-.rsvp-summary .status{font-family:var(--disp);font-size:19px;color:var(--brass-deep);margin-bottom:4px}
-.rsvp-summary .sub{font-size:13px;color:var(--ink-3);margin-bottom:20px}
-.rsvp-summary .sfield{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.rsvp-summary .status{font-family:var(--disp);font-size:20px;color:var(--brass-soft);margin-bottom:4px}
+.rsvp-summary .sub{font-size:14.5px;color:var(--text-dim);margin-bottom:20px}
+.rsvp-summary .sfield{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line-dk);font-size:15px}
 .rsvp-summary .sfield:last-of-type{border-bottom:none}
 .rsvp-summary .sfield b{font-weight:600}
 
+/* story: a simple vertical timeline, same left-rail language as the itinerary */
+.story-timeline{margin-top:44px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto}
+.story-item{position:relative;padding:0 0 38px 34px;border-left:1.5px solid var(--line-dk)}
+.story-item:last-child{border-color:transparent;padding-bottom:0}
+.story-dot{position:absolute;left:-6.5px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 4px var(--ink)}
+.story-year{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass-soft)}
+.story-item h3{font-family:var(--disp);font-style:italic;font-size:22px;font-weight:500;margin:6px 0 8px}
+/* A large opening mark before each entry -- the classic editorial pull-quote device -- so a
+   single short sentence still reads as a deliberate, premium moment instead of a thin,
+   sparse-looking line. Costs nothing when a couple only fills in one or two prompts. */
+.story-mark{font-family:var(--disp);font-style:italic;font-size:46px;line-height:.4;color:var(--brass-soft);opacity:.6;display:block;margin-bottom:2px}
+.story-item p{font-size:15.5px;color:var(--text-dim);line-height:1.7;max-width:460px}
+
+/* faq: native details/summary accordion -- zero JS cost, works everywhere */
+.faq-list{margin-top:40px;max-width:560px;margin-left:auto;margin-right:auto;text-align:left}
+.faq-item{border-bottom:1px solid var(--line-dk)}
+.faq-item summary{list-style:none;cursor:pointer;padding:18px 26px 18px 0;font-family:var(--disp);font-size:18px;font-weight:500;position:relative;color:var(--text)}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";position:absolute;right:2px;top:16px;font-size:20px;color:var(--brass-soft);transition:transform .25s}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item p{font-size:15px;color:var(--text-dim);line-height:1.7;padding:0 0 20px}
+
+/* hotels: small cards inside the "Getting There" block */
+.hotel-list{margin-top:24px;display:grid;gap:1px;background:var(--line-dk);border:1px solid var(--line-dk)}
+.hotel-card{background:var(--surface);padding:16px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.hotel-card .name{font-family:var(--disp);font-size:17px}
+.hotel-card .detail{font-size:13.5px;color:var(--text-dim);margin-top:3px}
+.hotel-card .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-soft);white-space:nowrap}
+
+.rsvp-deadline{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-soft);margin:16px 0 0}
+.ics-link{display:inline-block;margin-top:14px;font-size:13.5px;color:var(--text-dim);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ics-link:hover{color:var(--text)}
+
 .song-form{max-width:460px;margin:36px auto 0;display:flex;gap:10px}
-.song-form input{flex:1;border:none;border-bottom:1.5px solid var(--line);padding:10px 2px;outline:none;background:transparent;font-size:14.5px;transition:border-color .2s}
+.song-form input{flex:1;border:none;border-bottom:1.5px solid var(--line-dk);padding:10px 2px;outline:none;background:transparent;font-size:16px;transition:border-color .2s;color:var(--text)}
 .song-form input:focus{border-bottom-color:var(--brass)}
 .song-msg{font-size:12px;text-align:center;margin-top:12px;color:var(--brass-deep);display:none}
 
-.big-date{font-family:var(--disp);font-weight:400;font-size:clamp(52px,11vw,110px);letter-spacing:.02em;color:var(--ink);line-height:1;margin:0 0 8px;white-space:nowrap}
+.big-date{font-family:var(--disp);font-weight:400;font-size:clamp(52px,11vw,110px);letter-spacing:.02em;color:var(--text);line-height:1;margin:0 0 8px;white-space:nowrap}
 .big-date em{font-style:normal;color:var(--brass)}
-.big-date-sub{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:36px}
+.big-date-sub{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:36px}
 
 .countdown{display:flex;justify-content:center;gap:32px;margin-bottom:44px}
 .cd-unit{text-align:center}
-.cd-num{font-family:var(--disp);font-size:clamp(28px,5vw,40px);font-weight:400;color:var(--brass-deep);line-height:1}
-.cd-label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+.cd-num{font-family:var(--disp);font-size:clamp(28px,5vw,40px);font-weight:400;color:var(--brass-soft);line-height:1}
+.cd-label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-top:4px}
 
 .divider{width:64px;height:2px;background:var(--brass);margin:22px auto;border:none}
+/* Slots 2 and 3 each get their own full-bleed moment rather than being paired side by side --
+   one leads into the story, the other is a quiet pause before RSVP. The vw-based breakout
+   (width:100vw + negative margin) escapes .section's centered max-width regardless of how
+   deep it's nested, unlike a percentage margin, which would only escape its own direct parent.
+   No fixed aspect-ratio/object-fit crop -- height:auto lets the container match the photo's
+   own natural proportions exactly, so the whole image shows at full width instead of a
+   landscape-cropped slice of it. A tall portrait photo runs tall; that's the point. */
+.moment-photo{width:100vw;margin-left:calc(-50vw + 50%)}
+.moment-photo img{width:100%;height:auto;display:block}
+#storyLeadPhoto{margin-bottom:56px}
+.closing-photo-section{padding:0}
 
-.rsvp-card{max-width:460px;margin:36px auto 0;background:#fff;border:1px solid var(--line);border-radius:2px;padding:32px 28px;text-align:left}
+.rsvp-card{max-width:460px;margin:36px auto 0;background:var(--surface);border:1px solid var(--line-dk);border-radius:2px;padding:32px 28px;text-align:left}
 .rsvp-row{margin-bottom:22px}
-.rsvp-row label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-deep);margin-bottom:7px}
-.rsvp-row input,.rsvp-row select,.rsvp-row textarea{width:100%;border:none;border-bottom:1.5px solid var(--line);padding:10px 2px;outline:none;background:transparent;border-radius:0;font-size:14.5px;transition:border-color .2s}
-.rsvp-row select{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2326433C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 2px center;background-size:16px;padding-right:24px;cursor:pointer}
+.rsvp-row label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft);margin-bottom:7px}
+.rsvp-row input,.rsvp-row select,.rsvp-row textarea{width:100%;border:none;border-bottom:1.5px solid var(--line-dk);padding:10px 2px;outline:none;background:transparent;border-radius:0;font-size:16px;transition:border-color .2s;color:var(--text)}
+.rsvp-row select{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5EFE3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 2px center;background-size:16px;padding-right:24px;cursor:pointer}
 .rsvp-row input:focus,.rsvp-row select:focus,.rsvp-row textarea:focus{border-bottom-color:var(--brass)}
-.rsvp-row input::placeholder,.rsvp-row textarea::placeholder{color:var(--ink-3);opacity:.55}
+.rsvp-row input::placeholder,.rsvp-row textarea::placeholder{color:var(--text-dim);opacity:.55}
 .rc-choice{display:flex;gap:9px}
-.rc-btn{flex:1;padding:12px 8px;border:1px solid var(--line);border-radius:1px;background:var(--mist);color:var(--ink);font-weight:500;font-size:13px;transition:all .2s}
+.rc-btn{flex:1;padding:12px 8px;border:1px solid var(--line-dk);border-radius:1px;background:var(--surface);color:var(--text);font-weight:500;font-size:14.5px;transition:all .2s}
 .rc-btn.active{background:var(--ink);border-color:var(--ink);color:var(--mist)}
 #rYes.active{background:var(--brass);border-color:var(--brass);color:var(--ink)}
-.ev-check{display:flex;align-items:center;gap:16px;padding:12px 10px;border-bottom:1px solid var(--line);font-size:13px;border-radius:2px;transition:background .2s}
+.ev-check{display:flex;align-items:center;gap:16px;padding:12px 10px;border-bottom:1px solid var(--line-dk);font-size:14.5px;border-radius:2px;transition:background .2s}
 .ev-check:last-child{border:none}
 .ev-check:has(input:checked){background:color-mix(in srgb, var(--brass) 10%, transparent)}
 .ev-check input{position:absolute;opacity:0;width:1px;height:1px}
-.ev-check .box{width:20px;height:20px;flex-shrink:0;border:1.5px solid var(--ink-3);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ev-check .box{width:20px;height:20px;flex-shrink:0;border:1.5px solid var(--text-dim);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .ev-check input:checked + .box{background:var(--brass);border-color:var(--brass)}
 .ev-check .box svg{width:12px;height:12px;opacity:0;transform:scale(.6);transition:all .15s}
 .ev-check input:checked + .box svg{opacity:1;transform:scale(1)}
 .rsvp-msg{font-size:12px;text-align:center;margin-top:9px;display:none}
 
 .reg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:36px;justify-content:center}
-.reg-card{max-width:320px;margin:0 auto;width:100%;background:#fff;border:1px solid var(--line);padding:24px}
-.reg-card h3{font-family:var(--disp);font-size:18px;font-weight:600;margin:0 0 5px}
-.reg-card p{font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
-.reg-bar{height:2px;background:var(--line);overflow:hidden;margin-bottom:9px}
+.reg-card{max-width:320px;margin:0 auto;width:100%;background:var(--surface);border:1px solid var(--line-dk);padding:24px}
+.reg-card h3{font-family:var(--disp);font-size:19px;font-weight:600;margin:0 0 5px}
+.reg-card p{font-size:14px;color:var(--text-dim);margin-bottom:12px}
+.reg-bar{height:2px;background:var(--line-dk);overflow:hidden;margin-bottom:9px}
 .reg-bar i{display:block;height:100%;background:var(--brass);position:relative;transition:width 1s cubic-bezier(.22,1,.36,1)}
 .reg-bar i::after{content:"";position:absolute;right:0;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--brass);box-shadow:0 0 6px 1px var(--brass-soft)}
-.reg-amt{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.reg-amt{font-family:var(--mono);font-size:10.5px;color:var(--text-dim)}
 
-.foot{text-align:center;padding:40px 24px;color:var(--ink-3);font-size:11.5px;letter-spacing:.05em;border-top:1px solid var(--line)}
-.state-msg{text-align:center;padding:60px 20px;color:var(--ink-3);font-size:14px}
+.foot{text-align:center;padding:40px 24px;color:var(--text-dim);font-size:11.5px;letter-spacing:.05em;border-top:1px solid var(--line-dk)}
+.state-msg{text-align:center;padding:60px 20px;color:var(--text-dim);font-size:14px}
+/* .details-grid is flex now (see above) -- its old grid-column:1/-1 inline style no longer
+   does anything, so the loading/empty-state message would otherwise shrink to its own text
+   width instead of spanning the row. */
+.details-grid .state-msg{flex:1 1 100%}
 .up{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1)}
 .up.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.up{opacity:1;transform:none}}
@@ -140,10 +267,33 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 </head>
 <body>
 
+<div id="sealGate">
+  <div class="envelope-scene">
+    <div class="envelope-group">
+      <div class="envelope-eyebrow">You've Got Mail From</div>
+      <div class="envelope-names" id="envelopeNames"></div>
+      <div class="envelope-card">
+        <div class="envelope-body-card"></div>
+        <div class="envelope-flap" id="envelopeFlap">
+          <div class="envelope-flap-face envelope-flap-front"></div>
+          <div class="envelope-flap-face envelope-flap-back"></div>
+        </div>
+        <div class="flap-cast-shadow"></div>
+        <div class="wax-seal" id="waxSeal"><span id="sealInitials"></span></div>
+      </div>
+      <div class="seal-hint" id="sealHint">Touch to open</div>
+    </div>
+  </div>
+</div>
+
 <nav class="nav"><div class="word" id="navWord">Kymella</div></nav>
 
 <header class="hero">
-  <canvas id="heroCanvas"></canvas>
+  <div class="hero-photo" id="heroPhoto">
+    <img id="heroPhotoImg" alt="" style="display:none">
+    <canvas id="heroCanvas"></canvas>
+    <div class="frost-hint" id="frostHint" style="display:none">hold &amp; swipe to clear the frost</div>
+  </div>
   <div class="hero-content">
     <div class="eyebrow on-dark">You Are Invited</div>
     <h1 id="heroGreeting">Loading your invitation…</h1>
@@ -157,7 +307,6 @@ input,select,textarea{font-family:var(--body);font-size:15px}
   <div class="inner">
     <div class="eyebrow">The Essentials</div>
     <h2 class="h2">When & <em>where</em></h2>
-    <hr class="divider">
     <div class="big-date" id="bigDate"></div>
     <div class="big-date-sub" id="bigDateSub"></div>
     <div class="countdown" id="countdown"></div>
@@ -170,17 +319,43 @@ input,select,textarea{font-family:var(--body);font-size:15px}
     <div id="mapSection" style="display:none">
       <div class="eyebrow" style="margin-top:56px">Find Us</div>
       <h2 class="h2" style="font-size:clamp(22px,3.5vw,28px)">Getting <em>there</em></h2>
-      <div class="map-wrap" id="mapWrap"><iframe id="mapFrame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <a class="btn btn-quiet map-btn" id="mapLink" href="#" target="_blank" rel="noopener" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        Open in Google Maps
+      </a>
+      <div class="hotel-list" id="hotelList" style="display:none"></div>
     </div>
   </div>
+</section>
+
+<section class="section center" id="storySection" style="display:none">
+  <div class="moment-photo" id="storyLeadPhoto" style="display:none"><img id="storyPhoto2" alt=""></div>
+  <div class="inner">
+    <div class="eyebrow">Our Story</div>
+    <h2 class="h2">How we <em>got here</em></h2>
+    <div class="story-timeline" id="storyTimeline"></div>
+  </div>
+</section>
+
+<section class="section center" id="faqSection" style="display:none">
+  <div class="inner">
+    <div class="eyebrow">Good to Know</div>
+    <h2 class="h2">Questions, <em>answered</em></h2>
+    <div class="faq-list" id="faqList"></div>
+  </div>
+</section>
+
+<section class="closing-photo-section" id="closingPhotoSection" style="display:none">
+  <div class="moment-photo"><img id="storyPhoto3" alt=""></div>
 </section>
 
 <section class="section center" id="rsvp">
   <div class="inner">
     <div class="eyebrow">Please Respond</div>
     <h2 class="h2">Will you <em>be there?</em></h2>
-    <hr class="divider">
-    <p class="lede">We'd love to know — and which moments we'll see you at.</p>
+    <p class="lede">We'd love to know, and which moments we'll see you at.</p>
+    <div class="rsvp-deadline" id="rsvpDeadline"></div>
+    <a class="ics-link" id="icsLink">Add the date to your calendar</a>
     <div class="rsvp-card">
       <div id="rsvpLoading" style="text-align:center;opacity:.6;font-size:13.5px">Loading…</div>
       <div id="rsvpSummary" class="rsvp-summary" style="display:none">
@@ -211,7 +386,7 @@ input,select,textarea{font-family:var(--body);font-size:15px}
       </form>
       <div id="rsvpDone" style="display:none;text-align:center;padding:10px 0">
         <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're on the list ✦</p>
-        <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you — we can't wait to celebrate with you.</p>
+        <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you. We can't wait to celebrate with you.</p>
       </div>
     </div>
   </div>
@@ -221,7 +396,6 @@ input,select,textarea{font-family:var(--body);font-size:15px}
   <div class="inner">
     <div class="eyebrow">If You're Asking</div>
     <h2 class="h2">Registry</h2>
-    <hr class="divider">
     <p class="lede">Your presence is the real gift. If you'd still like to give something, here's where to look.</p>
     <div class="reg-grid" id="regGrid"></div>
   </div>
@@ -233,14 +407,14 @@ input,select,textarea{font-family:var(--body);font-size:15px}
     <h2 class="h2">Build our <em>playlist</em></h2>
     <p class="lede">Tell us a song that has to be played, and we'll do our best to make it happen.</p>
     <form class="song-form" id="songForm">
-      <input type="text" id="songInput" placeholder="Song — Artist" maxlength="120" required>
+      <input type="text" id="songInput" placeholder="Song / Artist" maxlength="120" required>
       <button type="submit" class="btn btn-brass">Add</button>
     </form>
-    <p class="song-msg" id="songMsg">Added — thank you!</p>
+    <p class="song-msg" id="songMsg">Added, thank you!</p>
   </div>
 </section>
 
-<footer class="foot" id="footText">KYMELLA</footer>
+<footer class="foot"><div id="footText">KYMELLA</div></footer>
 
 <script>
 // hero-effects.js — Kymella's four live hero effects, extracted from template-invite.html.
@@ -251,12 +425,17 @@ input,select,textarea{font-family:var(--body);font-size:15px}
 function hexToRgb(hex){ const n=parseInt((hex||"#000000").replace("#",""),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
 function createWaterRipple(canvas, opts = {}) {
   const ctx = canvas.getContext("2d");
+  let W, H, DPR;
   const RES_W = 150, RES_H = 84, N = RES_W * RES_H;
   let bufA = new Float32Array(N), bufB = new Float32Array(N), bufC = new Float32Array(N);
   const DAMPING = 0.985;
   const off = document.createElement("canvas"); off.width = RES_W; off.height = RES_H;
   const offCtx = off.getContext("2d"); const imgData = offCtx.createImageData(RES_W, RES_H);
-  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C"), BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28"), BRASS = hexToRgb(opts.brass || "#B8874A");
+  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C"), BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28");
+  // The water itself is deliberately colourless -- near-white highlights, near-black troughs
+  // -- so palette colours live only in what's UNDER the surface (the couple's photo, or the
+  // ink gradient), never tint the water. Changing palettes changes the pool, not the light.
+  const HI = [255, 251, 243], SH = [8, 15, 13];
   function splash(gx,gy,strength,radius){
     for (let dy=-radius; dy<=radius; dy++) for (let dx=-radius; dx<=radius; dx++){
       const x=gx+dx,y=gy+dy; if (x<1||x>=RES_W-1||y<1||y>=RES_H-1) continue;
@@ -272,25 +451,48 @@ function createWaterRipple(canvas, opts = {}) {
   const LIGHT_X=0.72, LIGHT_Y=0.62;
   function renderWater(){
     const data = imgData.data;
+    // Photo mode: the couple's photo sits as a real <img> UNDER this canvas at full display
+    // resolution, and the water renders as a transparent layer of light and shadow moving
+    // across it -- a reflecting pool, not a filter. The soft 150x84 sim resolution is fine
+    // here because only the light is soft; the photo itself never goes through the sim.
+    // Checked per frame (not once at mount) so the effect starts in gradient mode and picks
+    // the photo up the moment it finishes loading, with no remount choreography.
+    const hasPhoto = opts.photoImg && opts.photoImg.naturalWidth;
     for (let y=0;y<RES_H;y++){ const row=y*RES_W; const vt=y/RES_H;
       const baseR=BASE_TOP[0]+(BASE_BOTTOM[0]-BASE_TOP[0])*vt, baseG=BASE_TOP[1]+(BASE_BOTTOM[1]-BASE_TOP[1])*vt, baseB=BASE_TOP[2]+(BASE_BOTTOM[2]-BASE_TOP[2])*vt;
       for (let x=0;x<RES_W;x++){ const i=row+x; let shade=0;
         if (x>0&&x<RES_W-1&&y>0&&y<RES_H-1){ const dx=bufA[i+1]-bufA[i-1], dy=bufA[i+RES_W]-bufA[i-RES_W]; shade=(dx*LIGHT_X+dy*LIGHT_Y)*5.5; }
-        let r=baseR,g=baseG,b=baseB;
-        if (shade>0){ const t=Math.min(1,shade/14); r+=(BRASS[0]-r)*t; g+=(BRASS[1]-g)*t; b+=(BRASS[2]-b)*t; }
-        else if (shade<0){ const t=Math.min(1,-shade/22)*0.5; r*=(1-t); g*=(1-t); b*=(1-t); }
-        const depth=bufA[i]*0.18; const p=i*4;
-        data[p]=Math.max(0,Math.min(255,r+depth)); data[p+1]=Math.max(0,Math.min(255,g+depth)); data[p+2]=Math.max(0,Math.min(255,b+depth)); data[p+3]=255;
+        const p=i*4;
+        if (hasPhoto){
+          if (shade>0){ const t=Math.min(1,shade/14);
+            data[p]=HI[0]; data[p+1]=HI[1]; data[p+2]=HI[2]; data[p+3]=(t*185)|0;
+          } else if (shade<0){ const t=Math.min(1,-shade/22);
+            data[p]=SH[0]; data[p+1]=SH[1]; data[p+2]=SH[2]; data[p+3]=(t*115)|0;
+          } else { data[p+3]=0; }
+        } else {
+          let r=baseR,g=baseG,b=baseB;
+          if (shade>0){ const t=Math.min(1,shade/14); r+=(HI[0]-r)*t; g+=(HI[1]-g)*t; b+=(HI[2]-b)*t; }
+          else if (shade<0){ const t=Math.min(1,-shade/22)*0.5; r*=(1-t); g*=(1-t); b*=(1-t); }
+          const depth=bufA[i]*0.18;
+          data[p]=Math.max(0,Math.min(255,r+depth)); data[p+1]=Math.max(0,Math.min(255,g+depth)); data[p+2]=Math.max(0,Math.min(255,b+depth)); data[p+3]=255;
+        }
       }
     }
     offCtx.putImageData(imgData,0,0);
     ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(off,0,0,RES_W,RES_H,0,0,canvas.width,canvas.height);
-    const vg=ctx.createRadialGradient(canvas.width/2,canvas.height*0.4,canvas.width*0.15,canvas.width/2,canvas.height*0.4,canvas.width*0.75);
-    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)"); ctx.fillStyle=vg; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(off,0,0,RES_W,RES_H,0,0,W,H);
+    if (!hasPhoto){
+      const vg=ctx.createRadialGradient(W/2,H*0.4,W*0.15,W/2,H*0.4,W*0.75);
+      vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)"); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+    }
   }
-  function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; }
+  // Was canvas.width=canvas.clientWidth with no DPR scaling -- the only one of the three hero
+  // effects missing it (diya/frost both do this already). On any retina/high-DPI screen
+  // that renders the canvas at a lower resolution than the display, which the browser then
+  // stretches to fill -- compounding with the intentional 150x84 simulation-grid upscale below
+  // to read as soft/aliased "lines" rather than clean water.
+  function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
   window.addEventListener("resize", resize); resize();
   function toGrid(cx,cy){ const rect=canvas.getBoundingClientRect(); return { gx: Math.floor(((cx-rect.left)/rect.width)*RES_W), gy: Math.floor(((cy-rect.top)/rect.height)*RES_H) }; }
   function eventXY(e){ if (e.touches&&e.touches[0]) return [e.touches[0].clientX,e.touches[0].clientY]; return [e.clientX,e.clientY]; }
@@ -321,23 +523,45 @@ function createDiyaLight(canvas, opts = {}) {
   canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("touchstart", onDown, {passive:true});
   function draw(){
     const t=(performance.now()-startClock)/1000; ctx.clearRect(0,0,W,H);
-    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    // Photo mode: the couple's photo is a real <img> under this canvas, so the canvas only
+    // draws the dark veil (which the light then punches through via destination-out below) --
+    // the photo itself stays at full display resolution and full colour, never redrawn here.
+    const hasPhoto = opts.photoImg && opts.photoImg.naturalWidth;
+    if (hasPhoto){
+      ctx.fillStyle = `rgba(${hexToRgb(top)[0]},${hexToRgb(top)[1]},${hexToRgb(top)[2]},0.82)`;
+      ctx.fillRect(0,0,W,H);
+    } else {
+      const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    }
     if (!flame){
       const pulse=0.05+Math.sin(t*0.6)*0.015;
       const rg=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.min(W,H)*0.25);
       rg.addColorStop(0,`rgba(${br},${bg},${bb},${pulse})`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
     } else {
       const age=t-flame.born; const flicker=1+Math.sin(t*14)*0.06+Math.sin(t*23)*0.03;
+      // A brief flare right at the moment of contact -- like a wick actually catching --
+      // that eases down to the steady glow over about a second, rather than snapping
+      // straight to steady-state the instant someone touches.
+      const flare=1+Math.max(0,1-age/1.1)*0.4;
       const washGrow=Math.min(age/2.5,1); const washRadius=Math.max(W,H)*(0.55+washGrow*0.5)*(1+Math.sin(t*1.2)*0.02);
+      if (hasPhoto){
+        // Punch a hole in the dark veil where the light falls, so the actual photo shows
+        // through -- same radius/growth timing as the light itself, so the reveal and the
+        // glow always feel like the same event, not two separate things layered together.
+        ctx.save(); ctx.globalCompositeOperation="destination-out";
+        const hole=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius*0.85);
+        hole.addColorStop(0,`rgba(0,0,0,${Math.min(1,0.95*flare)})`); hole.addColorStop(0.55,`rgba(0,0,0,${0.55*washGrow})`); hole.addColorStop(1,`rgba(0,0,0,0)`);
+        ctx.fillStyle=hole; ctx.fillRect(0,0,W,H); ctx.restore();
+      }
       const wash=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius);
       wash.addColorStop(0,`rgba(${br},${bg},${bb},${0.16*washGrow})`); wash.addColorStop(0.45,`rgba(${br},${bg},${bb},${0.07*washGrow})`); wash.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
       ctx.fillStyle=wash; ctx.fillRect(0,0,W,H);
-      const radius=Math.min(W,H)*(0.32+Math.min(age*0.04,0.14))*flicker;
+      const radius=Math.min(W,H)*(0.32+Math.min(age*0.04,0.14))*flicker*flare;
       const rg=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,radius);
-      rg.addColorStop(0,`rgba(${br},${bg},${bb},0.6)`); rg.addColorStop(0.35,`rgba(${br},${bg},${bb},0.32)`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
+      rg.addColorStop(0,`rgba(${br},${bg},${bb},${Math.min(1,0.6*flare)})`); rg.addColorStop(0.35,`rgba(${br},${bg},${bb},${Math.min(1,0.32*flare)})`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
       ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
       ctx.fillStyle=`rgba(${br},${bg},${bb},${0.03*washGrow})`; ctx.fillRect(0,0,W,H);
-      const fh=22*flicker, fw=9*flicker;
+      const fh=22*flicker*flare, fw=9*flicker*flare;
       ctx.beginPath(); ctx.moveTo(flame.x, flame.y+fh*0.5);
       ctx.quadraticCurveTo(flame.x-fw, flame.y-fh*0.1, flame.x, flame.y-fh);
       ctx.quadraticCurveTo(flame.x+fw, flame.y-fh*0.1, flame.x, flame.y+fh*0.5);
@@ -371,229 +595,213 @@ function createFrostReveal(canvas, label, opts = {}) {
     for (let i=0;i<img.data.length;i+=4){ const n=(Math.random()-0.5)*12; img.data[i]=Math.min(255,Math.max(0,img.data[i]+n)); img.data[i+1]=Math.min(255,Math.max(0,img.data[i+1]+n)); img.data[i+2]=Math.min(255,Math.max(0,img.data[i+2]+n)); }
     frostCtx.putImageData(img,0,0);
   }
-  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; frostComposite.width=W; frostComposite.height=H; buildFrostTexture(); maskCtx.clearRect(0,0,W,H); }
+  function size(){
+    const newW = canvas.clientWidth, newH = canvas.clientHeight;
+    const firstRun = (W === undefined);
+    const widthChanged = !firstRun && newW !== W;
+    // A same-width, different-height resize on mobile is almost always the on-screen keyboard
+    // showing/hiding (or the address bar), not a real layout change -- snapshot the existing
+    // frost texture and wipe progress so guests don't lose their progress just from tapping a
+    // form field. Only a genuine width change (rotation, real reflow) earns a full rebuild.
+    let frostSnap = null, maskSnap = null;
+    if (!firstRun && !widthChanged){
+      frostSnap = document.createElement("canvas"); frostSnap.width=frostLayer.width; frostSnap.height=frostLayer.height;
+      frostSnap.getContext("2d").drawImage(frostLayer,0,0);
+      maskSnap = document.createElement("canvas"); maskSnap.width=maskLayer.width; maskSnap.height=maskLayer.height;
+      maskSnap.getContext("2d").drawImage(maskLayer,0,0);
+    }
+    W=newW; H=newH; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; frostComposite.width=W; frostComposite.height=H;
+    if (widthChanged || firstRun){
+      buildFrostTexture();
+      maskCtx.clearRect(0,0,W,H);
+    } else {
+      frostLayer.width=W; frostLayer.height=H;
+      if (frostSnap) frostCtx.drawImage(frostSnap,0,0,W,H);
+      if (maskSnap) maskCtx.drawImage(maskSnap,0,0,W,H);
+    }
+  }
   window.addEventListener("resize", size);
-  let holding=false, lastPos=null;
+  let holding=false, lastPos=null, committed=false, startPos=null, commitTimer=null, startedClearing=false;
+  const HOLD_DELAY=150, MOVE_THRESHOLD=12;
   function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
-  function wipeAt(x,y){ maskCtx.filter="blur(9px)"; maskCtx.fillStyle="rgba(0,0,0,1)"; maskCtx.beginPath(); maskCtx.arc(x,y,34,0,Math.PI*2); maskCtx.fill(); maskCtx.filter="none"; }
-  const onDown = e => { holding=true; const [x,y]=xy(e); lastPos=[x,y]; wipeAt(x,y); };
-  const onMove = e => { if (!holding) return; const [x,y]=xy(e);
+  // One frost for the whole hero: the first genuine wipe starts a full-canvas fade, revealing
+  // everything at once rather than a locally-wiped patch. (Used to also notify a separate
+  // sibling canvas via opts.onRealClear, back when the hero photo and the page-wide ambient
+  // background were two different canvases that needed to be kept in sync -- the redesign
+  // that made the hero one full-bleed photo per theme removed that split, so there's only ever
+  // one frost instance now and nothing left to notify.)
+  let clearingAll=false, clearStart=0;
+  const CLEAR_DURATION=800;
+  function clearAll(){
+    if (clearingAll) return;
+    clearingAll=true; clearStart=performance.now();
+  }
+  function triggerGlobalClear(){
+    if (startedClearing) return;
+    startedClearing=true;
+    clearAll();
+  }
+  // Hiding the "hold & swipe" hint is separate from triggering the actual clear -- the hint
+  // should disappear the instant a guest starts wiping (confirming they're doing the right
+  // thing), well before they've wiped enough to earn the full-page dissolve below.
+  let hintHidden=false;
+  function noteWipeStarted(){
+    if (hintHidden) return; hintHidden=true;
+    if (opts.onFirstWipe) opts.onFirstWipe();
+  }
+  function wipeAt(x,y){
+    maskCtx.filter="blur(9px)"; maskCtx.fillStyle="rgba(0,0,0,1)"; maskCtx.beginPath(); maskCtx.arc(x,y,34,0,Math.PI*2); maskCtx.fill(); maskCtx.filter="none";
+  }
+  // A single quick touch used to be enough to melt the whole page -- reads as broken, not
+  // magical, since there's nothing that felt like "clearing frost" about it. Now the global
+  // dissolve only fires once the guest has actually wiped a real amount, tracked as cumulative
+  // drag distance across the gesture (and across multiple separate wipes, if they lift and
+  // wipe again) -- roughly a couple of real strokes' worth, not one touch. Local wipeAt still
+  // fires on every move for immediate tactile feedback; only the big page-wide payoff waits.
+  let totalWipeDist=0;
+  const CLEAR_DIST_THRESHOLD=700;
+  // Wiping and scrolling are the same physical gesture (a drag), so on touch we never claim
+  // it on contact -- we wait a short beat. A fast swipe (scrolling) blows past the movement
+  // threshold before the hold delay elapses and gets abandoned entirely, leaving the browser's
+  // native scroll completely untouched. A pause-and-hold, or a slower deliberate drag, commits
+  // and behaves exactly like the wipe always has. Desktop mouse drags are unaffected in feel
+  // since the delay is under a sixth of a second.
+  const onDown = e => {
+    holding=true; committed=false; const [x,y]=xy(e); startPos=[x,y]; lastPos=[x,y];
+    clearTimeout(commitTimer);
+    commitTimer=setTimeout(() => { if (holding && !committed){ committed=true; noteWipeStarted(); wipeAt(lastPos[0],lastPos[1]); } }, HOLD_DELAY);
+  };
+  const onMove = e => {
+    if (!holding) return; const [x,y]=xy(e);
+    if (!committed){
+      const dx=x-startPos[0], dy=y-startPos[1];
+      if (Math.sqrt(dx*dx+dy*dy) > MOVE_THRESHOLD){ holding=false; clearTimeout(commitTimer); lastPos=null; return; }
+      lastPos=[x,y]; return;
+    }
+    // Once committed, this touch belongs to the wipe -- hold the page perfectly still for
+    // the rest of the gesture, the same way a mouse drag never had to compete with scrolling
+    // in the first place. Before commit we never touch this, so a genuine scroll swipe still
+    // passes straight through untouched.
+    if (e.cancelable) e.preventDefault();
     if (lastPos){ const dx=x-lastPos[0],dy=y-lastPos[1],dist=Math.sqrt(dx*dx+dy*dy),steps=Math.max(1,Math.floor(dist/8));
-      for (let s=0;s<=steps;s++) wipeAt(lastPos[0]+dx*(s/steps), lastPos[1]+dy*(s/steps)); }
+      for (let s=0;s<=steps;s++) wipeAt(lastPos[0]+dx*(s/steps), lastPos[1]+dy*(s/steps));
+      totalWipeDist += dist;
+      if (totalWipeDist > CLEAR_DIST_THRESHOLD) triggerGlobalClear();
+    }
     lastPos=[x,y];
   };
-  const onUp = () => { holding=false; lastPos=null; };
+  const onUp = () => { holding=false; committed=false; lastPos=null; clearTimeout(commitTimer); };
   canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); window.addEventListener("pointerup", onUp);
-  canvas.addEventListener("touchstart", onDown, {passive:true}); canvas.addEventListener("touchmove", onMove, {passive:true}); window.addEventListener("touchend", onUp);
+  // touchmove needs to be non-passive so preventDefault can take effect once committed --
+  // but we still never call it before commit, so the browser is free to start a genuine
+  // scroll immediately, exactly as before.
+  canvas.addEventListener("touchstart", onDown, {passive:true}); canvas.addEventListener("touchmove", onMove, {passive:false}); window.addEventListener("touchend", onUp);
+  // Safety net: if the gesture gets interrupted (an incoming call, switching apps, anything
+  // that stops a normal lift-off), release the lock rather than risk the page getting stuck.
+  window.addEventListener("pointercancel", onUp); canvas.addEventListener("touchcancel", onUp, {passive:true});
   size();
   function draw(){
     ctx.clearRect(0,0,W,H);
-    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    ctx.save(); ctx.font="500 28px Fraunces, Georgia, serif"; ctx.fillStyle="rgba(232,201,160,0.85)"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(label || "Kymella", W/2, H/2); ctx.restore();
+    // This canvas draws ONLY the fog. What a wipe reveals is whatever sits underneath it --
+    // the couple's full-colour photo (a real <img> below the canvas, at full display
+    // resolution) or, with no photo uploaded, the hero's own ink gradient. The canvas never
+    // redraws the photo itself, so the reveal is always as sharp as the upload.
+    // Very slow, continuous re-fog: erode the mask's opacity a tiny bit every frame so wiped
+    // areas gently return after roughly 20-25s of inactivity, like breath fogging a cold window
+    // again, rather than staying permanently clear. Skipped once the whole-page clear has
+    // started -- that's meant to be permanent for the rest of the visit, not something that
+    // fogs back up after a guest reads for a while.
+    if (!holding && !clearingAll){
+      maskCtx.save(); maskCtx.globalCompositeOperation="destination-out";
+      maskCtx.fillStyle="rgba(0,0,0,0.0018)"; maskCtx.fillRect(0,0,W,H); maskCtx.restore();
+    }
     // Build the frost-with-holes on its OWN canvas first, so destination-out only ever
     // erases the frost texture — never the gradient/label already drawn on the main canvas.
     compCtx.clearRect(0,0,W,H);
     compCtx.globalCompositeOperation="source-over"; compCtx.drawImage(frostLayer,0,0);
     compCtx.globalCompositeOperation="destination-out"; compCtx.drawImage(maskLayer,0,0);
-    ctx.drawImage(frostComposite,0,0);
-    raf=requestAnimationFrame(draw);
-  }
-  draw();
-  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); } };
-}
-
-function createIncenseDrift(canvas, opts = {}) {
-  const ctx = canvas.getContext("2d");
-  let W,H,DPR,raf;
-  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
-  window.addEventListener("resize", size); size();
-  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28";
-  const [ir, ig, ib] = hexToRgb(opts.brassSoft || opts.brass || "#E8C9A0");
-  const emberColor = opts.brassSoft || opts.brass || "#E8C9A0";
-  let mouseX=null, mouseY=null, velocity=0;
-  function updateMouse(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; const nx=p.clientX-r.left, ny=p.clientY-r.top;
-    if (mouseX!==null){ const dx=nx-mouseX,dy=ny-mouseY; velocity=Math.min(60,Math.sqrt(dx*dx+dy*dy)); } mouseX=nx; mouseY=ny; }
-  const onMove = e => updateMouse(e); const onLeave = () => { mouseX=null; mouseY=null; velocity=0; };
-  canvas.addEventListener("pointermove", onMove); canvas.addEventListener("touchmove", onMove, {passive:true}); canvas.addEventListener("pointerleave", onLeave);
-  const segments=60; let offsets=new Array(segments+1).fill(0); const startClock=performance.now();
-  function draw(){
-    const t=(performance.now()-startClock)/1000; velocity*=0.9; ctx.clearRect(0,0,W,H);
-    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    const baseX=W*0.5, baseY=H*0.72;
-    for (let i=0;i<=segments;i++){ const f=i/segments;
-      const naturalX=baseX+Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; const naturalY=baseY-f*H*0.62;
-      let target=0;
-      if (mouseX!==null){ const dx=naturalX-mouseX,dy=naturalY-mouseY,dist=Math.sqrt(dx*dx+dy*dy),radius=140+f*60;
-        if (dist<radius){ const strength=1-dist/radius, dirX=dx/(dist||1); target=dirX*strength*(40+f*70)+dirX*velocity*strength*1.8; } }
-      offsets[i]+=(target-offsets[i])*0.12;
+    // Once the whole-page clear has started, the local wipe holes above stop mattering --
+    // the frost fades out everywhere at once instead, eased so it settles rather than
+    // stopping abruptly. This is what makes it "one frost for the whole invite": no matter
+    // where the gesture started, the entire canvas clears together, not just the touched spot.
+    let frostAlpha = 1;
+    if (clearingAll){
+      const t = Math.min(1, (performance.now() - clearStart) / CLEAR_DURATION);
+      frostAlpha = 1 - (1 - Math.pow(1 - t, 3));
     }
-    ctx.beginPath(); ctx.moveTo(baseX,baseY);
-    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift=Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; ctx.lineTo(baseX+drift+offsets[i],y); }
-    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.18)`; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(baseX,baseY);
-    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift2=Math.sin(f*5-t*0.65+1.4)*(14+f*24); ctx.lineTo(baseX+drift2+offsets[i]*0.75,y); }
-    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.1)`; ctx.lineWidth=5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(baseX,baseY,2.4,0,Math.PI*2); ctx.fillStyle=emberColor; ctx.fill();
+    if (frostAlpha > 0.002){
+      ctx.globalAlpha = frostAlpha;
+      ctx.drawImage(frostComposite,0,0);
+      ctx.globalAlpha = 1;
+    }
     raf=requestAnimationFrame(draw);
   }
   draw();
-  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointermove",onMove); canvas.removeEventListener("touchmove",onMove); canvas.removeEventListener("pointerleave",onLeave); } };
+  return { stop(){ cancelAnimationFrame(raf); clearTimeout(commitTimer); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); window.removeEventListener("pointercancel",onUp); canvas.removeEventListener("touchcancel",onUp); }, clearAll };
 }
 
 /* ================= EXPERIENCE ENGINE: mount the right effect from stored data ================= */
 function mountHero(effectName, canvas, opts, coupleNames){
-  const fns = { ripple: createWaterRipple, diya: createDiyaLight, frost: createFrostReveal, incense: createIncenseDrift };
+  const fns = { ripple: createWaterRipple, diya: createDiyaLight, frost: createFrostReveal };
   const fn = fns[effectName] || createWaterRipple;
   if (effectName === "frost") return fn(canvas, coupleNames, opts);
   return fn(canvas, opts);
 }
 
-/* ================= ITINERARY CARD REVEALS ================= */
-/* Same visual language as the hero effects, but bounded and one-shot: each card veil
-   reveals once, then fades and stops, rather than animating forever underneath content
-   the guest has already read. Kept as separate lightweight functions rather than reusing
-   the ambient hero versions directly, since a page with several events shouldn't be running
-   several continuous full-hero animation loops at once. */
-function fadeVeilAndStop(canvas, raf, cleanup, onReveal){
-  canvas.style.transition = "opacity .6s ease";
-  canvas.style.opacity = "0";
-  setTimeout(() => { cancelAnimationFrame(raf); cleanup(); canvas.style.pointerEvents = "none"; onReveal && onReveal(); }, 620);
-}
-function frostCardReveal(canvas, palette, onReveal){
-  const ctx = canvas.getContext("2d");
-  let W,H,raf,revealed=false;
-  const maskLayer=document.createElement("canvas"), maskCtx=maskLayer.getContext("2d");
-  const frostLayer=document.createElement("canvas"), frostCtx=frostLayer.getContext("2d");
-  const composite=document.createElement("canvas"), compCtx=composite.getContext("2d");
-  const mist = palette.mist || "#F5EFE3";
-  function buildTexture(){
-    frostLayer.width=W; frostLayer.height=H; frostCtx.fillStyle=mist; frostCtx.globalAlpha=.92; frostCtx.fillRect(0,0,W,H); frostCtx.globalAlpha=1;
-    frostCtx.filter="blur(6px)";
-    for (let i=0;i<14;i++){ const x=Math.random()*W,y=Math.random()*H,r=8+Math.random()*26,op=.15+Math.random()*.3;
-      frostCtx.fillStyle=`rgba(255,255,255,${op})`; frostCtx.beginPath(); frostCtx.arc(x,y,r,0,Math.PI*2); frostCtx.fill(); }
-    frostCtx.filter="none";
-  }
-  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; maskLayer.width=W; maskLayer.height=H; composite.width=W; composite.height=H; buildTexture(); maskCtx.clearRect(0,0,W,H); }
-  size();
-  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
-  function wipeAt(x,y){ maskCtx.filter="blur(6px)"; maskCtx.fillStyle="#000"; maskCtx.beginPath(); maskCtx.arc(x,y,20,0,Math.PI*2); maskCtx.fill(); maskCtx.filter="none"; }
-  let holding=false, last=null;
-  const onDown = e => { holding=true; const [x,y]=xy(e); last=[x,y]; wipeAt(x,y); };
-  const onMove = e => { if (!holding) return; const [x,y]=xy(e);
-    if (last){ const dx=x-last[0],dy=y-last[1],d=Math.hypot(dx,dy),steps=Math.max(1,Math.floor(d/6));
-      for (let s=0;s<=steps;s++) wipeAt(last[0]+dx*(s/steps), last[1]+dy*(s/steps)); }
-    last=[x,y]; checkProgress();
-  };
-  const onUp = () => { holding=false; last=null; };
-  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("pointermove",onMove); window.addEventListener("pointerup",onUp);
-  canvas.addEventListener("touchstart",onDown,{passive:true}); canvas.addEventListener("touchmove",onMove,{passive:true}); window.addEventListener("touchend",onUp);
-  function checkProgress(){
-    if (revealed) return;
-    const data = maskCtx.getImageData(0,0,W,H).data;
-    let filled=0, total=0;
-    for (let i=3;i<data.length;i+=4*23){ total++; if (data[i]>40) filled++; }
-    if (total && filled/total > 0.42){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
-  }
-  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    compCtx.clearRect(0,0,W,H);
-    compCtx.globalCompositeOperation="source-over"; compCtx.drawImage(frostLayer,0,0);
-    compCtx.globalCompositeOperation="destination-out"; compCtx.drawImage(maskLayer,0,0);
-    ctx.drawImage(composite,0,0);
-    if (!revealed) raf=requestAnimationFrame(draw);
-  }
-  draw();
-  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
-}
-function diyaCardReveal(canvas, palette, onReveal){
-  const ctx = canvas.getContext("2d");
-  let W,H,raf,revealed=false;
-  const [br,bg,bb] = hexToRgb(palette.brass || "#B8874A");
-  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; }
-  size();
-  let lit=false, litAt=0;
-  const onDown = () => { if (lit) return; lit=true; litAt=performance.now(); };
-  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("touchstart",onDown,{passive:true});
-  function draw(now){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle="rgba(18,14,10,0.9)"; ctx.fillRect(0,0,W,H);
-    if (lit){
-      const age=(now-litAt)/1000;
-      const flicker=1+Math.sin(now*0.014)*0.08;
-      const radius=Math.min(W,H)*Math.min(1.1,age*0.75)*flicker;
-      const rg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,radius);
-      rg.addColorStop(0,`rgba(${br},${bg},${bb},0.9)`); rg.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
-      ctx.globalCompositeOperation="destination-out"; ctx.fillStyle=rg; ctx.fillRect(0,0,W,H); ctx.globalCompositeOperation="source-over";
-      if (age>1.3 && !revealed){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
+/* ================= SEAL GATE: the opening ritual, standard across every theme =================
+   A real envelope built from DOM elements and CSS (not canvas) -- this needed genuine 3D
+   transforms and crisp layered gradients/shadows for the flap and wax seal, which a 2D canvas
+   can't do nearly as convincingly. One tap: the flap does a real 3D flip open on its top edge,
+   the wax seal fades right as it lifts, and then the whole gate slides upward off-screen,
+   revealing the real page underneath in one continuous gesture. Standard across all four
+   themes on purpose -- this is a pre-theme ritual, not a theme expression. */
+function mountSealGate(palette, coupleNames){
+  const gate = document.getElementById("sealGate");
+  if (!gate) return;
+  const initials = (coupleNames||"").split("&").map(s=>s.trim()[0]).filter(Boolean).join(" & ");
+  const initialsEl = document.getElementById("sealInitials");
+  if (initialsEl) initialsEl.textContent = initials;
+  const namesEl = document.getElementById("envelopeNames");
+  if (namesEl) namesEl.textContent = coupleNames || "";
+  gate.style.setProperty("--seal-ink", palette.ink || "#0E1F1C");
+  gate.style.setProperty("--seal-ink2", palette.ink2 || "#152D28");
+  gate.style.setProperty("--seal-brass-deep", palette.brassDeep || "#8E6836");
+
+  let opening = false;
+  function onOpen(){
+    if (opening) return; opening = true;
+    const hint = document.getElementById("sealHint"); if (hint) hint.style.opacity = "0";
+    const waxSeal = document.getElementById("waxSeal");
+    const flap = document.getElementById("envelopeFlap");
+    if (flap) flap.classList.add("open");
+
+    // Anchor the zoom at the seal's actual rendered position (not the screen center) so the
+    // whole scene visibly converges on that one real object -- this is what makes it read as
+    // a camera pushing toward the seal, rather than a generic full-screen zoom transition.
+    if (waxSeal){
+      const r = waxSeal.getBoundingClientRect();
+      gate.style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`;
     }
-    if (!revealed) raf=requestAnimationFrame(draw);
+    gate.classList.add("zooming");
+
+    // The zoom itself stays slow and deliberate (1.2s) -- that's the part that's supposed to
+    // read as a real camera push, not a rushed cut. The seal breaks about a third of the way
+    // in, once it's visibly grown close.
+    setTimeout(() => { if (waxSeal) waxSeal.style.opacity = "0"; }, 420);
+
+    // But once the seal is gone, there's nothing left to look at -- the handoff to the real
+    // page should be quick from there, not wait around for the slow zoom to fully finish. This
+    // fires well before the 1.2s zoom completes, cutting away mid-motion; the fade covers that
+    // seam so it reads as a deliberate quick cut, not a truncated animation.
+    setTimeout(() => {
+      gate.classList.add("opened");
+      setTimeout(() => { gate.style.display = "none"; }, 180);
+    }, 750);
   }
-  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); }
-  raf=requestAnimationFrame(draw);
-  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
+  gate.addEventListener("pointerdown", onOpen);
+  gate.addEventListener("touchstart", onOpen, {passive:true});
 }
-function rippleCardReveal(canvas, palette, onReveal){
-  const ctx = canvas.getContext("2d");
-  let W,H,raf,revealed=false;
-  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17";
-  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; }
-  size();
-  const splashes = [];
-  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
-  const onDown = e => { if (revealed) return; const [x,y]=xy(e); splashes.push({x,y,born:performance.now()}); };
-  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("touchstart",onDown,{passive:true});
-  function draw(now){
-    ctx.clearRect(0,0,W,H);
-    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    let maxAge=0;
-    for (const s of splashes){
-      const age=(now-s.born)/1000; maxAge=Math.max(maxAge,age);
-      const radius=age*Math.max(W,H)*0.95;
-      const alpha=Math.max(0,0.92-age*0.55);
-      if (alpha<=0) continue;
-      ctx.globalCompositeOperation="destination-out";
-      ctx.beginPath(); ctx.arc(s.x,s.y,radius,0,Math.PI*2); ctx.fillStyle=`rgba(0,0,0,${alpha})`; ctx.fill();
-      ctx.globalCompositeOperation="source-over";
-    }
-    if (splashes.length && maxAge>1.6 && !revealed){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
-    if (!revealed) raf=requestAnimationFrame(draw);
-  }
-  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("touchstart",onDown); }
-  raf=requestAnimationFrame(draw);
-  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
-}
-function incenseCardReveal(canvas, palette, onReveal){
-  const ctx = canvas.getContext("2d");
-  let W,H,raf,revealed=false;
-  const top = palette.ink||"#171310", bottom = palette.ink2||"#221C17";
-  function size(){ W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W; canvas.height=H; }
-  size();
-  let fanned=0, lastPos=null, dragging=false;
-  function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
-  const onDown = e => { dragging=true; lastPos=xy(e); };
-  const onMove = e => { if (!dragging) return; const p=xy(e); if (lastPos) fanned += Math.hypot(p[0]-lastPos[0], p[1]-lastPos[1]); lastPos=p; };
-  const onUp = () => { dragging=false; lastPos=null; };
-  canvas.addEventListener("pointerdown",onDown); canvas.addEventListener("pointermove",onMove); window.addEventListener("pointerup",onUp);
-  canvas.addEventListener("touchstart",onDown,{passive:true}); canvas.addEventListener("touchmove",onMove,{passive:true}); window.addEventListener("touchend",onUp);
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    const clearedPct = Math.min(1, fanned/650);
-    ctx.fillStyle = `rgba(18,14,10,${0.88*(1-clearedPct)})`; ctx.fillRect(0,0,W,H);
-    if (clearedPct>=1 && !revealed){ revealed=true; fadeVeilAndStop(canvas, raf, cleanup, onReveal); }
-    if (!revealed) raf=requestAnimationFrame(draw);
-  }
-  function cleanup(){ canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); }
-  raf=requestAnimationFrame(draw);
-  return { stop(){ cancelAnimationFrame(raf); cleanup(); } };
-}
-function mountCardVeil(effectName, canvas, palette, onReveal){
-  const fns = { ripple: rippleCardReveal, diya: diyaCardReveal, frost: frostCardReveal, incense: incenseCardReveal };
-  const fn = fns[effectName] || rippleCardReveal;
-  return fn(canvas, palette, onReveal);
-}
+
 
 </script>
 <script>
@@ -607,17 +815,29 @@ function startCountdown(targetDate){
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
-    el.innerHTML = [[days,"Days"],[hours,"Hours"],[mins,"Minutes"]]
+    const secs = Math.floor((diff % 60000) / 1000);
+    el.innerHTML = [[days,"Days"],[hours,"Hours"],[mins,"Minutes"],[secs,"Seconds"]]
       .map(([n,label]) => `<div class="cd-unit"><div class="cd-num">${n}</div><div class="cd-label">${label}</div></div>`).join("");
   }
   tick();
   if (countdownInterval) clearInterval(countdownInterval);
-  countdownInterval = setInterval(tick, 30000);
+  countdownInterval = setInterval(tick, 1000); // was 30s -- seconds need to move every second
 }
 const navEl = document.querySelector(".nav");
 function updateNavScrolled(){ navEl.classList.toggle("scrolled", window.scrollY > window.innerHeight * 0.75); }
 window.addEventListener("scroll", updateNavScrolled, { passive:true });
 updateNavScrolled();
+
+// Mobile browsers (especially iOS Safari) resize the visible viewport as the address bar
+// shows/hides without always firing a plain window "resize" event, which can leave the
+// canvas's internal buffer out of sync with its actual displayed box -- stretching circular
+// splashes into ovals. Re-broadcasting a resize on these mobile-specific signals lets every
+// effect's existing resize listener pick up the change without touching each effect's code.
+function nudgeCanvasResize(){ window.dispatchEvent(new Event("resize")); }
+if (window.visualViewport){
+  window.visualViewport.addEventListener("resize", nudgeCanvasResize);
+}
+window.addEventListener("orientationchange", () => setTimeout(nudgeCanvasResize, 60));
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 // This page is served by the Kymella/Evarria backend itself at /i/:token, so API calls are same-origin.
 const API_BASE = "";
@@ -663,11 +883,11 @@ function renderInvite(){
   const status = d.guest.rsvp_status;
   if (status === "Accepted"){
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>we can't wait</em>`;
-    $("heroSub").textContent = `You're on the list — we're so glad you'll be there.`;
+    $("heroSub").textContent = `You're on the list. We're so glad you'll be there.`;
     $("heroCta").textContent = "View my response";
   } else if (status === "Declined"){
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>you'll be missed</em>`;
-    $("heroSub").textContent = `Thank you for letting us know — we'll be thinking of you.`;
+    $("heroSub").textContent = `Thank you for letting us know. We'll be thinking of you.`;
     $("heroCta").textContent = "View my response";
   } else {
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>will you join us?</em>`;
@@ -682,46 +902,162 @@ function renderInvite(){
   startCountdown(dt);
 
   const effect = d.wedding.hero_effect || "ripple";
-  const canvas = $("heroCanvas");
   const palette = d.wedding.palette || {};
-  heroInstance = mountHero(effect, canvas, { colorTop: palette.ink, colorBottom: palette.ink2, brass: palette.brass, brassSoft: palette.brassSoft, mist: palette.mist }, couple);
 
-  $("itinerary").innerHTML = d.events.map((e,i) => `<div class="itin-item"><div class="itin-dot"></div><div class="itin-tag">${esc(e.day_label)} · ${esc(e.time_label)}</div><h3>${esc(e.title)}</h3>${e.location?`<div class="itin-loc">${esc(e.location)}</div>`:""}${e.description?`<div class="itin-veil-wrap"><div class="itin-desc">${esc(e.description)}</div><div class="itin-veil" id="itinVeil${i}"><canvas></canvas><div class="itin-veil-hint" id="itinHint${i}"></div></div></div>`:""}</div>`).join("");
-  const veilHints = { ripple:"touch the water", diya:"tap to light", frost:"wipe to reveal", incense:"drag to fan away" };
-  d.events.forEach((e,i) => {
-    if (!e.description) return;
-    const veil = document.getElementById(`itinVeil${i}`);
-    const canvas = veil.querySelector("canvas");
-    document.getElementById(`itinHint${i}`).textContent = veilHints[effect] || veilHints.ripple;
-    mountCardVeil(effect, canvas, palette, () => { document.getElementById(`itinHint${i}`).style.display = "none"; });
-  });
+  // First-time affordance for frost's hold-and-wipe gesture -- hides the moment a real wipe lands.
+  const hideFrostHint = () => {
+    const fh = $("frostHint"); if (!fh) return;
+    // The pulse keyframe animation drives opacity continuously, so it would keep overriding a
+    // plain style.opacity write every frame -- kill the animation first so the transition-based
+    // fade actually sticks, then hard-hide once it's finished.
+    fh.style.animation = "none"; fh.style.opacity = "0";
+    setTimeout(() => { fh.style.display = "none"; }, 500);
+  };
+
+  // One template for every theme: the hero is the couple's full-colour photo (slot 1, shown
+  // exactly as uploaded) with the theme's effect playing over it on a single hero-scoped
+  // canvas -- water light rolls across it, embers drift over it, frost wipes to it, diya
+  // light reveals it. No photo uploaded: the same effect runs over the ink gradient instead.
+  // The photo is a real <img> under the canvas, so it always renders at full display
+  // resolution; every effect checks photoImg per frame, so mounting doesn't wait for the
+  // image to finish loading -- the effect starts in gradient mode and picks the photo up the
+  // moment it arrives.
+  const photos = Array.isArray(d.wedding.photos) ? d.wedding.photos : [];
+  const heroP = photos.find(p => p.slot === 1);
+  const heroImg = $("heroPhotoImg");
+  const frostHintEl = $("frostHint");
+  if (frostHintEl){
+    frostHintEl.style.display = (effect === "frost") ? "block" : "none";
+    frostHintEl.style.opacity = "1"; frostHintEl.style.animation = "";
+  }
+  if (heroP){
+    heroImg.onload = () => { heroImg.style.display = "block"; };
+    heroImg.style.objectPosition = `50% ${heroP.focus ?? 40}%`;
+    heroImg.src = heroP.url;
+  } else {
+    heroImg.style.display = "none";
+  }
+  const heroOpts = { colorTop: palette.ink, colorBottom: palette.ink2, brass: palette.brass, brassSoft: palette.brassSoft, brassDeep: palette.brassDeep, mist: palette.mist, photoImg: heroP ? heroImg : null, onFirstWipe: hideFrostHint };
+  if (heroInstance) heroInstance.stop();
+  heroInstance = mountHero(effect, $("heroCanvas"), heroOpts, couple);
+  mountSealGate(palette, couple);
+
+  // Slots 2 and 3 each get their own full-bleed moment rather than being paired: slot 2 leads
+  // into the story (so the story section shows even with no story text yet, same as before),
+  // slot 3 is a standalone quiet pause right before RSVP. No focus/crop wiring needed here --
+  // these show the whole photo at its natural aspect (see .moment-photo), unlike the hero,
+  // which does crop to fill the viewport and needs the focus value.
+  const p2 = photos.find(p => p.slot === 2), p3 = photos.find(p => p.slot === 3);
+  const leadEl = $("storyLeadPhoto");
+  if (p2){
+    $("storySection").style.display = "block";
+    leadEl.style.display = "block";
+    $("storyPhoto2").src = p2.url;
+  } else {
+    leadEl.style.display = "none";
+  }
+  const closingEl = $("closingPhotoSection");
+  if (p3){
+    closingEl.style.display = "block";
+    $("storyPhoto3").src = p3.url;
+  } else {
+    closingEl.style.display = "none";
+  }
+
+  $("itinerary").innerHTML = d.events.map((e,i) => `<div class="itin-item"><div class="itin-dot"></div><div class="itin-tag">${esc(e.day_label)} · ${esc(e.time_label)}</div><h3>${esc(e.title)}</h3>${e.location?`<div class="itin-loc">${esc(e.location)}</div>`:""}${e.description?`<div class="itin-desc">${esc(e.description)}</div>`:""}</div>`).join("");
 
   const extra = [
     d.wedding.dress_code ? `<div class="dcard"><span class="tag">Dress Code</span><h3>What to Wear</h3><p>${esc(d.wedding.dress_code)}</p></div>` : "",
+    d.wedding.arrival_info ? `<div class="dcard"><span class="tag">Arrival</span><h3>Getting Started</h3><p>${esc(d.wedding.arrival_info)}</p></div>` : "",
     d.wedding.parking_info ? `<div class="dcard"><span class="tag">Parking</span><h3>Getting There</h3><p>${esc(d.wedding.parking_info)}</p></div>` : "",
     d.wedding.kids_policy ? `<div class="dcard"><span class="tag">Children</span><h3>Little Ones</h3><p>${esc(d.wedding.kids_policy)}</p></div>` : "",
   ].join("");
   $("detailsGrid").innerHTML = extra || `<div class="state-msg" style="grid-column:1/-1">Details coming soon.</div>`;
 
+  // The modern Maps URL API (not the old embed query-string format) -- opens the guest's own
+  // Maps app on mobile with real turn-by-turn directions available, or maps.google.com on
+  // desktop, rather than a small fixed iframe most guests would just want to escape anyway.
   const mapQuery = d.wedding.venue_address || d.wedding.venue;
   if (mapQuery){
-    $("mapFrame").src = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
+    const mapLink = $("mapLink");
+    mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
+    mapLink.style.display = "inline-flex";
     $("mapSection").style.display = "block";
   }
 
-  if (d.registry.length){
-    $("regGrid").innerHTML = d.registry.map(f => {
-      const pct = f.goal_cents ? Math.min(100, Math.round(f.raised_cents/f.goal_cents*100)) : 0;
-      return `<div class="reg-card"><h3>${esc(f.title)}</h3><p>${esc(f.description)}</p>
-        <div class="reg-bar"><i style="width:${pct}%"></i></div>
-        <div class="reg-amt">$${Math.round(f.raised_cents/100)} raised${f.goal_cents?` of $${Math.round(f.goal_cents/100)} goal`:""}</div>
-        <button class="btn btn-quiet" style="width:100%;margin-top:12px" onclick="pledge(${f.id})">Contribute</button></div>`;
-    }).join("");
-  } else {
-    $("registrySection").style.display = "none";
+  // Our Story -- collected in setup, previously never shown to a single guest.
+  const story = Array.isArray(d.wedding.story) ? d.wedding.story.filter(s => s.text) : [];
+  if (story.length){
+    $("storyTimeline").innerHTML = story.map(s => `<div class="story-item"><div class="story-dot"></div>${s.year ? `<div class="story-year">${esc(s.year)}</div>` : ""}<h3>${esc(s.title || "")}</h3><span class="story-mark">&ldquo;</span><p>${esc(s.text)}</p></div>`).join("");
+    $("storySection").style.display = "block";
   }
 
+  // Frequently asked -- built server-side from arrival/parking/kids/dress/travel answers,
+  // also previously collected and never rendered.
+  const faq = Array.isArray(d.wedding.faq) ? d.wedding.faq.filter(f => f.q && f.a) : [];
+  if (faq.length){
+    $("faqList").innerHTML = faq.map((f,i) => `<details class="faq-item"${i===0?" open":""}><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("");
+    $("faqSection").style.display = "block";
+  }
+
+  // Hotels -- shown alongside the map since both are travel logistics for out-of-town guests.
+  const hotels = Array.isArray(d.wedding.hotels) ? d.wedding.hotels.filter(h => h.name) : [];
+  if (hotels.length){
+    $("hotelList").innerHTML = hotels.map(h => `<div class="hotel-card"><div><div class="name">${esc(h.name)}</div>${h.detail ? `<div class="detail">${esc(h.detail)}</div>` : ""}</div>${h.tag ? `<div class="tag">${esc(h.tag)}</div>` : ""}</div>`).join("");
+    $("hotelList").style.display = "grid";
+    $("mapSection").style.display = "block"; // hotels alone are still worth showing even with no map query
+  }
+
+  // RSVP deadline: computed, not couple-set (no schema change) -- roughly three weeks out,
+  // never later than the wedding itself, so there's always a real, visible date to react to.
+  const weddingDt = new Date(d.wedding.wedding_date);
+  const deadlineDt = new Date(weddingDt.getTime() - 21*24*60*60*1000);
+  const today = new Date();
+  const isPast = weddingDt < today;
+  if (!isPast && status === "Pending"){
+    $("rsvpDeadline").textContent = `Please respond by ${deadlineDt.toLocaleDateString("en-US",{month:"long",day:"numeric"})}`;
+  }
+
+  // Day-of / after mode: once the date has passed, the page quietly stops asking guests to
+  // RSVP to something that already happened.
+  if (isPast){
+    $("rsvp").querySelector(".eyebrow").textContent = "It Happened";
+    $("rsvp").querySelector(".h2").innerHTML = `Thank you for <em>celebrating</em>`;
+    $("rsvp").querySelector(".lede").textContent = "We're so glad you were part of our day, or with us in spirit.";
+    $("rsvpDeadline").textContent = "";
+    if (status === "Pending"){ $("rsvpForm").style.display = "none"; $("rsvpLoading").style.display = "none"; }
+  }
+
+  // Add-to-calendar: generated client-side, no backend endpoint needed.
+  const icsLink = $("icsLink");
+  if (isPast){ icsLink.style.display = "none"; }
+  else icsLink.onclick = () => {
+    const pad = n => String(n).padStart(2, "0");
+    const startUtc = new Date(weddingDt.getTime());
+    const stampPart = dt => `${dt.getUTCFullYear()}${pad(dt.getUTCMonth()+1)}${pad(dt.getUTCDate())}`;
+    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Kymella//Wedding//EN","BEGIN:VEVENT",
+      `UID:${d.wedding.slug || "wedding"}-${Date.now()}@kymella`,
+      `DTSTAMP:${stampPart(new Date())}T000000Z`,
+      `DTSTART;VALUE=DATE:${stampPart(startUtc)}`,
+      `SUMMARY:${(couple + "'s Wedding").replace(/,/g,"\\,")}`,
+      d.wedding.venue ? `LOCATION:${d.wedding.venue.replace(/,/g,"\\,")}` : "",
+      "END:VEVENT","END:VCALENDAR"].filter(Boolean).join("\r\n");
+    const blob = new Blob([ics], { type: "text/calendar" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${(d.wedding.partner1||"wedding").split(" ")[0]}-${(d.wedding.partner2||"").split(" ")[0]}-wedding.ics`;
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+
+  renderRegistry();
+
   $("rParty").max = d.guest.max_party;
+  // Plus-one clarity: state explicitly how many seats this guest holds, right where they'll
+  // set the party size, instead of leaving them to guess whether "1" already includes them.
+  const partyRow = $("rParty").closest(".rsvp-row");
+  if (partyRow){
+    let hint = partyRow.querySelector(".party-hint");
+    if (!hint){ hint = document.createElement("div"); hint.className = "party-hint"; hint.style.cssText = "font-size:11.5px;color:var(--text-dim);margin-top:4px"; partyRow.appendChild(hint); }
+    hint.textContent = d.guest.max_party > 1 ? `You have ${d.guest.max_party} seats reserved, including you.` : "This invitation is for one seat.";
+  }
   $("rsvpLoading").style.display = "none";
 
   if (d.guest.rsvp_status && d.guest.rsvp_status !== "Pending"){
@@ -732,11 +1068,25 @@ function renderInvite(){
     $("rsvpForm").style.display = "block";
   }
 }
+function renderRegistry(){
+  const d = INVITE_DATA;
+  if (d.registry.length){
+    $("regGrid").innerHTML = d.registry.map(f => {
+      const pct = f.goal_cents ? Math.min(100, Math.round(f.raised_cents/f.goal_cents*100)) : 0;
+      return `<div class="reg-card"><h3>${esc(f.title)}</h3><p>${esc(f.description)}</p>
+        <div class="reg-bar"><i style="width:${pct}%"></i></div>
+        <div class="reg-amt">$${Math.round(f.raised_cents/100)} pledged${f.goal_cents?` of $${Math.round(f.goal_cents/100)} goal`:""}</div>
+        <button class="btn btn-quiet" style="width:100%;margin-top:12px" onclick="pledge(${f.id})">Contribute</button></div>`;
+    }).join("");
+  } else {
+    $("registrySection").style.display = "none";
+  }
+}
 function renderRsvpSummary(){
   const g = INVITE_DATA.guest;
   const accepted = g.rsvp_status === "Accepted";
   $("sumStatus").textContent = accepted ? "You're joyfully attending ✦" : "You've let us know you can't make it";
-  $("sumSub").textContent = accepted ? "Here's what you told us — tap below any time to change it." : "We'll miss you — tap below if that changes.";
+  $("sumSub").textContent = accepted ? "Here's what you told us. Tap below any time to change it." : "We'll miss you. Tap below if that changes.";
   const rows = [];
   if (accepted){
     rows.push(`<div class="sfield"><span>Party size</span><b>${g.party_size}</b></div>`);
@@ -776,7 +1126,7 @@ function renderRsvpEvents(priorSet){
   if (events.length < 2){ $("rEventsRow").style.display="none"; return; }
   // Default to everyone checked for a first-time reply; when editing, reflect their actual prior answer.
   const isChecked = (id) => priorSet ? priorSet.has(id) : true;
-  $("rEventsList").innerHTML = events.map(e => `<label class="ev-check"><input type="checkbox" data-ev="${e.id}" ${isChecked(e.id)?"checked":""}><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink)"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>${esc(e.title)}</b> — ${esc(e.time_label)}</span></label>`).join("");
+  $("rEventsList").innerHTML = events.map(e => `<label class="ev-check"><input type="checkbox" data-ev="${e.id}" ${isChecked(e.id)?"checked":""}><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink)"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>${esc(e.title)}</b> · ${esc(e.time_label)}</span></label>`).join("");
 }
 
 let attending = null;
@@ -797,7 +1147,7 @@ $("rsvpForm").addEventListener("submit", async e => {
       $("rsvpForm").style.display="none";
       $("rsvpDone").style.display="block";
     }, 500);
-  }catch(e){ msg.textContent="That didn't go through — please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; btn.classList.remove("pulsing"); }
+  }catch(e){ msg.textContent="That didn't go through. Please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; btn.classList.remove("pulsing"); }
 });
 $("songForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -811,7 +1161,7 @@ $("songForm").addEventListener("submit", async e => {
     input.value = "";
     msg.style.display = "block";
     setTimeout(() => { msg.style.display = "none"; }, 3000);
-  }catch(e){ alert("That didn't go through — please try again."); }
+  }catch(e){ alert("That didn't go through. Please try again."); }
 });
 async function pledge(fundId){
   const amt = prompt("How much would you like to contribute?");
@@ -821,8 +1171,8 @@ async function pledge(fundId){
       body: JSON.stringify({ amount_cents: Math.round(Number(amt)*100) }) });
     const data = await r.json();
     if (data.pay_at) window.open(data.pay_at, "_blank");
-    const fresh = await fetch(`${API_BASE}/api/invite/${TOKEN}`); INVITE_DATA = await fresh.json(); renderInvite();
-  }catch(e){ alert("That didn't go through — please try again."); }
+    const fresh = await fetch(`${API_BASE}/api/invite/${TOKEN}`); INVITE_DATA = await fresh.json(); renderRegistry();
+  }catch(e){ alert("That didn't go through. Please try again."); }
 }
 
 const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});

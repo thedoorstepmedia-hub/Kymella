@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Kymella — A wedding site your guests will actually touch</title>
+<title>Kymella: A wedding site your guests will actually touch</title>
 <meta name="description" content="Pick a live, physics-driven hero effect, set up your wedding in ten minutes, and get your own invite link and RSVP dashboard immediately. One purchase, one wedding.">
-<meta property="og:title" content="Kymella — A wedding site your guests will actually touch">
-<meta property="og:description" content="A real water ripple, a diya flame, a frost reveal, drifting incense — pick one, make it yours, send it to your guests.">
+<meta property="og:title" content="Kymella: A wedding site your guests will actually touch">
+<meta property="og:description" content="A real water ripple, a diya flame, a frost reveal: pick one, make it yours, send it to your guests.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230E1F1C'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23B8874A' stroke-width='1.3'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23B8874A' stroke-width='0.8' opacity='0.5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,6 +69,10 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 .swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(245,239,227,.3) inset}
 .picker-cta{margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .picker-fine{font-size:11.5px;color:rgba(245,239,227,.45)}
+.picker-examples{margin-top:16px;padding-top:16px;border-top:1px solid rgba(245,239,227,.14);display:flex;flex-direction:column;align-items:center;gap:8px}
+.example-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.example-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft);border:1px solid rgba(245,239,227,.2);border-radius:2px;padding:8px 14px;transition:border-color .2s,color .2s}
+.example-links a:hover{border-color:var(--brass-soft);color:var(--mist)}
 @media(max-width:560px){.effect-choices{grid-template-columns:repeat(2,1fr)}}
 
 /* ================= sections ================= */
@@ -116,6 +120,9 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 
 .foot{text-align:center;padding:52px 24px;color:var(--ink-3);font-size:12px}
 .foot .serif{font-family:var(--disp);font-size:19px;font-style:italic;margin-bottom:6px;color:var(--ink)}
+.foot .links{margin-top:14px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.foot .links a{color:var(--brass-deep);border-bottom:1px solid rgba(142,104,54,.35)}
+.foot .links a:hover{color:var(--ink)}
 
 .notice{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--mist);font-size:13.5px;text-align:center;padding:14px 20px;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:200}
 .notice.on{transform:none}
@@ -139,12 +146,12 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   <div class="picker-content">
     <div class="eyebrow on-dark">Touch It Before You Buy It</div>
     <h1>A wedding site<br><em>your guests will actually touch</em></h1>
-    <p class="sub">Four real, physics-driven effects — not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.</p>
+    <p class="sub">Four real, physics-driven effects, not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.</p>
   </div>
 
   <div class="picker-controls">
     <div class="picker-row">
-      <div class="picker-label">The effect — touch the canvas above to try it</div>
+      <div class="picker-label">The effect: touch the canvas above to try it</div>
       <div class="effect-choices" id="effectChoices"></div>
     </div>
     <div class="picker-row">
@@ -153,7 +160,15 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     </div>
     <div class="picker-cta">
       <button class="btn btn-brass" style="width:100%" onclick="goToExperience()" id="ctaBtn">Try it with your names</button>
-      <p class="picker-fine">$499 CAD · once · no subscription — you'll set up names, date, and guests next</p>
+      <p class="picker-fine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
+    </div>
+    <div class="picker-examples">
+      <p class="picker-fine">Or open a real invite on your phone, exactly as your guests would see it</p>
+      <div class="example-links">
+        <a href="https://kymella.com/i/112-42-cF2j4Xo68b-510La" target="_blank" rel="noopener">Ripple — Elena &amp; Marcus</a>
+        <a href="https://kymella.com/i/113-43-wOcYorAaIJpo4_HY" target="_blank" rel="noopener">Diya — Ananya &amp; Vikram</a>
+        <a href="https://kymella.com/i/114-44-aSlUTZUzdUfBHhz5" target="_blank" rel="noopener">Frost — Sofia &amp; Daniel</a>
+      </div>
     </div>
   </div>
 </header>
@@ -163,9 +178,9 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <div class="eyebrow">How It Works</div>
     <h2 class="h2 up">Ten minutes to set up. <em>Yours</em> from the first touch.</h2>
     <div class="steps3">
-      <div class="step up"><div class="n">1</div><h3>Choose your experience</h3><p>Pick the hero effect and palette above — this is the one your guests will experience, not a description of it.</p></div>
-      <div class="step up"><div class="n">2</div><h3>Tell us your story</h3><p>Names, date, venue, events, dress code, registry, guest list — a short self-serve wizard, nothing technical.</p></div>
-      <div class="step up"><div class="n">3</div><h3>Get your links, immediately</h3><p>Your live invite link and your private RSVP dashboard are ready the moment you finish — send invitations yourself, whenever you're ready.</p></div>
+      <div class="step up"><div class="n">1</div><h3>Choose your experience</h3><p>Pick the hero effect and palette above. This is the one your guests will experience, not a description of it.</p></div>
+      <div class="step up"><div class="n">2</div><h3>Tell us your story</h3><p>Names, date, venue, events, dress code, registry, guest list: a short self-serve wizard, nothing technical.</p></div>
+      <div class="step up"><div class="n">3</div><h3>Get your links, immediately</h3><p>Your live invite link and your private RSVP dashboard are ready the moment you finish. Send invitations yourself, whenever you're ready.</p></div>
     </div>
   </div>
 </section>
@@ -175,12 +190,12 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <div class="eyebrow">What's Included</div>
     <h2 class="h2 up">Everything for <em>one</em> celebration</h2>
     <div class="feat-grid">
-      <div class="feat up"><h3>The interactive invitation</h3><p>Water, flame, frost, or incense — a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.</p></div>
-      <div class="feat up"><h3>RSVPs that run themselves</h3><p>Attendance, party size, meal choices, allergies, transport, per-event attendance for multi-day celebrations — collected automatically.</p></div>
-      <div class="feat up"><h3>Your private dashboard</h3><p>Every guest, every reply, a kitchen-ready allergy summary, and one-click CSV export — yours for the whole engagement.</p></div>
+      <div class="feat up"><h3>The interactive invitation</h3><p>Water, flame, or frost: a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.</p></div>
+      <div class="feat up"><h3>RSVPs that run themselves</h3><p>Attendance, party size, meal choices, allergies, transport, per-event attendance for multi-day celebrations, collected automatically.</p></div>
+      <div class="feat up"><h3>Your private dashboard</h3><p>Every guest, every reply, a kitchen-ready allergy summary, and one-click CSV export, yours for the whole engagement.</p></div>
       <div class="feat up"><h3>Gentle reminders</h3><p>Guests who haven't replied get a warm nudge. Everyone attending gets final details 48 hours out. You never chase anyone.</p></div>
       <div class="feat up"><h3>Your registry</h3><p>Funds your guests contribute to, paid directly to you through your own payment link.</p></div>
-      <div class="feat up"><h3>Multi-day, built in</h3><p>Mehndi, sangeet, ceremony, reception, farewell brunch — add as many events as your celebration holds.</p></div>
+      <div class="feat up"><h3>Multi-day, built in</h3><p>Mehndi, sangeet, ceremony, reception, farewell brunch: add as many events as your celebration holds.</p></div>
     </div>
   </div>
 </section>
@@ -211,11 +226,11 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <div class="eyebrow">Questions</div>
     <h2 class="h2 up">Asked before</h2>
     <div class="faq">
-      <div class="fq" id="q0"><button onclick="document.getElementById('q0').classList.toggle('open')"><span>Do my guests need to download anything?</span><span class="x">+</span></button><div class="a">No. Their invitation is a link — it opens in any browser, on any phone. No app, no account, no password.</div></div>
-      <div class="fq" id="q1"><button onclick="document.getElementById('q1').classList.toggle('open')"><span>How do invitations reach my guests?</span><span class="x">+</span></button><div class="a">You send each guest their personal link yourself — over WhatsApp, text, or email. An invitation should come from you, not from a platform. Every link is one tap to copy from your dashboard.</div></div>
-      <div class="fq" id="q2"><button onclick="document.getElementById('q2').classList.toggle('open')"><span>Can I change my experience after I've set up?</span><span class="x">+</span></button><div class="a">Your dashboard is yours for the whole engagement — write to us and we'll update your effect or palette.</div></div>
-      <div class="fq" id="q3"><button onclick="document.getElementById('q3').classList.toggle('open')"><span>How do registry payments work?</span><span class="x">+</span></button><div class="a">Contributions go directly to you through your own payment link — PayPal, Interac, or Stripe. We record the pledges and messages; the money never passes through us.</div></div>
-      <div class="fq" id="q4"><button onclick="document.getElementById('q4').classList.toggle('open')"><span>What about multi-day celebrations?</span><span class="x">+</span></button><div class="a">Built for them. Mehndi, sangeet, welcome dinners, ceremonies, receptions, farewell brunches — add as many events as your celebration holds.</div></div>
+      <div class="fq" id="q0"><button onclick="document.getElementById('q0').classList.toggle('open')"><span>Do my guests need to download anything?</span><span class="x">+</span></button><div class="a">No. Their invitation is a link. It opens in any browser, on any phone. No app, no account, no password.</div></div>
+      <div class="fq" id="q1"><button onclick="document.getElementById('q1').classList.toggle('open')"><span>How do invitations reach my guests?</span><span class="x">+</span></button><div class="a">You send each guest their personal link yourself, over WhatsApp, text, or email. An invitation should come from you, not from a platform. Every link is one tap to copy from your dashboard.</div></div>
+      <div class="fq" id="q2"><button onclick="document.getElementById('q2').classList.toggle('open')"><span>Can I change my experience after I've set up?</span><span class="x">+</span></button><div class="a">Your dashboard is yours for the whole engagement. Write to us and we'll update your effect or palette.</div></div>
+      <div class="fq" id="q3"><button onclick="document.getElementById('q3').classList.toggle('open')"><span>How do registry payments work?</span><span class="x">+</span></button><div class="a">Contributions go directly to you through your own payment link: PayPal, Interac, or Stripe. We record the pledges and messages; the money never passes through us.</div></div>
+      <div class="fq" id="q4"><button onclick="document.getElementById('q4').classList.toggle('open')"><span>What about multi-day celebrations?</span><span class="x">+</span></button><div class="a">Built for them. Mehndi, sangeet, welcome dinners, ceremonies, receptions, farewell brunches: add as many events as your celebration holds.</div></div>
     </div>
   </div>
 </section>
@@ -223,6 +238,10 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 <footer class="foot">
   <div class="serif">Kymella</div>
   <div>Made for the two of you.</div>
+  <div class="links">
+    <a href="/privacy">Privacy, Terms &amp; Refunds</a>
+    <a href="mailto:info@kymella.com">info@kymella.com</a>
+  </div>
 </footer>
 
 <div class="notice" id="notice"></div>
@@ -236,12 +255,16 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 function hexToRgb(hex){ const n=parseInt((hex||"#000000").replace("#",""),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
 function createWaterRipple(canvas, opts = {}) {
   const ctx = canvas.getContext("2d");
+  let W, H, DPR;
   const RES_W = 150, RES_H = 84, N = RES_W * RES_H;
   let bufA = new Float32Array(N), bufB = new Float32Array(N), bufC = new Float32Array(N);
   const DAMPING = 0.985;
   const off = document.createElement("canvas"); off.width = RES_W; off.height = RES_H;
   const offCtx = off.getContext("2d"); const imgData = offCtx.createImageData(RES_W, RES_H);
-  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C"), BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28"), BRASS = hexToRgb(opts.brass || "#B8874A");
+  const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C"), BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28");
+  // Colourless water, matching the live invite: near-white highlights so palette colours live
+  // in the background only, never tint the water itself.
+  const BRASS = [255, 251, 243];
   function splash(gx,gy,strength,radius){
     for (let dy=-radius; dy<=radius; dy++) for (let dx=-radius; dx<=radius; dx++){
       const x=gx+dx,y=gy+dy; if (x<1||x>=RES_W-1||y<1||y>=RES_H-1) continue;
@@ -270,12 +293,17 @@ function createWaterRipple(canvas, opts = {}) {
     }
     offCtx.putImageData(imgData,0,0);
     ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(off,0,0,RES_W,RES_H,0,0,canvas.width,canvas.height);
-    const vg=ctx.createRadialGradient(canvas.width/2,canvas.height*0.4,canvas.width*0.15,canvas.width/2,canvas.height*0.4,canvas.width*0.75);
-    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)"); ctx.fillStyle=vg; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(off,0,0,RES_W,RES_H,0,0,W,H);
+    const vg=ctx.createRadialGradient(W/2,H*0.4,W*0.15,W/2,H*0.4,W*0.75);
+    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.35)"); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
   }
-  function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; }
+  // Was canvas.width=canvas.clientWidth with no DPR scaling -- the only one of the three hero
+  // effects missing it (diya/frost both do this already). On any retina/high-DPI screen
+  // that renders the canvas at a lower resolution than the display, which the browser then
+  // stretches to fill -- compounding with the intentional 150x84 simulation-grid upscale below
+  // to read as soft/aliased "lines" rather than clean water.
+  function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
   window.addEventListener("resize", resize); resize();
   function toGrid(cx,cy){ const rect=canvas.getBoundingClientRect(); return { gx: Math.floor(((cx-rect.left)/rect.width)*RES_W), gy: Math.floor(((cy-rect.top)/rect.height)*RES_H) }; }
   function eventXY(e){ if (e.touches&&e.touches[0]) return [e.touches[0].clientX,e.touches[0].clientY]; return [e.clientX,e.clientY]; }
@@ -388,47 +416,9 @@ function createFrostReveal(canvas, label, opts = {}) {
   return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointerdown",onDown); canvas.removeEventListener("pointermove",onMove); window.removeEventListener("pointerup",onUp); canvas.removeEventListener("touchstart",onDown); canvas.removeEventListener("touchmove",onMove); window.removeEventListener("touchend",onUp); } };
 }
 
-function createIncenseDrift(canvas, opts = {}) {
-  const ctx = canvas.getContext("2d");
-  let W,H,DPR,raf;
-  function size(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
-  window.addEventListener("resize", size); size();
-  const top = opts.colorTop || "#0E1F1C", bottom = opts.colorBottom || "#152D28";
-  const [ir, ig, ib] = hexToRgb(opts.brassSoft || opts.brass || "#E8C9A0");
-  const emberColor = opts.brassSoft || opts.brass || "#E8C9A0";
-  let mouseX=null, mouseY=null, velocity=0;
-  function updateMouse(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; const nx=p.clientX-r.left, ny=p.clientY-r.top;
-    if (mouseX!==null){ const dx=nx-mouseX,dy=ny-mouseY; velocity=Math.min(60,Math.sqrt(dx*dx+dy*dy)); } mouseX=nx; mouseY=ny; }
-  const onMove = e => updateMouse(e); const onLeave = () => { mouseX=null; mouseY=null; velocity=0; };
-  canvas.addEventListener("pointermove", onMove); canvas.addEventListener("touchmove", onMove, {passive:true}); canvas.addEventListener("pointerleave", onLeave);
-  const segments=60; let offsets=new Array(segments+1).fill(0); const startClock=performance.now();
-  function draw(){
-    const t=(performance.now()-startClock)/1000; velocity*=0.9; ctx.clearRect(0,0,W,H);
-    const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    const baseX=W*0.5, baseY=H*0.72;
-    for (let i=0;i<=segments;i++){ const f=i/segments;
-      const naturalX=baseX+Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; const naturalY=baseY-f*H*0.62;
-      let target=0;
-      if (mouseX!==null){ const dx=naturalX-mouseX,dy=naturalY-mouseY,dist=Math.sqrt(dx*dx+dy*dy),radius=140+f*60;
-        if (dist<radius){ const strength=1-dist/radius, dirX=dx/(dist||1); target=dirX*strength*(40+f*70)+dirX*velocity*strength*1.8; } }
-      offsets[i]+=(target-offsets[i])*0.12;
-    }
-    ctx.beginPath(); ctx.moveTo(baseX,baseY);
-    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift=Math.sin(f*6-t*0.8)*(18+f*30)+Math.sin(f*13+t*1.3)*f*8; ctx.lineTo(baseX+drift+offsets[i],y); }
-    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.18)`; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(baseX,baseY);
-    for (let i=1;i<=segments;i++){ const f=i/segments,y=baseY-f*H*0.62,drift2=Math.sin(f*5-t*0.65+1.4)*(14+f*24); ctx.lineTo(baseX+drift2+offsets[i]*0.75,y); }
-    ctx.strokeStyle=`rgba(${ir},${ig},${ib},0.1)`; ctx.lineWidth=5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(baseX,baseY,2.4,0,Math.PI*2); ctx.fillStyle=emberColor; ctx.fill();
-    raf=requestAnimationFrame(draw);
-  }
-  draw();
-  return { stop(){ cancelAnimationFrame(raf); window.removeEventListener("resize",size); canvas.removeEventListener("pointermove",onMove); canvas.removeEventListener("touchmove",onMove); canvas.removeEventListener("pointerleave",onLeave); } };
-}
-
 /* ================= EXPERIENCE ENGINE: mount the right effect from stored data ================= */
 function mountHero(effectName, canvas, opts, coupleNames){
-  const fns = { ripple: createWaterRipple, diya: createDiyaLight, frost: createFrostReveal, incense: createIncenseDrift };
+  const fns = { ripple: createWaterRipple, diya: createDiyaLight, frost: createFrostReveal };
   const fn = fns[effectName] || createWaterRipple;
   if (effectName === "frost") return fn(canvas, coupleNames, opts);
   return fn(canvas, opts);
@@ -438,17 +428,21 @@ function mountHero(effectName, canvas, opts, coupleNames){
 <script>
 /* ================= PALETTES ================= */
 const PALETTES = [
-  { name:"Brass & Ink", ink:"#171310", ink2:"#221C17", ink3:"#3E342B", mist:"#F5EFE3", mistDim:"#EDE5D4", brass:"#B8874A", brassSoft:"#E8C9A0", brassDeep:"#8E6836" },
-  { name:"Rosewood",    ink:"#2B1518", ink2:"#3A1E22", ink3:"#5C333A", mist:"#F7EDE6", mistDim:"#EFDDD1", brass:"#C08552", brassSoft:"#E8C4A0", brassDeep:"#9C6238" },
-  { name:"Slate & Blue",ink:"#161A21", ink2:"#1F2530", ink3:"#3A4250", mist:"#F0F1F3", mistDim:"#E2E5E9", brass:"#8C97A8", brassSoft:"#C3CBD6", brassDeep:"#5E6A7C" },
-  { name:"Silver",      ink:"#1C1C1C", ink2:"#272727", ink3:"#464646", mist:"#F4F4F2", mistDim:"#E8E8E5", brass:"#A8ACB0", brassSoft:"#D4D7DA", brassDeep:"#7A7D80" },
-  { name:"Emerald",     ink:"#0A2119", ink2:"#123528", ink3:"#255040", mist:"#F2F0E4", mistDim:"#E5E1CE", brass:"#C9A227", brassSoft:"#E8D488", brassDeep:"#9C7D1B" },
+  { name:"Brass & Ink",     ink:"#171310", ink2:"#221C17", ink3:"#3E342B", mist:"#F5EFE3", mistDim:"#EDE5D4", brass:"#B8874A", brassSoft:"#E8C9A0", brassDeep:"#8E6836" },
+  { name:"Rosewood",        ink:"#2B1518", ink2:"#3A1E22", ink3:"#5C333A", mist:"#F7EDE6", mistDim:"#EFDDD1", brass:"#C08552", brassSoft:"#E8C4A0", brassDeep:"#9C6238" },
+  { name:"Slate & Blue",    ink:"#161A21", ink2:"#1F2530", ink3:"#3A4250", mist:"#F0F1F3", mistDim:"#E2E5E9", brass:"#8C97A8", brassSoft:"#C3CBD6", brassDeep:"#5E6A7C" },
+  { name:"Emerald",         ink:"#0A2119", ink2:"#123528", ink3:"#255040", mist:"#F2F0E4", mistDim:"#E5E1CE", brass:"#C9A227", brassSoft:"#E8D488", brassDeep:"#9C7D1B" },
+  // Three lighter, more neutral additions -- ink stays dark enough for the water/frost/diya
+  // effects to still read, but the accent moves away from metal (gold/copper/silver) toward
+  // soft matte neutrals, for couples who want something quieter than the original five.
+  { name:"Champagne Blush", ink:"#241A1C", ink2:"#2E2124", ink3:"#5C4247", mist:"#F6EEEA", mistDim:"#EDE0D9", brass:"#D9A9A0", brassSoft:"#EDCEC5", brassDeep:"#B37E73" },
+  { name:"Parchment",       ink:"#201E1B", ink2:"#2A2723", ink3:"#4A453D", mist:"#F7F4EC", mistDim:"#EBE6D8", brass:"#C4BCA6", brassSoft:"#E4DDC8", brassDeep:"#8C8370" },
+  { name:"Heather",         ink:"#211C24", ink2:"#2B2530", ink3:"#4F4655", mist:"#F3F0F2", mistDim:"#E6E1E6", brass:"#A79AAE", brassSoft:"#D2C7D9", brassDeep:"#7A6E85" },
 ];
 const EFFECTS = [
   { key:"ripple",  label:"Ripple"  },
   { key:"diya",    label:"Diya"    },
   { key:"frost",   label:"Frost"   },
-  { key:"incense", label:"Incense" },
 ];
 
 let effectIdx = 0, paletteIdx = 0, heroInstance = null;
