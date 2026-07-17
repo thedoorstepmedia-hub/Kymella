@@ -152,11 +152,24 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 .hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block}
 .hero-photo canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;touch-action:pan-y;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(14,31,28,.55) 0%, rgba(14,31,28,.25) 35%, rgba(14,31,28,.55) 75%, rgba(14,31,28,.85) 100%);pointer-events:none;z-index:1}
-/* First-time affordance for frost's hold-and-wipe gesture -- without it a guest who's never
-   seen the theme has no way to guess a deliberate hold (not a quick swipe) is what clears it.
-   Sits above the veil canvas and the darkening overlay; fades out the moment a real wipe lands. */
-.frost-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass-soft);opacity:.85;text-align:center;pointer-events:none;text-shadow:0 2px 10px rgba(0,0,0,.6);transition:opacity .5s ease;animation:frostHintPulse 2.4s ease-in-out infinite}
-@keyframes frostHintPulse{0%,100%{opacity:.85}50%{opacity:.4}}
+/* First-time affordance for the hero gesture -- every theme needs one, not just frost: diya
+   only ever shows a dim ambient glow until touched (the couple's actual photo stays hidden
+   behind the veil otherwise), and even ripple's self-playing ambient splashes don't make the
+   touch interaction itself obvious. Text alone turned out to still get missed in the wild, so
+   this pairs it with a real background scrim (for contrast against any photo, not just dark
+   ones) and a small animated tap-motion icon -- motion catches the eye in a way a static label
+   doesn't. Fades out the moment a real gesture lands (see onFirstWipe wiring per effect). */
+/* Bottom-anchored, not centered: dead-center collides directly with the greeting/date text
+   stack (verified in testing -- the two visually merge into unreadable clutter, which likely
+   explains why even frost's centered hint was going unnoticed despite being present). Sitting
+   below everything else keeps it a clearly separate, uncluttered instruction. */
+.hero-hint{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 22px;border-radius:40px;background:rgba(10,8,6,.38);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);text-align:center;pointer-events:none;transition:opacity .5s ease;animation:heroHintAttention 3.2s ease-in-out infinite}
+.hero-hint span{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass-soft);text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.hero-hint svg{width:30px;height:30px;color:var(--brass-soft);animation:heroHintTap 1.6s ease-in-out infinite}
+@keyframes heroHintTap{0%,100%{transform:translateY(0) scale(1);opacity:.9}40%{transform:translateY(3px) scale(.92);opacity:1}60%{transform:translateY(3px) scale(.92);opacity:1}100%{transform:translateY(0) scale(1);opacity:.9}}
+/* A slow, subtle breathing scale on the whole pill every ~3.2s -- combats banner-blindness on a
+   hint that otherwise just sits there pulsing gently forever and becomes easy to filter out. */
+@keyframes heroHintAttention{0%,80%,100%{transform:translateX(-50%) scale(1)}88%{transform:translateX(-50%) scale(1.06)}}
 .hero .eyebrow{margin-bottom:20px}
 .hero h1{font-family:var(--disp);font-style:italic;font-size:clamp(30px,6vw,54px);font-weight:500;line-height:1.18;max-width:720px;text-shadow:0 2px 24px rgba(0,0,0,.4)}
 .hero h1 em{font-style:italic;color:var(--brass-soft)}
@@ -363,7 +376,10 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
   <div class="hero-photo" id="heroPhoto">
     <img id="heroPhotoImg" alt="" style="display:none">
     <canvas id="heroCanvas"></canvas>
-    <div class="frost-hint" id="frostHint" style="display:none">hold &amp; swipe to clear the frost</div>
+    <div class="hero-hint" id="heroHint" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5V6.5a1.5 1.5 0 0 1 3 0v4M12 10.5V5a1.5 1.5 0 0 1 3 0v6.5M15 11V7a1.5 1.5 0 0 1 3 0v7c0 3.5-2 6.5-6 6.5s-5.5-2-7-5c-.8-1.6-1.5-2.7-2.3-3.5-.7-.7-.5-1.8.4-2.2.9-.4 2 0 2.9.9l1 1"/></svg>
+      <span id="heroHintText"></span>
+    </div>
   </div>
   <div class="hero-content">
     <div class="eyebrow on-dark">You Are Invited</div>
@@ -568,8 +584,8 @@ function createWaterRipple(canvas, opts = {}) {
   window.addEventListener("resize", resize); resize();
   function toGrid(cx,cy){ const rect=canvas.getBoundingClientRect(); return { gx: Math.floor(((cx-rect.left)/rect.width)*RES_W), gy: Math.floor(((cy-rect.top)/rect.height)*RES_H) }; }
   function eventXY(e){ if (e.touches&&e.touches[0]) return [e.touches[0].clientX,e.touches[0].clientY]; return [e.clientX,e.clientY]; }
-  let dragging=false;
-  function onDown(e){ const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,26,5); dragging=true; }
+  let dragging=false, hintCleared=false;
+  function onDown(e){ const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,26,5); dragging=true; if (!hintCleared){ hintCleared=true; if (opts.onFirstWipe) opts.onFirstWipe(); } }
   function onMove(e){ if(!dragging) return; const [cx,cy]=eventXY(e); const {gx,gy}=toGrid(cx,cy); splash(gx,gy,8,3); }
   function onUp(){ dragging=false; }
   canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); window.addEventListener("pointerup", onUp);
@@ -591,7 +607,8 @@ function createDiyaLight(canvas, opts = {}) {
   let flame = null; const startClock = performance.now();
   function spawn(x,y){ flame = {x,y,born:(performance.now()-startClock)/1000}; }
   function xy(e){ const r=canvas.getBoundingClientRect(); const p=(e.touches&&e.touches[0])?e.touches[0]:e; return [p.clientX-r.left, p.clientY-r.top]; }
-  const onDown = e => spawn(...xy(e));
+  let hintCleared=false;
+  const onDown = e => { spawn(...xy(e)); if (!hintCleared){ hintCleared=true; if (opts.onFirstWipe) opts.onFirstWipe(); } };
   canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("touchstart", onDown, {passive:true});
   function draw(){
     const t=(performance.now()-startClock)/1000; ctx.clearRect(0,0,W,H);
@@ -1001,14 +1018,17 @@ function renderInvite(){
   const effect = d.wedding.hero_effect || "ripple";
   const palette = d.wedding.palette || {};
 
-  // First-time affordance for frost's hold-and-wipe gesture -- hides the moment a real wipe lands.
-  const hideFrostHint = () => {
-    const fh = $("frostHint"); if (!fh) return;
-    // The pulse keyframe animation drives opacity continuously, so it would keep overriding a
-    // plain style.opacity write every frame -- kill the animation first so the transition-based
+  // First-time affordance for the hero gesture -- every theme needs this, not just frost (see
+  // the .hero-hint comment above). Hides the moment a real gesture lands, wired into all three
+  // effects' first touch via opts.onFirstWipe below.
+  const HERO_HINT_TEXT = { frost: "hold & swipe to clear the frost", diya: "touch to light the way", ripple: "touch the water" };
+  const hideHeroHint = () => {
+    const hh = $("heroHint"); if (!hh) return;
+    // The pulse/attention keyframe animations drive opacity and transform continuously, so they'd
+    // keep overriding a plain style write every frame -- kill them first so the transition-based
     // fade actually sticks, then hard-hide once it's finished.
-    fh.style.animation = "none"; fh.style.opacity = "0";
-    setTimeout(() => { fh.style.display = "none"; }, 500);
+    hh.style.animation = "none"; hh.style.opacity = "0";
+    setTimeout(() => { hh.style.display = "none"; }, 500);
   };
 
   // One template for every theme: the hero is the couple's full-colour photo (slot 1, shown
@@ -1022,10 +1042,11 @@ function renderInvite(){
   const photos = Array.isArray(d.wedding.photos) ? d.wedding.photos : [];
   const heroP = photos.find(p => p.slot === 1);
   const heroImg = $("heroPhotoImg");
-  const frostHintEl = $("frostHint");
-  if (frostHintEl){
-    frostHintEl.style.display = (effect === "frost") ? "block" : "none";
-    frostHintEl.style.opacity = "1"; frostHintEl.style.animation = "";
+  const heroHintEl = $("heroHint");
+  if (heroHintEl){
+    $("heroHintText").textContent = HERO_HINT_TEXT[effect] || HERO_HINT_TEXT.ripple;
+    heroHintEl.style.display = "flex";
+    heroHintEl.style.opacity = "1"; heroHintEl.style.animation = "";
   }
   if (heroP){
     heroImg.onload = () => { heroImg.style.display = "block"; };
@@ -1034,7 +1055,7 @@ function renderInvite(){
   } else {
     heroImg.style.display = "none";
   }
-  const heroOpts = { colorTop: palette.ink, colorBottom: palette.ink2, brass: palette.brass, brassSoft: palette.brassSoft, brassDeep: palette.brassDeep, mist: palette.mist, photoImg: heroP ? heroImg : null, onFirstWipe: hideFrostHint };
+  const heroOpts = { colorTop: palette.ink, colorBottom: palette.ink2, brass: palette.brass, brassSoft: palette.brassSoft, brassDeep: palette.brassDeep, mist: palette.mist, photoImg: heroP ? heroImg : null, onFirstWipe: hideHeroHint };
   if (heroInstance) heroInstance.stop();
   heroInstance = mountHero(effect, $("heroCanvas"), heroOpts, couple);
   mountSealGate(palette, couple);
