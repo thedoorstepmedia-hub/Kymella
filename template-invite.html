@@ -878,6 +878,11 @@ function mountSealGate(palette, coupleNames){
   let opening = false;
   function onOpen(){
     if (opening) return; opening = true;
+    // Re-asserted here, not just once at script load: some mobile browsers restore scroll
+    // position asynchronously, after the page's initial script has already run, which was
+    // overriding the top-of-file scrollTo(0,0) right as the envelope revealed -- so the guest
+    // would tap the seal and land wherever they'd scrolled to before refreshing, not the hero.
+    window.scrollTo(0, 0);
     const hint = document.getElementById("sealHint"); if (hint) hint.style.opacity = "0";
     const waxSeal = document.getElementById("waxSeal");
     const flap = document.getElementById("envelopeFlap");
@@ -911,7 +916,8 @@ function mountSealGate(palette, coupleNames){
     // seam so it reads as a deliberate quick cut, not a truncated animation.
     setTimeout(() => {
       gate.classList.add("opened");
-      setTimeout(() => { gate.style.display = "none"; }, 180);
+      window.scrollTo(0, 0);
+      setTimeout(() => { gate.style.display = "none"; window.scrollTo(0, 0); }, 180);
     }, 750);
   }
   gate.addEventListener("pointerdown", onOpen);
