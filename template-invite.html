@@ -84,7 +84,13 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
    side edge to the seal -- the top flap's own crease is already the flap element's real clipped
    edge (with its own drop-shadow) so it doesn't need duplicating here, only the two side ones,
    which real fold lines always show as a light/shadow line PAIR, not one flat stroke. */
-.envelope-creases{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+/* The crease strokes use non-scaling-stroke so they stay a crisp hairline at rest, but that
+   same property is what makes them separate from everything else during the zoom -- every
+   other layer scales up together as the scene pushes in, while these hold a fixed screen
+   width, so they visibly stretch apart from their surroundings right as the camera converges
+   on the seal. Fading them out right as the zoom starts (see onOpen) sidesteps that entirely
+   rather than trying to make a fixed-width stroke scale convincingly. */
+.envelope-creases{position:absolute;inset:0;width:100%;height:100%;z-index:1;transition:opacity .3s ease}
 .envelope-creases line{vector-effect:non-scaling-stroke}
 .crease-light{stroke:rgba(255,255,255,.45)}
 .crease-shadow{stroke:rgba(70,50,20,.22)}
@@ -322,7 +328,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
       <div class="envelope-names" id="envelopeNames"></div>
       <div class="envelope-card">
         <div class="envelope-body-card"></div>
-        <svg class="envelope-creases" viewBox="0 0 400 282" preserveAspectRatio="none">
+        <svg class="envelope-creases" id="envelopeCreases" viewBox="0 0 400 282" preserveAspectRatio="none">
           <line class="crease-light" x1="1" y1="141" x2="199" y2="174" stroke-width="1"></line>
           <line class="crease-shadow" x1="2" y1="142.5" x2="200" y2="175.5" stroke-width="1.1"></line>
           <line class="crease-light" x1="399" y1="141" x2="201" y2="174" stroke-width="1"></line>
@@ -841,6 +847,11 @@ function mountSealGate(palette, coupleNames){
       gate.style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`;
     }
     gate.classList.add("zooming");
+    // The crease lines hold a fixed screen width (non-scaling-stroke, so they stay a crisp
+    // hairline at rest) while everything around them scales up with the zoom -- left in place
+    // they'd visibly separate from their surroundings as the scene converges on the seal.
+    // Fading them out right as the push-in begins is well before that becomes visible.
+    const creases = document.getElementById("envelopeCreases"); if (creases) creases.style.opacity = "0";
 
     // The zoom itself stays slow and deliberate (1.2s) -- that's the part that's supposed to
     // read as a real camera push, not a rushed cut. The seal breaks about a third of the way
