@@ -505,6 +505,15 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 <footer class="foot"><div id="footText">KYMELLA</div></footer>
 
 <script>
+// A guest refreshing (or reopening) their invite while scrolled halfway down should land back
+// on the hero, not wherever the browser thinks they left off -- the envelope-opening moment is
+// meant to happen every time, not just on the very first visit. Browsers restore scroll
+// position on reload/back-forward navigation by default; this has to run before that
+// restoration takes effect, so it sits at the very top of the very first script on the page,
+// ahead of everything else including the effect library below.
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+window.scrollTo(0, 0);
+
 // hero-effects.js — Kymella's four live hero effects, extracted from template-invite.html.
 // Shared, unmodified logic used by BOTH the public experience picker and the couple's live invite,
 // so a couple always sees on their invite exactly what they touched during their experience selection.
