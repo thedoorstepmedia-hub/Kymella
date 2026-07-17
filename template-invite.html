@@ -1431,10 +1431,17 @@ $("rsvpForm").addEventListener("submit", async e => {
       const reader = new FileReader();
       const dataUrl = await new Promise((resolve, reject) => { reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(recordedBlob); });
       const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/voice`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ audio: dataUrl }) });
-      if (!r.ok) throw new Error();
+      if (!r.ok){
+        // Surface the server's actual reason (rate limit, bad format, etc.) instead of a single
+        // generic message -- otherwise a real cause like "too many attempts, try again shortly"
+        // is indistinguishable from every other failure and can't be self-diagnosed from a bug report.
+        let reason = "";
+        try{ reason = (await r.json()).error || ""; }catch(e2){}
+        throw new Error(reason);
+      }
       showPanel(sentEl);
     }catch(e){
-      showError("That recording didn't send -- please try again, or use the note field above instead.");
+      showError(e.message ? `That recording didn't send -- ${e.message}` : "That recording didn't send -- please try again, or use the note field above instead.");
     }finally{
       sendBtn.disabled = false; sendBtn.textContent = "Send to the couple";
     }
