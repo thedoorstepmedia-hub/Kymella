@@ -76,7 +76,7 @@ svg.i{width:17px;height:17px;stroke:currentColor;stroke-width:1.5;fill:none;stro
 .rowgrid{display:grid;grid-template-columns:110px 110px 1fr;gap:10px}
 .rowgrid input{border:1px solid var(--line);padding:11px 12px;outline:none;width:100%}
 .rowgrid input:focus{border-color:var(--gold)}
-.rowcard .sub{margin-top:10px;display:grid;gap:10px}
+.rowcard .sub{margin-top:10px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .rowcard .sub input{border:1px solid var(--line);padding:11px 12px;outline:none;width:100%}
 .rowcard .sub input:focus{border-color:var(--gold)}
 @media(max-width:560px){.rowgrid{grid-template-columns:1fr 1fr}.rowgrid input:last-child{grid-column:1/-1}}
@@ -674,14 +674,15 @@ async function retryPublish(){
   draw();
 }
 function buildFaq(){
-  // Phrased the way a guest actually texts, not a formal FAQ document -- and the last three
-  // need no new field at all, they're built entirely from data collected elsewhere (allergies
-  // are always askable at RSVP, registry funds/hashtag just need to exist).
+  // dress_code, arrival_info, parking_info, and kids_policy each already get their own card in
+  // the invite's Essentials section (template-invite.html's .dcard grid) -- auto-pushing them
+  // in here too meant the exact same sentence showed up twice on the same page, once as a card
+  // and again as an FAQ answer. travel_info has no card of its own anywhere on the invite, so
+  // it stays here as the only place a guest ever sees it. Phrased the way a guest actually
+  // texts, not a formal FAQ document -- and the last three need no new field at all, they're
+  // built entirely from data collected elsewhere (allergies are always askable at RSVP,
+  // registry funds/hashtag just need to exist).
   const f=[];
-  if (S.dress_code)   f.push({q:"What should I wear?", a:S.dress_code});
-  if (S.arrival_info) f.push({q:"What time should I get there?", a:S.arrival_info});
-  if (S.parking_info) f.push({q:"Where do I park?", a:S.parking_info});
-  if (S.kids_policy)  f.push({q:"Are kids welcome?", a:S.kids_policy});
   if (S.travel_info)  f.push({q:"How do I get there from out of town?", a:S.travel_info});
   if (S.hashtag)       f.push({q:"Is there a wedding hashtag?", a:`Yes! Use ${S.hashtag} whenever you post photos from the day.`});
   if (S.funds.length)  f.push({q:"Do you have a gift registry?", a: S.registry_note || "We've set up a few funds below, see the Registry section for details."});

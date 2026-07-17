@@ -192,10 +192,14 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
    each wrapped line independently, so a partially-filled last row just stretches to fill
    itself -- there's no shared track for a "leftover" cell to exist in. */
 .details-grid{display:flex;flex-wrap:wrap;gap:1px;background:var(--line-dk);margin-top:40px;border:1px solid var(--line-dk)}
-.dcard{flex:1 1 220px;background:var(--surface);padding:26px 24px}
+/* min-width:0 alongside overflow-wrap on the text itself -- a flex item's default min-width is
+   its content's natural width, so one long unbroken string a couple pastes in (a URL in
+   arrival/travel info, say) can force this card wider than the screen regardless of how the
+   text would otherwise wrap. */
+.dcard{flex:1 1 220px;min-width:0;background:var(--surface);padding:26px 24px}
 .dcard .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft)}
-.dcard h3{font-family:var(--disp);font-style:italic;font-size:20px;font-weight:500;margin:8px 0 6px}
-.dcard p{font-size:15px;color:var(--text-dim)}
+.dcard h3{font-family:var(--disp);font-style:italic;font-size:20px;font-weight:500;margin:8px 0 6px;overflow-wrap:break-word}
+.dcard p{font-size:15px;color:var(--text-dim);overflow-wrap:break-word}
 
 .itinerary{margin-top:44px;text-align:left}
 .itin-item{position:relative;padding:0 0 34px 34px;border-left:1.5px solid var(--line-dk)}
@@ -204,7 +208,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 .itin-tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass-soft)}
 .itin-item h3{font-family:var(--disp);font-style:italic;font-size:22px;font-weight:500;margin:6px 0 4px}
 .itin-loc{font-size:14.5px;color:var(--text-dim);margin-bottom:6px}
-.itin-desc{font-size:15px;color:var(--text-dim);line-height:1.6;max-width:440px}
+.itin-desc{font-size:15px;color:var(--text-dim);line-height:1.6;max-width:440px;overflow-wrap:break-word}
 
 /* An embedded map reads like a form, not an invitation -- a plain link button is what most
    premium printed-style invites do instead, and it's what guests actually want (their own
@@ -214,9 +218,10 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 .rsvp-summary{text-align:left}
 .rsvp-summary .status{font-family:var(--disp);font-size:20px;color:var(--brass-soft);margin-bottom:4px}
 .rsvp-summary .sub{font-size:14.5px;color:var(--text-dim);margin-bottom:20px}
-.rsvp-summary .sfield{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line-dk);font-size:15px}
+.rsvp-summary .sfield{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-dk);font-size:15px}
 .rsvp-summary .sfield:last-of-type{border-bottom:none}
-.rsvp-summary .sfield b{font-weight:600}
+.rsvp-summary .sfield span{flex-shrink:0}
+.rsvp-summary .sfield b{font-weight:600;min-width:0;overflow-wrap:break-word;text-align:right}
 
 /* story: a simple vertical timeline, same left-rail language as the itinerary */
 .story-timeline{margin-top:44px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto}
@@ -229,22 +234,27 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
    single short sentence still reads as a deliberate, premium moment instead of a thin,
    sparse-looking line. Costs nothing when a couple only fills in one or two prompts. */
 .story-mark{font-family:var(--disp);font-style:italic;font-size:46px;line-height:.4;color:var(--brass-soft);opacity:.6;display:block;margin-bottom:2px}
-.story-item p{font-size:15.5px;color:var(--text-dim);line-height:1.7;max-width:460px}
+.story-item p{font-size:15.5px;color:var(--text-dim);line-height:1.7;max-width:460px;overflow-wrap:break-word}
 
 /* faq: native details/summary accordion -- zero JS cost, works everywhere */
 .faq-list{margin-top:40px;max-width:560px;margin-left:auto;margin-right:auto;text-align:left}
 .faq-item{border-bottom:1px solid var(--line-dk)}
-.faq-item summary{list-style:none;cursor:pointer;padding:18px 26px 18px 0;font-family:var(--disp);font-size:18px;font-weight:500;position:relative;color:var(--text)}
+.faq-item summary{list-style:none;cursor:pointer;padding:18px 26px 18px 0;font-family:var(--disp);font-size:18px;font-weight:500;position:relative;color:var(--text);overflow-wrap:break-word}
 .faq-item summary::-webkit-details-marker{display:none}
 .faq-item summary::after{content:"+";position:absolute;right:2px;top:16px;font-size:20px;color:var(--brass-soft);transition:transform .25s}
 .faq-item[open] summary::after{transform:rotate(45deg)}
-.faq-item p{font-size:15px;color:var(--text-dim);line-height:1.7;padding:0 0 20px}
+.faq-item p{font-size:15px;color:var(--text-dim);line-height:1.7;padding:0 0 20px;overflow-wrap:break-word}
 
 /* hotels: small cards inside the "Getting There" block */
-.hotel-list{margin-top:24px;display:grid;gap:1px;background:var(--line-dk);border:1px solid var(--line-dk)}
+/* grid-template-columns:minmax(0,1fr) is load-bearing: a grid with no explicit column sizing
+   defaults to "auto", which lets a track grow to fit its content's full max-content width
+   instead of staying pinned to the container -- the same overflow bug as an unstyled input,
+   just at the grid-track level rather than the form-control level. */
+.hotel-list{margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr);gap:1px;background:var(--line-dk);border:1px solid var(--line-dk)}
 .hotel-card{background:var(--surface);padding:16px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
-.hotel-card .name{font-family:var(--disp);font-size:17px}
-.hotel-card .detail{font-size:13.5px;color:var(--text-dim);margin-top:3px}
+.hotel-card>div:first-child{min-width:0}
+.hotel-card .name{font-family:var(--disp);font-size:17px;overflow-wrap:break-word}
+.hotel-card .detail{font-size:13.5px;color:var(--text-dim);margin-top:3px;overflow-wrap:break-word}
 .hotel-card .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-soft);white-space:nowrap}
 
 .rsvp-deadline{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-soft);margin:16px 0 0}
@@ -301,8 +311,8 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 
 .reg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:36px;justify-content:center}
 .reg-card{max-width:320px;margin:0 auto;width:100%;background:var(--surface);border:1px solid var(--line-dk);padding:24px}
-.reg-card h3{font-family:var(--disp);font-size:19px;font-weight:600;margin:0 0 5px}
-.reg-card p{font-size:14px;color:var(--text-dim);margin-bottom:12px}
+.reg-card h3{font-family:var(--disp);font-size:19px;font-weight:600;margin:0 0 5px;overflow-wrap:break-word}
+.reg-card p{font-size:14px;color:var(--text-dim);margin-bottom:12px;overflow-wrap:break-word}
 .reg-bar{height:2px;background:var(--line-dk);overflow:hidden;margin-bottom:9px}
 .reg-bar i{display:block;height:100%;background:var(--brass);position:relative;transition:width 1s cubic-bezier(.22,1,.36,1)}
 .reg-bar i::after{content:"";position:absolute;right:0;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--brass);box-shadow:0 0 6px 1px var(--brass-soft)}
