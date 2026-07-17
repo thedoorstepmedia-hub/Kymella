@@ -617,7 +617,9 @@ function createDiyaLight(canvas, opts = {}) {
     // the photo itself stays at full display resolution and full colour, never redrawn here.
     const hasPhoto = opts.photoImg && opts.photoImg.naturalWidth;
     if (hasPhoto){
-      ctx.fillStyle = `rgba(${hexToRgb(top)[0]},${hexToRgb(top)[1]},${hexToRgb(top)[2]},0.82)`;
+      // Darker at rest (was 0.82) so the light's arrival reads as a real brightening, not just
+      // a filter lifting -- the deeper the "before," the bigger the felt jump to "after."
+      ctx.fillStyle = `rgba(${hexToRgb(top)[0]},${hexToRgb(top)[1]},${hexToRgb(top)[2]},0.91)`;
       ctx.fillRect(0,0,W,H);
     } else {
       const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bottom); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
@@ -637,13 +639,19 @@ function createDiyaLight(canvas, opts = {}) {
         // Punch a hole in the dark veil where the light falls, so the actual photo shows
         // through -- same radius/growth timing as the light itself, so the reveal and the
         // glow always feel like the same event, not two separate things layered together.
+        // Full clear at the very center at steady state too (was capped at 0.95) -- with the
+        // veil now noticeably darker at rest, leaving even a faint residue at the touch point
+        // undercuts the "fully lit" payoff the darker before is supposed to set up.
         ctx.save(); ctx.globalCompositeOperation="destination-out";
         const hole=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius*0.85);
-        hole.addColorStop(0,`rgba(0,0,0,${Math.min(1,0.95*flare)})`); hole.addColorStop(0.55,`rgba(0,0,0,${0.55*washGrow})`); hole.addColorStop(1,`rgba(0,0,0,0)`);
+        hole.addColorStop(0,`rgba(0,0,0,${Math.min(1,flare)})`); hole.addColorStop(0.55,`rgba(0,0,0,${0.55*washGrow})`); hole.addColorStop(1,`rgba(0,0,0,0)`);
         ctx.fillStyle=hole; ctx.fillRect(0,0,W,H); ctx.restore();
       }
+      // A real warm brightening on top of the revealed photo, not just the veil lifting --
+      // was 0.16/0.07, roughly doubled and given its own flare kick so the catch moment itself
+      // has a visible flash of extra warmth before settling to a steady glow.
       const wash=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,washRadius);
-      wash.addColorStop(0,`rgba(${br},${bg},${bb},${0.16*washGrow})`); wash.addColorStop(0.45,`rgba(${br},${bg},${bb},${0.07*washGrow})`); wash.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
+      wash.addColorStop(0,`rgba(${br},${bg},${bb},${Math.min(0.55,0.32*washGrow*flare)})`); wash.addColorStop(0.45,`rgba(${br},${bg},${bb},${Math.min(0.24,0.14*washGrow*flare)})`); wash.addColorStop(1,`rgba(${br},${bg},${bb},0)`);
       ctx.fillStyle=wash; ctx.fillRect(0,0,W,H);
       const radius=Math.min(W,H)*(0.32+Math.min(age*0.04,0.14))*flicker*flare;
       const rg=ctx.createRadialGradient(flame.x,flame.y,0,flame.x,flame.y,radius);
