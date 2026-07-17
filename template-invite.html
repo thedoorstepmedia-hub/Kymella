@@ -45,17 +45,55 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
    on independent transitions, so this overlaps the tail of the zoom as one continuous, graceful
    handoff rather than a hard stop-then-fade. */
 #sealGate.opened{pointer-events:none;opacity:0}
-.envelope-scene{position:absolute;inset:0;background:var(--seal-ink,#0E1F1C);display:flex;align-items:center;justify-content:center;padding:24px;perspective:1800px}
+/* A flat fill read as a solid-colour div, not a room the envelope sits in -- a soft radial
+   pool of light behind the object plus a whisper of grain gives the scene actual depth. */
+.envelope-scene{position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 46%, var(--seal-ink2,#152D28) 0%, var(--seal-ink,#0E1F1C) 72%);display:flex;align-items:center;justify-content:center;padding:24px;perspective:1800px}
+.envelope-scene::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px 180px}
 .envelope-group{display:flex;flex-direction:column;align-items:center;gap:30px;max-width:520px;width:100%}
 .envelope-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,239,227,.5);text-align:center}
 .envelope-names{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(24px,6.5vw,36px);color:#F5EFE3;text-align:center;line-height:1.2}
-/* Sized to dominate the scene (was 300px/72vw) and given its own perspective + a static
-   resting tilt so it reads as an object sitting in 3D space even before it opens. */
-.envelope-card{position:relative;width:min(460px,90vw);aspect-ratio:1.42/1;perspective:1800px;transform:rotateX(6deg);transform-style:preserve-3d}
+/* No static tilt: a real flat-lay photo (the reference this is now built from) isn't shot at a
+   3D angle at all -- the realism comes entirely from shadow layering and fold geometry, not
+   perspective. Kept preserve-3d/perspective since the flap still needs a real 3D context for
+   its own open animation below. */
+.envelope-card{position:relative;width:min(460px,90vw);aspect-ratio:1.42/1;perspective:1800px;transform-style:preserve-3d}
 .envelope-body-card{
-  position:absolute;inset:0;border-radius:4px;
-  background:linear-gradient(155deg,#fbf7ed,#eee3cc 58%,#e2d1ae);
-  box-shadow:0 2px 4px rgba(0,0,0,.35),0 16px 32px rgba(0,0,0,.42),0 50px 90px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.6);
+  position:absolute;inset:0;border-radius:4px;overflow:hidden;
+  background:linear-gradient(150deg,#fbf7ed 0%,#eee3cc 55%,#e2d1ae 100%);
+  /* Two layers, not one: a tight, darker shadow right at the edge (the card sits a hair proud
+     of the surface behind it) plus a much softer, wider ambient one. A single soft shadow is
+     the single biggest "this is a flat graphic" tell -- real flat-lay photography always shows
+     both. */
+  box-shadow:
+    0 1px 2px rgba(20,14,6,.4),
+    0 3px 6px rgba(20,14,6,.25),
+    0 18px 40px -6px rgba(10,7,3,.5),
+    0 34px 70px -10px rgba(10,7,3,.38),
+    inset 0 1px 0 rgba(255,255,255,.6);
+}
+/* A soft top-lit falloff across the whole card (body AND flap, so the light direction agrees
+   across the fold instead of each piece looking separately lit) -- not a shiny streak, just
+   enough gradient to say the object is sitting under a real light source. */
+.envelope-card::before{
+  content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:4px;
+  background:
+    radial-gradient(ellipse 90% 65% at 38% -8%, rgba(255,255,255,.4) 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(ellipse 80% 55% at 65% 112%, rgba(0,0,0,.10) 0%, rgba(0,0,0,0) 60%);
+}
+/* The side flaps folded underneath a real envelope leave two faint creases running from each
+   side edge to the seal -- the top flap's own crease is already the flap element's real clipped
+   edge (with its own drop-shadow) so it doesn't need duplicating here, only the two side ones,
+   which real fold lines always show as a light/shadow line PAIR, not one flat stroke. */
+.envelope-creases{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+.envelope-creases line{vector-effect:non-scaling-stroke}
+.crease-light{stroke:rgba(255,255,255,.45)}
+.crease-shadow{stroke:rgba(70,50,20,.22)}
+/* Fine paper-fibre grain (SVG turbulence, not an image asset) so the gradient reads as stock,
+   not a flat CSS fill. */
+.envelope-body-card::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:140px 140px;
 }
 .envelope-flap{
   position:absolute;top:0;left:0;right:0;height:62%;
@@ -69,8 +107,9 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 /* Two faces instead of one flat gradient, so the flap shows a genuine underside -- the
    brand's own ink/brass lining -- as it lifts, rather than the same paper color flipping
    through itself. */
-.envelope-flap-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.envelope-flap-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
 .envelope-flap-front{background:linear-gradient(160deg,#ffffff,#e9e0cf)}
+.envelope-flap-front::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:140px 140px}
 .envelope-flap-back{background:linear-gradient(200deg,var(--seal-brass-deep,#8E6836),var(--seal-ink,#0E1F1C));transform:rotateX(180deg)}
 /* A real cast shadow beneath the flap, distinct from the flap's own drop-shadow filter --
    this one deliberately GROWS as the flap actually lifts off the surface, rather than staying
@@ -81,6 +120,15 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
   opacity:0;transition:opacity 1.05s cubic-bezier(.6,.08,.3,1);pointer-events:none;
 }
 .envelope-flap.open ~ .flap-cast-shadow{opacity:1}
+/* A soft contact shadow directly under the seal, distinct from the seal's own drop shadow --
+   this is what grounds it to the paper instead of looking like it's floating a few pixels
+   above the flap. */
+.seal-ground{
+  position:absolute;top:62%;left:50%;transform:translate(-50%,-38%);
+  width:78px;height:32px;border-radius:50%;z-index:3;
+  background:radial-gradient(ellipse, rgba(20,14,6,.4) 0%, rgba(20,14,6,0) 72%);
+  pointer-events:none;transition:opacity .4s ease;
+}
 .wax-seal{
   position:absolute;top:62%;left:50%;transform:translate(-50%,-50%);
   width:64px;height:64px;border-radius:50%;
@@ -274,11 +322,18 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
       <div class="envelope-names" id="envelopeNames"></div>
       <div class="envelope-card">
         <div class="envelope-body-card"></div>
+        <svg class="envelope-creases" viewBox="0 0 400 282" preserveAspectRatio="none">
+          <line class="crease-light" x1="1" y1="141" x2="199" y2="174" stroke-width="1"></line>
+          <line class="crease-shadow" x1="2" y1="142.5" x2="200" y2="175.5" stroke-width="1.1"></line>
+          <line class="crease-light" x1="399" y1="141" x2="201" y2="174" stroke-width="1"></line>
+          <line class="crease-shadow" x1="398" y1="142.5" x2="200" y2="175.5" stroke-width="1.1"></line>
+        </svg>
         <div class="envelope-flap" id="envelopeFlap">
           <div class="envelope-flap-face envelope-flap-front"></div>
           <div class="envelope-flap-face envelope-flap-back"></div>
         </div>
         <div class="flap-cast-shadow"></div>
+        <div class="seal-ground" id="sealGround"></div>
         <div class="wax-seal" id="waxSeal"><span id="sealInitials"></span></div>
       </div>
       <div class="seal-hint" id="sealHint">Touch to open</div>
@@ -790,7 +845,10 @@ function mountSealGate(palette, coupleNames){
     // The zoom itself stays slow and deliberate (1.2s) -- that's the part that's supposed to
     // read as a real camera push, not a rushed cut. The seal breaks about a third of the way
     // in, once it's visibly grown close.
-    setTimeout(() => { if (waxSeal) waxSeal.style.opacity = "0"; }, 420);
+    setTimeout(() => {
+      if (waxSeal) waxSeal.style.opacity = "0";
+      const ground = document.getElementById("sealGround"); if (ground) ground.style.opacity = "0";
+    }, 420);
 
     // But once the seal is gone, there's nothing left to look at -- the handoff to the real
     // page should be quick from there, not wait around for the slow zoom to fully finish. This
