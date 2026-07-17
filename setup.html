@@ -208,6 +208,7 @@ const S = {
   hotels: [],
   registry_note:"Your presence is the greatest gift. Should you wish to contribute, we've set aside a few funds below.",
   funds: [],
+  voice_notes_enabled: false, // off by default -- couples opt in, not out
   guests: [],   // computed union of _pasted + _imported -- never written to directly
   _pasted: [],  // derived fresh from the paste textarea on every keystroke
   _imported: [], // accumulated from CSV/XLSX imports -- untouched by the textarea
@@ -370,6 +371,13 @@ function draw(){
           <input placeholder="Your payment link (paypal.me/…, Interac, Stripe)" value="${esc(f.external_url)}" onchange="S.funds[${i}].external_url=this.value">
         </div></div>`).join("")}
       <button class="addrow" style="margin-top:${S.funds.length?0:"26px"}" onclick="S.funds.push({title:'',description:'',goal:'',external_url:''});draw()">+ Add a fund</button>
+      <div class="tglrow" style="margin-top:26px">
+        <div style="flex:1">
+          <div class="t">Something to keep, in their own voice</div>
+          <div class="d">Guests can leave you a brief spoken message when they RSVP — the kind of thing you'll still have long after the wedding.</div>
+        </div>
+        <button class="tgl ${S.voice_notes_enabled?"on":""}" onclick="S.voice_notes_enabled=!S.voice_notes_enabled;draw()" aria-label="Toggle voice notes"></button>
+      </div>
       ${navHtml(true, "Continue", true)}`;
   }
   else if (name==="guests"){
@@ -627,6 +635,7 @@ async function publish(){
       hotels_json: S.hotels.filter(h=>h.name),
       faq_json: buildFaq(),
       registry_note: S.funds.length ? S.registry_note : "",
+      voice_notes_enabled: !!S.voice_notes_enabled,
       ...(CHOSEN_EXPERIENCE ? { hero_effect: CHOSEN_EXPERIENCE.effect, palette_json: CHOSEN_EXPERIENCE.palette } : {}),
     }, admin_key);
 

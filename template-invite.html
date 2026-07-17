@@ -322,6 +322,22 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 .ev-check input:checked + .box svg{opacity:1;transform:scale(1)}
 .rsvp-msg{font-size:12px;text-align:center;margin-top:9px;display:none}
 
+/* voice note: opt-in per wedding, offered right after RSVP -- not a gate, entirely optional,
+   and the existing "note for the couple" textarea already covers the write-instead path, so
+   this doesn't duplicate a text UI, just adds a second way to say something. */
+.voice-widget{margin-top:28px;padding-top:26px;border-top:1px solid var(--line-dk)}
+.voice-widget .vw-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-soft);margin-bottom:14px}
+.voice-widget .vw-sub{font-size:13px;color:var(--text-dim);margin-top:4px}
+.vw-btn{width:64px;height:64px;border-radius:50%;margin:0 auto 12px;background:radial-gradient(circle at 35% 30%,var(--brass-soft),var(--brass) 60%,var(--brass-deep) 100%);box-shadow:0 6px 18px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;transition:transform .15s ease}
+.vw-btn:active{transform:scale(.94)}
+.vw-btn svg{width:24px;height:24px;color:var(--ink)}
+.vw-btn.recording{background:radial-gradient(circle at 35% 30%,#e8a89a,#C0392B 60%,#8e2d20 100%);animation:vwPulse 1.6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,.3),0 0 0 0 rgba(192,57,43,.5)}50%{box-shadow:0 6px 18px rgba(0,0,0,.3),0 0 0 12px rgba(192,57,43,0)}}
+.vw-timer{font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums;margin:8px 0 2px}
+.voice-widget audio{width:100%;max-width:340px;margin:14px auto 4px;display:block}
+.voice-widget .btn-row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.voice-widget .vw-err{font-size:12.5px;color:#C0392B;margin-top:10px;max-width:320px;margin-left:auto;margin-right:auto;line-height:1.5}
+
 .reg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:36px;justify-content:center}
 .reg-card{max-width:320px;margin:0 auto;width:100%;background:var(--surface);border:1px solid var(--line-dk);padding:24px}
 .reg-card h3{font-family:var(--disp);font-size:19px;font-weight:600;margin:0 0 5px;overflow-wrap:break-word}
@@ -475,6 +491,35 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
       <div id="rsvpDone" style="display:none;text-align:center;padding:10px 0">
         <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're on the list ✦</p>
         <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you. We can't wait to celebrate with you.</p>
+
+        <div class="voice-widget" id="voiceWidget" style="display:none">
+          <div class="vw-label">Something to keep, in their own voice</div>
+          <div id="vwIdle">
+            <button class="vw-btn" id="vwRecordBtn" aria-label="Record a voice note" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+            </button>
+            <div class="vw-sub">Leave a brief spoken message for the couple — up to 20 seconds, entirely optional. Prefer to write instead? Use the note field above next time you edit your reply.</div>
+          </div>
+          <div id="vwRecording" style="display:none">
+            <button class="vw-btn recording" id="vwStopBtn" aria-label="Stop recording" type="button">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+            </button>
+            <div class="vw-timer" id="vwTimer">0:00</div>
+            <div class="vw-sub">Recording · tap to stop</div>
+          </div>
+          <div id="vwPreview" style="display:none">
+            <audio controls id="vwPlayer"></audio>
+            <div class="btn-row">
+              <button class="btn btn-quiet" id="vwRerecordBtn" type="button">Re-record</button>
+              <button class="btn btn-brass" id="vwSendBtn" type="button">Send to the couple</button>
+            </div>
+          </div>
+          <div id="vwSent" style="display:none">
+            <div class="vw-label" style="color:var(--brass-deep)">Sent ✦</div>
+            <div class="vw-sub">Thank you — they'll treasure this.</div>
+          </div>
+          <div class="vw-err" id="vwErr" style="display:none"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1189,6 +1234,8 @@ function renderInvite(){
   };
 
   renderRegistry();
+  // Off by default -- only shows at all if the couple opted in during setup.
+  if ($("voiceWidget")) $("voiceWidget").style.display = d.wedding.voice_notes_enabled ? "block" : "none";
 
   $("rParty").max = d.guest.max_party;
   // Plus-one clarity: state explicitly how many seats this guest holds, right where they'll
@@ -1307,6 +1354,83 @@ $("rsvpForm").addEventListener("submit", async e => {
     }, 500);
   }catch(e){ msg.textContent="That didn't go through. Please try again."; msg.style.color="#A4523F"; msg.style.display="block"; btn.disabled=false; btn.textContent="Send reply"; btn.classList.remove("pulsing"); }
 });
+
+/* ---- voice note: opt-in, offered right after a fresh RSVP submit. Entirely optional -- the
+   existing note textarea in the form above already covers "I'd rather write it." ---- */
+(function initVoiceWidget(){
+  const idleEl = $("vwIdle"), recEl = $("vwRecording"), prevEl = $("vwPreview"), sentEl = $("vwSent"), errEl = $("vwErr");
+  if (!idleEl) return; // markup not present on some older cached page loads mid-deploy
+  const VOICE_MAX_MS = 20000; // 20s cap, matches the copy in the widget
+  let mediaRecorder = null, chunks = [], stream = null, startedAt = 0, timerInt = null;
+
+  function showPanel(which){
+    [idleEl, recEl, prevEl, sentEl].forEach(el => { if (el) el.style.display = (el === which ? "block" : "none"); });
+    errEl.style.display = "none";
+  }
+  // showPanel() always hides the error box (it's the right behaviour for every other call
+  // site), so the error text has to go on *after* it here, not before -- otherwise showPanel's
+  // own unconditional hide immediately undoes the "block" this just set.
+  function showError(text){ showPanel(idleEl); errEl.textContent = text; errEl.style.display = "block"; }
+
+  async function startRecording(){
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined"){
+      showError("Voice notes need a more modern browser -- try opening this link in a current version of Safari or Chrome, or use the note field above instead.");
+      return;
+    }
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }catch(e){
+      showError("Microphone access is off. Check your browser's site settings and allow the microphone, then try again -- or just use the note field above, no mic needed.");
+      return;
+    }
+    chunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
+      $("vwPlayer").src = URL.createObjectURL(blob);
+      $("vwPlayer").dataset.blobType = blob.type;
+      stream.getTracks().forEach(t => t.stop());
+      showPanel(prevEl);
+    };
+    mediaRecorder.start();
+    startedAt = Date.now();
+    showPanel(recEl);
+    timerInt = setInterval(() => {
+      const ms = Date.now() - startedAt;
+      const secs = Math.floor(ms / 1000);
+      $("vwTimer").textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
+      if (ms >= VOICE_MAX_MS) stopRecording();
+    }, 200);
+  }
+  function stopRecording(){
+    clearInterval(timerInt);
+    if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+  }
+  async function sendRecording(){
+    const player = $("vwPlayer");
+    const sendBtn = $("vwSendBtn");
+    sendBtn.disabled = true; sendBtn.textContent = "Sending…";
+    try{
+      const blob = await (await fetch(player.src)).blob();
+      const reader = new FileReader();
+      const dataUrl = await new Promise((resolve, reject) => { reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+      const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/voice`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ audio: dataUrl }) });
+      if (!r.ok) throw new Error();
+      showPanel(sentEl);
+    }catch(e){
+      showError("That recording didn't send -- please try again, or use the note field above instead.");
+    }finally{
+      sendBtn.disabled = false; sendBtn.textContent = "Send to the couple";
+    }
+  }
+
+  $("vwRecordBtn").addEventListener("click", startRecording);
+  $("vwStopBtn").addEventListener("click", stopRecording);
+  $("vwRerecordBtn").addEventListener("click", () => showPanel(idleEl));
+  $("vwSendBtn").addEventListener("click", sendRecording);
+})();
+
 $("songForm").addEventListener("submit", async e => {
   e.preventDefault();
   const input = $("songInput"), msg = $("songMsg");
