@@ -1361,7 +1361,7 @@ $("rsvpForm").addEventListener("submit", async e => {
   const idleEl = $("vwIdle"), recEl = $("vwRecording"), prevEl = $("vwPreview"), sentEl = $("vwSent"), errEl = $("vwErr");
   if (!idleEl) return; // markup not present on some older cached page loads mid-deploy
   const VOICE_MAX_MS = 20000; // 20s cap, matches the copy in the widget
-  let mediaRecorder = null, chunks = [], stream = null, startedAt = 0, timerInt = null;
+  let mediaRecorder = null, chunks = [], stream = null, startedAt = 0, timerInt = null, recordedBlob = null;
 
   function showPanel(which){
     [idleEl, recEl, prevEl, sentEl].forEach(el => { if (el) el.style.display = (el === which ? "block" : "none"); });
@@ -1383,17 +1383,29 @@ $("rsvpForm").addEventListener("submit", async e => {
       showError("Microphone access is off. Check your browser's site settings and allow the microphone, then try again -- or just use the note field above, no mic needed.");
       return;
     }
-    chunks = [];
+    chunks = []; recordedBlob = null;
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
     mediaRecorder.onstop = () => {
-      const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
-      $("vwPlayer").src = URL.createObjectURL(blob);
-      $("vwPlayer").dataset.blobType = blob.type;
+      recordedBlob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
       stream.getTracks().forEach(t => t.stop());
+      // A real ~20s voice note is tens of KB at minimum -- a handful of bytes means the
+      // recording never actually captured audio (seen in practice: MediaRecorder relying on a
+      // single chunk delivered only at stop() can hand back essentially nothing on some
+      // browsers). Catching that here, before the guest sends it, beats the couple discovering
+      // an unplayable file days later.
+      if (recordedBlob.size < 800){
+        showError("That recording came out empty -- this can happen on some phones. Please try again, or use the note field above instead.");
+        return;
+      }
+      $("vwPlayer").src = URL.createObjectURL(recordedBlob);
       showPanel(prevEl);
     };
-    mediaRecorder.start();
+    // A timeslice (chunk requested every 250ms) instead of relying on one single chunk
+    // delivered only when stop() is called -- the single-final-chunk pattern is the less
+    // reliable of the two across real browser implementations, which is what produced the
+    // empty recordings this replaces.
+    mediaRecorder.start(250);
     startedAt = Date.now();
     showPanel(recEl);
     timerInt = setInterval(() => {
@@ -1408,13 +1420,16 @@ $("rsvpForm").addEventListener("submit", async e => {
     if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
   }
   async function sendRecording(){
-    const player = $("vwPlayer");
     const sendBtn = $("vwSendBtn");
     sendBtn.disabled = true; sendBtn.textContent = "Sending…";
     try{
-      const blob = await (await fetch(player.src)).blob();
+      // Uses the Blob kept in memory from onstop directly, rather than re-fetching it back out
+      // through its own blob: object URL (what this used to do) -- that extra round-trip
+      // through fetch() was the other suspect alongside the single-chunk recording pattern for
+      // why real recordings were arriving as a couple of empty bytes.
+      if (!recordedBlob) throw new Error("no recording");
       const reader = new FileReader();
-      const dataUrl = await new Promise((resolve, reject) => { reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+      const dataUrl = await new Promise((resolve, reject) => { reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(recordedBlob); });
       const r = await fetch(`${API_BASE}/api/invite/${TOKEN}/voice`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ audio: dataUrl }) });
       if (!r.ok) throw new Error();
       showPanel(sentEl);
