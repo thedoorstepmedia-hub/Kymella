@@ -1235,7 +1235,12 @@ function renderInvite(){
 
   renderRegistry();
   // Off by default -- only shows at all if the couple opted in during setup.
-  if ($("voiceWidget")) $("voiceWidget").style.display = d.wedding.voice_notes_enabled ? "block" : "none";
+  if ($("voiceWidget")) {
+    $("voiceWidget").style.display = d.wedding.voice_notes_enabled ? "block" : "none";
+    // One per guest -- if they already sent one (this visit or a prior one), show the "sent"
+    // state instead of offering to record again.
+    if (d.guest.has_voice_note && window.__markVoiceSent) window.__markVoiceSent();
+  }
 
   $("rParty").max = d.guest.max_party;
   // Plus-one clarity: state explicitly how many seats this guest holds, right where they'll
@@ -1451,6 +1456,12 @@ $("rsvpForm").addEventListener("submit", async e => {
   $("vwStopBtn").addEventListener("click", stopRecording);
   $("vwRerecordBtn").addEventListener("click", () => showPanel(idleEl));
   $("vwSendBtn").addEventListener("click", sendRecording);
+
+  // Called from renderInvite() once the guest's own data comes back -- a guest who already sent
+  // a voice note (on a prior visit, or by reopening this same link) should just see the "sent"
+  // state, not the record button again. This IIFE runs before that fetch resolves, so
+  // renderInvite() needs a hook to reach into it rather than checking state that isn't loaded yet.
+  window.__markVoiceSent = () => showPanel(sentEl);
 })();
 
 $("songForm").addEventListener("submit", async e => {
