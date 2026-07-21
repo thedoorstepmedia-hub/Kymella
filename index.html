@@ -269,11 +269,29 @@ function hexToRgb(hex){ const n=parseInt((hex||"#000000").replace("#",""),16); r
 function createWaterRipple(canvas, opts = {}) {
   const ctx = canvas.getContext("2d");
   let W, H, DPR;
-  const RES_W = 150, RES_H = 84, N = RES_W * RES_H;
+  // Grid shape now tracks the canvas's own aspect ratio (recomputed on resize), rather than a
+  // fixed 150x84 landscape shape applied to every device. A fixed-shape grid stretched
+  // non-uniformly to fill a tall portrait phone canvas turns genuinely circular splashes into
+  // visibly elongated ovals -- exactly what was being reported as "the ripples look stretched
+  // on my phone." Cell count is kept close to the original 150*84 so simulation cost and the
+  // softness of the water are unchanged; only the grid's shape adapts.
+  const TARGET_CELLS = 150 * 84;
+  let RES_W = 150, RES_H = 84, N = RES_W * RES_H;
   let bufA = new Float32Array(N), bufB = new Float32Array(N), bufC = new Float32Array(N);
   const DAMPING = 0.985;
   const off = document.createElement("canvas"); off.width = RES_W; off.height = RES_H;
-  const offCtx = off.getContext("2d"); const imgData = offCtx.createImageData(RES_W, RES_H);
+  const offCtx = off.getContext("2d"); let imgData = offCtx.createImageData(RES_W, RES_H);
+  function regrid(newW, newH){
+    if (!newW || !newH) return;
+    const aspect = Math.max(0.2, Math.min(5, newW / newH));
+    const resH = Math.max(20, Math.round(Math.sqrt(TARGET_CELLS / aspect)));
+    const resW = Math.max(20, Math.round(resH * aspect));
+    if (resW === RES_W && resH === RES_H) return;
+    RES_W = resW; RES_H = resH; N = RES_W * RES_H;
+    bufA = new Float32Array(N); bufB = new Float32Array(N); bufC = new Float32Array(N);
+    off.width = RES_W; off.height = RES_H;
+    imgData = offCtx.createImageData(RES_W, RES_H);
+  }
   const BASE_TOP = hexToRgb(opts.colorTop || "#0E1F1C"), BASE_BOTTOM = hexToRgb(opts.colorBottom || "#152D28");
   // Colourless water, matching the live invite: near-white highlights so palette colours live
   // in the background only, never tint the water itself.
@@ -314,9 +332,9 @@ function createWaterRipple(canvas, opts = {}) {
   // Was canvas.width=canvas.clientWidth with no DPR scaling -- the only one of the three hero
   // effects missing it (diya/frost both do this already). On any retina/high-DPI screen
   // that renders the canvas at a lower resolution than the display, which the browser then
-  // stretches to fill -- compounding with the intentional 150x84 simulation-grid upscale below
-  // to read as soft/aliased "lines" rather than clean water.
-  function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  // stretches to fill -- compounding with the simulation-grid upscale below to read as
+  // soft/aliased "lines" rather than clean water.
+  function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); regrid(W,H); }
   window.addEventListener("resize", resize); resize();
   function toGrid(cx,cy){ const rect=canvas.getBoundingClientRect(); return { gx: Math.floor(((cx-rect.left)/rect.width)*RES_W), gy: Math.floor(((cy-rect.top)/rect.height)*RES_H) }; }
   function eventXY(e){ if (e.touches&&e.touches[0]) return [e.touches[0].clientX,e.touches[0].clientY]; return [e.clientX,e.clientY]; }
