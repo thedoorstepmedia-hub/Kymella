@@ -489,8 +489,8 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
         <p class="rsvp-msg" id="rMsg"></p>
       </form>
       <div id="rsvpDone" style="display:none;text-align:center;padding:10px 0">
-        <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're on the list ✦</p>
-        <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you. We can't wait to celebrate with you.</p>
+        <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're celebrating with us ✦</p>
+        <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you for saying yes — we can't wait to see you there.</p>
 
         <div class="voice-widget" id="voiceWidget" style="display:none">
           <div class="vw-label">Send them your best wishes, in your own voice</div>
@@ -1079,7 +1079,7 @@ function renderInvite(){
   const status = general ? "Pending" : d.guest.rsvp_status;
   if (status === "Accepted"){
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>we can't wait</em>`;
-    $("heroSub").textContent = `You're on the list. We're so glad you'll be there.`;
+    $("heroSub").textContent = `Your seat's saved. We're so glad you'll be there.`;
     $("heroCta").textContent = "View my response";
   } else if (status === "Declined"){
     $("heroGreeting").innerHTML = `Dear ${esc(first)}, <em>you'll be missed</em>`;
