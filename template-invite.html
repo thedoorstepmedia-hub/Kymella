@@ -373,6 +373,14 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
   box-shadow:0 12px 18px rgba(0,0,0,.22), 0 28px 48px rgba(0,0,0,.22);transform:rotate(-1.4deg)}
 #closingPhotoSection .moment-photo.as-polaroid{transform:rotate(1.6deg)}
 .moment-photo.as-polaroid .polaroid-shake-hint{display:none}
+/* Unlike the hero photo, these two slots have never had a couple-set crop/focus position --
+   forcing them into the hero's fixed square with a guessed default position is what was
+   cropping them oddly. Let the window take the photo's own natural aspect instead (the image
+   back in normal flow establishes the height; .fog/.sheen still overlay it correctly since
+   .polaroid-win stays position:relative), same as these photos always displayed before
+   becoming polaroids -- just bordered now, not cropped. */
+.moment-photo.as-polaroid .polaroid-win{aspect-ratio:auto}
+.moment-photo.as-polaroid .polaroid-win img{position:static;width:100%;height:auto;object-fit:unset;display:block}
 
 .rsvp-card{max-width:460px;margin:36px auto 0;background:var(--surface);border:1px solid var(--line-dk);border-radius:2px;padding:32px 28px;text-align:left}
 .rsvp-row{margin-bottom:22px}
@@ -1098,7 +1106,7 @@ function mountScrollPolaroid(containerEl, c){
   containerEl.classList.remove("developing", "developed");
   containerEl.innerHTML = `
     <div class="polaroid-win">
-      <img src="${c.url}" alt="" style="object-position:50% ${c.focus ?? 40}%">
+      <img src="${c.url}" alt="">
       <div class="fog"></div>
       <div class="sheen"></div>
     </div>
@@ -1397,7 +1405,7 @@ function renderInvite(){
     $("storySection").style.display = "block";
     leadEl.style.display = "block";
     if (isPolaroid){
-      mountScrollPolaroid(leadEl, { url: p2.url, focus: p2.focus, cap: d.wedding.venue || "our celebration", sub: d.wedding.wedding_date ? new Date(d.wedding.wedding_date).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"}) : "" });
+      mountScrollPolaroid(leadEl, { url: p2.url, cap: d.wedding.venue || "our celebration", sub: d.wedding.wedding_date ? new Date(d.wedding.wedding_date).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"}) : "" });
     } else {
       let img = leadEl.querySelector("img"); if (!img){ img = document.createElement("img"); img.alt=""; leadEl.innerHTML=""; leadEl.appendChild(img); }
       img.src = p2.url;
@@ -1411,7 +1419,7 @@ function renderInvite(){
   if (p3){
     closingEl.style.display = "block";
     if (isPolaroid && closingPhotoEl){
-      mountScrollPolaroid(closingPhotoEl, { url: p3.url, focus: p3.focus, cap: "see you there", sub: "we can't wait" });
+      mountScrollPolaroid(closingPhotoEl, { url: p3.url, cap: "see you there", sub: "we can't wait" });
     } else if (closingPhotoEl){
       let img = closingPhotoEl.querySelector("img"); if (!img){ img = document.createElement("img"); img.alt=""; closingPhotoEl.innerHTML=""; closingPhotoEl.appendChild(img); }
       img.src = p3.url;
