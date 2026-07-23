@@ -180,7 +180,7 @@ try {
 // only overrides when a recognized effect name is actually given.
 if (FOUNDER_KEY) {
   const effectParam = new URLSearchParams(location.search).get("effect");
-  if (["ripple","diya","frost"].includes(effectParam)) {
+  if (["ripple","diya","frost","polaroid"].includes(effectParam)) {
     CHOSEN_EXPERIENCE = { effect: effectParam, palette: { ink:"#0E1F1C", ink2:"#152D28", brass:"#B8874A", brassSoft:"#E8C9A0", brassDeep:"#8E6836", mist:"#F5EFE3" } };
   }
 }
