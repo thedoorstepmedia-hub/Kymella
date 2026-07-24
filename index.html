@@ -320,7 +320,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <p class="sb-note">Storybook themes are illustrated once, in one signature palette designed to match their art — the theme <em>is</em> the palette, so there's nothing to tune here.</p>
     </div>
     <div class="picker-cta">
-      <button class="btn btn-brass" style="width:100%" onclick="goToExperience()" id="ctaBtn">Try it with your names</button>
+      <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="ctaBtn">Get Started</button>
       <p class="picker-fine" id="ctaFine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
     </div>
     <div class="picker-examples">
@@ -332,7 +332,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 
 <div class="demo-overlay" id="demoOverlay">
   <button class="demo-close" onclick="closeDemo()" aria-label="Close preview">&times;</button>
-  <button class="demo-cta btn btn-brass" id="demoCta" onclick="goToExperienceFromDemo()">Make Your Own — $499 CAD</button>
+  <button class="demo-cta btn btn-brass" id="demoCta" onclick="goToCheckoutFromDemo()">Make Your Own — $499 CAD</button>
   <iframe id="demoIframe" src="about:blank" title="Wedding invite preview"></iframe>
 </div>
 
@@ -341,7 +341,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <div class="eyebrow">How It Works</div>
     <h2 class="h2 up">Ten minutes to set up. <em>Yours</em> from the first touch.</h2>
     <div class="steps3">
-      <div class="step up"><div class="n">1</div><h3>Choose your experience</h3><p>Pick the hero effect and palette above. This is the one your guests will experience, not a description of it.</p></div>
+      <div class="step up"><div class="n">1</div><h3 id="step1Title">Choose your experience</h3><p id="step1Text">Pick the hero effect and palette above. This is the one your guests will experience, not a description of it.</p></div>
       <div class="step up"><div class="n">2</div><h3>Tell us your story</h3><p>Names, date, venue, events, dress code, registry, guest list: a short self-serve wizard, nothing technical.</p></div>
       <div class="step up"><div class="n">3</div><h3>Get your links, immediately</h3><p>Your live invite link and your private RSVP dashboard are ready the moment you finish. Send invitations yourself, whenever you're ready.</p></div>
     </div>
@@ -353,7 +353,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <div class="eyebrow">What's Included</div>
     <h2 class="h2 up">Everything for <em>one</em> celebration</h2>
     <div class="feat-grid">
-      <div class="feat up"><h3>The interactive invitation</h3><p>Water, flame, or frost: a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.</p></div>
+      <div class="feat up"><h3 id="feat1Title">The interactive invitation</h3><p id="feat1Text">Water, flame, or frost: a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.</p></div>
       <div class="feat up"><h3>RSVPs that run themselves</h3><p>Attendance, party size, meal choices, allergies, transport, per-event attendance for multi-day celebrations, collected automatically.</p></div>
       <div class="feat up"><h3>Your private dashboard</h3><p>Every guest, every reply, a kitchen-ready allergy summary, and one-click CSV export, yours for the whole engagement.</p></div>
       <div class="feat up"><h3>Gentle reminders</h3><p>Guests who haven't replied get a warm nudge. Everyone attending gets final details 48 hours out. You never chase anyone.</p></div>
@@ -373,14 +373,14 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <div class="price"><small>$</small>499</div>
       <div class="price-sub">CAD · once · no subscription</div>
       <div class="plist">
-        <div>✦ Your chosen hero effect, in your palette</div>
+        <div id="priceBullet1">✦ Your chosen hero effect, in your palette</div>
         <div>✦ Unlimited guests, each with a personal invitation link</div>
         <div>✦ Full RSVP management, meal counts, and dashboard</div>
         <div>✦ Automatic reminders & final-details messages</div>
         <div>✦ Optional guest voice notes, yours to keep</div>
         <div>✦ Registry funds, paid directly to you</div>
       </div>
-      <button class="btn btn-brass" style="width:100%" onclick="goToExperience()">Try it with your names</button>
+      <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="priceCta">Get Started</button>
       <p class="price-fine">Secure checkout · set up in about ten minutes</p>
     </div>
 
@@ -685,6 +685,12 @@ const STORYBOOK_THEMES = [
   { key:"fable", label:"Fable", tag:"Live" },
   { key:"soon1", label:"More on the way", tag:"Coming soon", soon:true },
 ];
+// Fable's own fixed palette (matches storybook-fable.html's --ink/--mist/--coral-deep tokens
+// exactly) -- applied to the SAME site-wide CSS custom properties the interactive palettes use,
+// so picking Storybook re-skins the whole page (nav accent, every button, every section below
+// the fold), not just the hero. Reverting to Interactive Experiences re-applies whichever
+// interactive palette was last selected.
+const FABLE_PALETTE = { ink:"#3A2E22", ink2:"#4F3F2E", ink3:"#6B5745", mist:"#FBF3E4", mistDim:"#F0E4CC", brass:"#B33953", brassSoft:"#EDA1AE", brassDeep:"#8E2E42" };
 
 let effectIdx = 0, paletteIdx = 0, sbIdx = 0, category = "experience", heroInstance = null;
 
@@ -835,23 +841,43 @@ function setCategory(cat){
   category = cat;
   const isExp = cat === "experience";
   document.getElementById("pickerHero").classList.toggle("sb-mode", !isExp);
+  document.body.classList.toggle("sb-mode", !isExp);
   document.getElementById("catExpBtn").classList.toggle("active", isExp);
   document.getElementById("catSbBtn").classList.toggle("active", !isExp);
   document.getElementById("experienceControls").style.display = isExp ? "" : "none";
   document.getElementById("experiencePaletteRow").style.display = isExp ? "" : "none";
   document.getElementById("storybookControls").style.display = isExp ? "none" : "";
+
+  // Re-skins the WHOLE page, not just the hero -- these CSS custom properties drive the nav
+  // accent, every button, and every section below the fold, so switching category has to
+  // re-apply them site-wide. Otherwise the page keeps showing whichever interactive palette
+  // was last mounted, bleeding into a category it no longer belongs to.
+  applyPalette(isExp ? PALETTES[paletteIdx] : FABLE_PALETTE);
+
   if (isExp){
     document.getElementById("modeEyebrow").textContent = "Touch It Before You Buy It";
     document.getElementById("modeHeadline").innerHTML = "A wedding site<br><em>your guests will actually touch</em>";
     document.getElementById("modeSub").textContent = "Four real, physics-driven effects, not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.";
-    document.getElementById("ctaBtn").textContent = "Try it with your names";
+    document.getElementById("ctaBtn").textContent = "Get Started";
     document.getElementById("ctaFine").textContent = "$499 CAD · once · no subscription · you'll set up names, date, and guests next";
+    document.getElementById("step1Title").textContent = "Choose your experience";
+    document.getElementById("step1Text").textContent = "Pick the hero effect and palette above. This is the one your guests will experience, not a description of it.";
+    document.getElementById("feat1Title").textContent = "The interactive invitation";
+    document.getElementById("feat1Text").textContent = "Water, flame, or frost: a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.";
+    document.getElementById("priceBullet1").textContent = "✦ Your chosen hero effect, in your palette";
+    document.getElementById("priceCta").textContent = "Get Started";
   } else {
     document.getElementById("modeEyebrow").textContent = "A New Category";
     document.getElementById("modeHeadline").innerHTML = "A wedding site<br><em>illustrated like a storybook</em>";
     document.getElementById("modeSub").textContent = "No touch effects here — each Storybook theme is hand-illustrated once, animated throughout, and comes in its own fixed, matching palette.";
-    document.getElementById("ctaBtn").textContent = "Try the Fable theme";
+    document.getElementById("ctaBtn").textContent = "Get the Fable Theme";
     document.getElementById("ctaFine").textContent = "$499 CAD · once · no subscription · same wizard, same dashboard, same RSVPs";
+    document.getElementById("step1Title").textContent = "Choose your theme";
+    document.getElementById("step1Text").textContent = "Pick your Storybook theme above. Every scene, animation, and detail is already illustrated and matched to it — there's no effect or palette to configure.";
+    document.getElementById("feat1Title").textContent = "The illustrated invitation";
+    document.getElementById("feat1Text").textContent = "A fully illustrated, animated scene — hand-drawn art, not a template. Built for atmosphere and story, not a touch effect.";
+    document.getElementById("priceBullet1").textContent = "✦ Your chosen Storybook theme, fully illustrated";
+    document.getElementById("priceCta").textContent = "Get the Fable Theme";
   }
   renderControls();
   mount();
@@ -860,20 +886,35 @@ function setCategory(cat){
 renderControls();
 mount();
 
-/* ================= HANDOFF TO THE COMPARE PAGE ================= */
+/* ================= CHECKOUT HANDOFF -- straight to Stripe, no separate compare page.
+   The homepage picker already IS the live preview (real canvas, real palette swaps, real demo
+   weddings to click through), so a second "try it with your names" step was pure friction, not
+   a different decision -- couples type their actual names during the wizard itself, right
+   after paying. ================= */
 function notice(m){ const n=document.getElementById("notice"); n.textContent=m; n.classList.add("on"); clearTimeout(n._t); n._t=setTimeout(()=>n.classList.remove("on"),2800); }
-function goToExperience(){
-  // The hero is a quick, no-typing demo — the real decision (with real names) happens on
-  // /experience. Storybook themes carry no palette (their art is illustrated to match one
-  // fixed look), so there's nothing for palette_json to hold in that branch.
-  const experiencePayload = category === "storybook"
-    ? { effect: STORYBOOK_THEMES[sbIdx].key, palette: {} }
-    : (() => { const p = PALETTES[paletteIdx]; return {
-        effect: EFFECTS[effectIdx].key,
-        palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep },
-      }; })();
+function currentExperiencePayload(){
+  // Storybook themes carry no palette (their art is illustrated to match one fixed look), so
+  // there's nothing for palette_json to hold in that branch.
+  if (category === "storybook") return { effect: STORYBOOK_THEMES[sbIdx].key, palette: {} };
+  const p = PALETTES[paletteIdx];
+  return { effect: EFFECTS[effectIdx].key,
+    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } };
+}
+async function goToCheckout(experiencePayload){
   sessionStorage.setItem("kymella_experience", JSON.stringify(experiencePayload));
-  location.href = "/experience";
+  try{
+    const r = await fetch("/api/checkout", { method:"POST" });
+    const j = await r.json();
+    if (j.url) location.href = j.url;
+    else notice("Checkout is unavailable right now. Please try again shortly.");
+  }catch(e){ notice("Checkout is unavailable right now. Please try again shortly."); }
+}
+function startPurchase(){ goToCheckout(currentExperiencePayload()); }
+function goToCheckoutFromDemo(){
+  if (!activeDemo) return startPurchase();
+  const p = PALETTES.find(x => x.name === activeDemo.palette) || PALETTES[0];
+  goToCheckout({ effect: activeDemo.effect,
+    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } });
 }
 
 /* ================= real example previews ================= */
@@ -904,15 +945,6 @@ function closeDemo(){
   activeDemo = null;
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && activeDemo) closeDemo(); });
-function goToExperienceFromDemo(){
-  if (!activeDemo) return goToExperience();
-  const p = PALETTES.find(x => x.name === activeDemo.palette) || PALETTES[0];
-  sessionStorage.setItem("kymella_experience", JSON.stringify({
-    effect: activeDemo.effect,
-    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep },
-  }));
-  location.href = "/experience";
-}
 renderExamples();
 
 const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
