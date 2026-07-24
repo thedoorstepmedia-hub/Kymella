@@ -583,7 +583,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
       </form>
       <div id="rsvpDone" style="display:none;text-align:center;padding:10px 0">
         <p style="font-family:var(--disp);font-size:19px;color:var(--brass-deep)">You're celebrating with us ✦</p>
-        <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you for saying yes — we can't wait to see you there.</p>
+        <p style="font-size:13px;color:var(--ink-3);margin-top:6px">Thank you for saying yes. We can't wait to see you there.</p>
 
         <div class="voice-widget" id="voiceWidget" style="display:none">
           <div class="vw-label">Send them your best wishes, in your own voice</div>
@@ -591,7 +591,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
             <button class="vw-btn" id="vwRecordBtn" aria-label="Record a voice note" type="button">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
             </button>
-            <div class="vw-sub">Leave a brief spoken message for the couple — up to 20 seconds, entirely optional. Prefer to write instead? Use the note field above next time you edit your reply.</div>
+            <div class="vw-sub">Leave a brief spoken message for the couple, up to 20 seconds, entirely optional. Prefer to write instead? Use the note field above next time you edit your reply.</div>
           </div>
           <div id="vwRecording" style="display:none">
             <button class="vw-btn recording" id="vwStopBtn" aria-label="Stop recording" type="button">
@@ -609,7 +609,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
           </div>
           <div id="vwSent" style="display:none">
             <div class="vw-label" style="color:var(--brass-deep)">Sent ✦</div>
-            <div class="vw-sub">Thank you — they'll treasure this.</div>
+            <div class="vw-sub">Thank you. They'll treasure this.</div>
           </div>
           <div class="vw-err" id="vwErr" style="display:none"></div>
         </div>
@@ -1599,7 +1599,10 @@ function renderRsvpEvents(priorSet){
   const events = INVITE_DATA.events;
   if (events.length < 2){ $("rEventsRow").style.display="none"; return; }
   // Default to everyone checked for a first-time reply; when editing, reflect their actual prior answer.
-  const isChecked = (id) => priorSet ? priorSet.has(id) : true;
+  // An empty Set is still truthy, so checking just `priorSet` here would leave every box
+  // unchecked on a first-time reply (empty prior set) instead of defaulting to all-checked --
+  // has to gate on priorSet.size instead. (Same bug, same fix, as storybook-fable.html.)
+  const isChecked = (id) => priorSet && priorSet.size ? priorSet.has(id) : true;
   $("rEventsList").innerHTML = events.map(e => `<label class="ev-check"><input type="checkbox" data-ev="${e.id}" ${isChecked(e.id)?"checked":""}><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink)"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>${esc(e.title)}</b> · ${esc(e.time_label)}</span></label>`).join("");
 }
 

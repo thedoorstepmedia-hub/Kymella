@@ -327,7 +327,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <div class="picker-row" id="storybookControls" style="display:none">
       <div class="picker-label">The theme</div>
       <div class="sb-grid" id="sbGrid"></div>
-      <p class="sb-note">Storybook themes are illustrated once, in one signature palette designed to match their art — the theme <em>is</em> the palette, so there's nothing to tune here.</p>
+      <p class="sb-note">Storybook themes are illustrated once, in one signature palette designed to match their art: the theme <em>is</em> the palette, so there's nothing to tune here.</p>
     </div>
     <div class="picker-cta" id="pickerCtaExperience">
       <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="ctaBtn">Get Started</button>
@@ -339,8 +339,8 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
         <input class="wl-input" type="email" id="wlEmail" placeholder="Email address" required maxlength="120">
         <button class="btn btn-brass" type="submit" style="width:100%" id="wlSubmitBtn">Join The Waitlist</button>
       </form>
-      <p class="picker-fine">Fable isn't for sale yet — join the waitlist and we'll email you the moment it opens.</p>
-      <p class="picker-fine wl-success hidden" id="wlSuccess">You're on the list — we'll be in touch when Fable launches.</p>
+      <p class="picker-fine">Fable isn't for sale yet. Join the waitlist and we'll email you the moment it opens.</p>
+      <p class="picker-fine wl-success hidden" id="wlSuccess">You're on the list. We'll be in touch when Fable launches.</p>
     </div>
     <div class="picker-examples" id="pickerExamples">
       <p class="picker-fine" id="examplesFine">Or open a real invite right here, exactly as your guests would see it</p>
@@ -351,7 +351,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 
 <div class="demo-overlay" id="demoOverlay">
   <button class="demo-close" onclick="closeDemo()" aria-label="Close preview">&times;</button>
-  <button class="demo-cta btn btn-brass" id="demoCta" onclick="goToCheckoutFromDemo()">Make Your Own — $499 CAD</button>
+  <button class="demo-cta btn btn-brass" id="demoCta" onclick="goToCheckoutFromDemo()">Make Your Own · $499 CAD</button>
   <iframe id="demoIframe" src="about:blank" title="Wedding invite preview"></iframe>
 </div>
 
@@ -376,7 +376,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <div class="feat up"><h3>RSVPs that run themselves</h3><p>Attendance, party size, meal choices, allergies, transport, per-event attendance for multi-day celebrations, collected automatically.</p></div>
       <div class="feat up"><h3>Your private dashboard</h3><p>Every guest, every reply, a kitchen-ready allergy summary, and one-click CSV export, yours for the whole engagement.</p></div>
       <div class="feat up"><h3>Gentle reminders</h3><p>Guests who haven't replied get a warm nudge. Everyone attending gets final details 48 hours out. You never chase anyone.</p></div>
-      <div class="feat up"><h3 id="feat5Title">Voice notes, not just RSVPs</h3><p id="feat5Text">Right after replying, guests can leave a short spoken message — up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.</p></div>
+      <div class="feat up"><h3 id="feat5Title">Voice notes, not just RSVPs</h3><p id="feat5Text">Right after replying, guests can leave a short spoken message, up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.</p></div>
       <div class="feat up"><h3>Your registry</h3><p>Funds your guests contribute to, paid directly to you through your own payment link.</p></div>
       <div class="feat up"><h3>Multi-day, built in</h3><p>Mehndi, sangeet, ceremony, reception, farewell brunch: add as many events as your celebration holds.</p></div>
     </div>
@@ -409,12 +409,12 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <div class="price">Tell us your vision, <em>we'll build it</em></div>
       <div class="price-sub">Custom pricing · built by hand, around what you want</div>
       <div class="plist">
-        <div>✦ Describe exactly what you picture — effect, tone, everything</div>
+        <div>✦ Describe exactly what you picture: effect, tone, everything</div>
         <div>✦ We design and build it around your wedding, not a template</div>
         <div>✦ Everything in the standard plan, tailored to you</div>
       </div>
       <button class="btn btn-quiet" style="width:100%" onclick="openInquiry()">Tell us your vision</button>
-      <p class="price-fine">A few quick questions — we'll follow up directly</p>
+      <p class="price-fine">A few quick questions, then we'll follow up directly</p>
     </div>
   </div>
 </section>
@@ -424,7 +424,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <button class="inquiry-close" onclick="closeInquiry()" aria-label="Close">&times;</button>
     <div class="eyebrow">Tell Us Your Vision</div>
     <h3 style="font-family:var(--disp);font-weight:500;font-size:22px;margin-top:8px">Let's build something just for you</h3>
-    <p class="inquiry-sub">A few quick questions — we'll read every word and follow up directly.</p>
+    <p class="inquiry-sub">A few quick questions. We'll read every word and follow up directly.</p>
     <form id="inquiryForm">
       <div class="ifield">
         <label>Your names</label>
@@ -452,7 +452,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     </form>
     <div id="inquiryDone" style="display:none">
       <p>Got it ✦</p>
-      <p>Thank you — we'll follow up at the email you gave us.</p>
+      <p>Thank you. We'll follow up at the email you gave us.</p>
     </div>
   </div>
 </div>
@@ -893,25 +893,25 @@ function setCategory(cat){
     document.getElementById("priceSub").textContent = "CAD · once · no subscription";
     document.getElementById("priceFine").textContent = "Secure checkout · set up in about ten minutes";
     document.getElementById("feat5Title").textContent = "Voice notes, not just RSVPs";
-    document.getElementById("feat5Text").textContent = "Right after replying, guests can leave a short spoken message — up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.";
+    document.getElementById("feat5Text").textContent = "Right after replying, guests can leave a short spoken message, up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.";
     document.getElementById("priceBullet5").textContent = "✦ Optional guest voice notes, yours to keep";
   } else {
     document.getElementById("modeEyebrow").textContent = "A New Category";
     document.getElementById("modeHeadline").innerHTML = "A wedding site<br><em>illustrated like a storybook</em>";
-    document.getElementById("modeSub").textContent = "No touch effects here — each Storybook theme is hand-illustrated once, animated throughout, and comes in its own fixed, matching palette.";
+    document.getElementById("modeSub").textContent = "No touch effects here. Each Storybook theme is hand-illustrated once, animated throughout, and comes in its own fixed, matching palette.";
     document.getElementById("ctaBtn").textContent = "Get the Fable Theme";
     document.getElementById("ctaFine").textContent = "$499 CAD · once · no subscription · same wizard, same dashboard, same RSVPs";
     document.getElementById("step1Title").textContent = "Choose your theme";
-    document.getElementById("step1Text").textContent = "Pick your Storybook theme above. Every scene, animation, and detail is already illustrated and matched to it — there's no effect or palette to configure.";
+    document.getElementById("step1Text").textContent = "Pick your Storybook theme above. Every scene, animation, and detail is already illustrated and matched to it, so there's no effect or palette to configure.";
     document.getElementById("feat1Title").textContent = "The illustrated invitation";
-    document.getElementById("feat1Text").textContent = "A fully illustrated, animated scene — hand-drawn art, not a template. Built for atmosphere and story, not a touch effect.";
+    document.getElementById("feat1Text").textContent = "A fully illustrated, animated scene: hand-drawn art, not a template. Built for atmosphere and story, not a touch effect.";
     document.getElementById("priceBullet1").textContent = "✦ Your chosen Storybook theme, fully illustrated";
     document.getElementById("priceCta").textContent = "Join The Waitlist";
     document.getElementById("priceAmount").textContent = "Not Yet For Sale";
     document.getElementById("priceSub").textContent = "Fable is in development";
     document.getElementById("priceFine").textContent = "Join the waitlist above and we'll email you the moment it opens";
     document.getElementById("feat5Title").textContent = "A living soundtrack";
-    document.getElementById("feat5Text").textContent = "A gentle score plays as guests read, theirs to turn on or off — voice notes belong to the interactive experiences; Storybook themes set the mood with music instead.";
+    document.getElementById("feat5Text").textContent = "A gentle score plays as guests read, theirs to turn on or off. Voice notes belong to the interactive experiences; Storybook themes set the mood with music instead.";
     document.getElementById("priceBullet5").textContent = "✦ A gentle soundtrack, guest-toggled";
   }
   renderControls();
@@ -996,14 +996,14 @@ async function submitWaitlist(e){
 // prospect sees here is the actual product, not a mockup. See each wedding's own dashboard
 // to swap in different photos/copy; this list just needs to stay in sync with those links.
 const DEMOS = [
-  { effect: "ripple", palette: "Emerald",     label: "Ripple — Elena & Marcus",  url: "https://kymella.com/i/112-42-cF2j4Xo68b-510La" },
-  { effect: "diya",   palette: "Brass & Ink", label: "Diya — Ananya & Vikram",   url: "https://kymella.com/i/113-43-wOcYorAaIJpo4_HY" },
-  { effect: "frost",  palette: "Slate & Blue", label: "Frost — Sofia & Daniel",  url: "https://kymella.com/i/114-44-aSlUTZUzdUfBHhz5" },
+  { effect: "ripple", palette: "Emerald",     label: "Ripple · Elena & Marcus",  url: "https://kymella.com/i/112-42-cF2j4Xo68b-510La" },
+  { effect: "diya",   palette: "Brass & Ink", label: "Diya · Ananya & Vikram",   url: "https://kymella.com/i/113-43-wOcYorAaIJpo4_HY" },
+  { effect: "frost",  palette: "Slate & Blue", label: "Frost · Sofia & Daniel",  url: "https://kymella.com/i/114-44-aSlUTZUzdUfBHhz5" },
 ];
 // Storybook's own demo list -- kept separate from DEMOS above so switching category never
 // shows an interactive-effect wedding under the Storybook tab (they carry no palette to match).
 const STORYBOOK_DEMOS = [
-  { effect: "fable", label: "Fable — Wren & Callum", url: "https://kymella.com/i/158-51-vqYOy4eBj78TuyT9" },
+  { effect: "fable", label: "Fable · Wren & Callum", url: "https://kymella.com/i/158-51-vqYOy4eBj78TuyT9" },
 ];
 let activeDemo = null;
 
@@ -1064,7 +1064,7 @@ document.getElementById("inquiryForm").addEventListener("submit", async e => {
     form.style.display = "none";
     document.getElementById("inquiryDone").style.display = "block";
   } catch (err) {
-    msg.textContent = err.message || "That didn't go through — please try again.";
+    msg.textContent = err.message || "That didn't go through. Please try again.";
     msg.style.color = "#A4523F";
     msg.classList.add("show");
     btn.disabled = false; btn.textContent = "Send it to us";
