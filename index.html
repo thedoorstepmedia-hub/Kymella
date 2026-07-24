@@ -95,6 +95,60 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 .polaroid-dots{display:flex;gap:7px}
 .polaroid-dot{width:6px;height:6px;border-radius:50%;background:rgba(245,239,227,.3);cursor:pointer;transition:background .2s,transform .2s;pointer-events:auto}
 .polaroid-dot.on{background:var(--brass-soft);transform:scale(1.3)}
+/* -- category switch: Interactive Experiences keep the touch canvas + palette picker exactly
+   as they work today; Storybook themes are a fixed, single-palette look each (illustrated to
+   match one exact palette), so they get their own lane -- a theme-card grid instead of a
+   palette row that wouldn't apply to them -- rather than being forced through the same picker. -- */
+.cat-switch{position:relative;z-index:3;display:inline-flex;gap:4px;padding:4px;background:rgba(245,239,227,.06);border:1px solid rgba(245,239,227,.16);border-radius:30px;margin-bottom:28px}
+.cat-btn{padding:9px 20px;border-radius:26px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,227,.55);transition:all .25s}
+.cat-btn.active{background:var(--brass-soft);color:var(--ink)}
+.cat-btn:not(.active):hover{color:var(--mist)}
+
+/* -- Storybook ground: no photo, no illustrated objects -- a matte parchment surface (layered
+   radial-gradients, no image file) with just the display type on it, full-bleed behind the
+   whole hero exactly like the canvas it replaces. A picture would have to stand in for every
+   theme this category ever holds; the material + type doesn't have that problem. -- */
+.fable-ground{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(58,46,34,.05) 0, transparent 3%),
+    radial-gradient(circle at 72% 64%, rgba(58,46,34,.04) 0, transparent 3%),
+    radial-gradient(circle at 40% 80%, rgba(58,46,34,.05) 0, transparent 2.4%),
+    radial-gradient(circle at 85% 15%, rgba(58,46,34,.04) 0, transparent 2.4%),
+    linear-gradient(155deg, #FBF3E4 0%, #F2E6CE 100%)}
+.fable-ground::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 120px rgba(58,46,34,.16)}
+.fable-ground-text{position:relative;z-index:2;text-align:center;padding:0 20px}
+.fable-ground-text .eb{font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:#B33953}
+.fable-ground-text h3{font-family:var(--disp);font-style:italic;font-weight:500;font-size:clamp(30px,7vw,44px);color:#3A2E22;margin:12px 0 0}
+
+.picker-hero.sb-mode .picker-content{color:#3A2E22}
+.picker-hero.sb-mode .picker-content .eyebrow{color:#B33953}
+.picker-hero.sb-mode .picker-content h1 em{color:#B33953}
+.picker-hero.sb-mode .picker-content .sub{color:rgba(58,46,34,.62)}
+.picker-hero.sb-mode .picker-controls{background:rgba(255,253,248,.82);border-color:rgba(58,46,34,.14)}
+.picker-hero.sb-mode .picker-label{color:#B33953}
+.picker-hero.sb-mode .sb-note{color:rgba(58,46,34,.55)}
+.picker-hero.sb-mode .picker-examples{border-top-color:rgba(58,46,34,.14)}
+.picker-hero.sb-mode .picker-fine{color:rgba(58,46,34,.5)}
+.picker-hero.sb-mode .cat-switch{background:rgba(58,46,34,.06);border-color:rgba(58,46,34,.18)}
+.picker-hero.sb-mode .cat-btn{color:rgba(58,46,34,.55)}
+.picker-hero.sb-mode .cat-btn.active{background:#B33953;color:#FBF3E4}
+.picker-hero.sb-mode .cat-btn:not(.active):hover{color:#3A2E22}
+.picker-hero.sb-mode .example-links a{border-color:rgba(58,46,34,.2);color:#B33953}
+.picker-hero.sb-mode .example-links a:hover{color:#3A2E22;border-color:#B33953}
+
+.sb-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sb-card{position:relative;border:1px solid rgba(245,239,227,.18);border-radius:6px;overflow:hidden;text-align:left;background:rgba(245,239,227,.03);transition:border-color .2s}
+.sb-card.active{border-color:#EDA1AE}
+.sb-card .sb-swatch{width:100%;height:56px;background:linear-gradient(155deg, #FBF3E4 0%, #F2E6CE 100%)}
+.sb-card .sb-card-body{padding:9px 11px 11px}
+.sb-card .sb-card-body h4{font-family:var(--disp);font-style:italic;font-size:14px;margin:0 0 2px}
+.sb-card .sb-card-body p{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase}
+.sb-card.soon{opacity:.4;pointer-events:none}
+.picker-hero.sb-mode .sb-card{border-color:rgba(58,46,34,.16)}
+.picker-hero.sb-mode .sb-card .sb-card-body h4{color:#3A2E22}
+.picker-hero.sb-mode .sb-card .sb-card-body p{color:rgba(58,46,34,.5)}
+.sb-note{font-size:11.5px;color:rgba(245,239,227,.5);line-height:1.6;margin-top:2px}
+
 .picker-content{position:relative;z-index:2;color:var(--mist);max-width:600px}
 .picker-content .eyebrow{margin-bottom:16px}
 .picker-content h1{font-family:var(--disp);font-size:clamp(30px,6vw,52px);font-weight:400;line-height:1.14}
@@ -223,7 +277,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   </div>
 </nav>
 
-<header class="picker-hero">
+<header class="picker-hero" id="pickerHero">
   <canvas id="pickerCanvas"></canvas>
   <div class="polaroid-stage" id="polaroidStage" style="display:none">
     <div class="polaroid-track" id="polaroidTrack"></div>
@@ -233,24 +287,41 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <button class="polaroid-arrow" id="polaroidNext" type="button" aria-label="Next">›</button>
     </div>
   </div>
+  <div class="fable-ground" id="fableGround" style="display:none">
+    <div class="fable-ground-text">
+      <div class="eb">Once Upon A Wedding Day</div>
+      <h3>Fable</h3>
+    </div>
+  </div>
+
+  <div class="cat-switch">
+    <button class="cat-btn active" id="catExpBtn" onclick="setCategory('experience')">Interactive Experiences</button>
+    <button class="cat-btn" id="catSbBtn" onclick="setCategory('storybook')">Storybook</button>
+  </div>
+
   <div class="picker-content">
-    <div class="eyebrow on-dark">Touch It Before You Buy It</div>
-    <h1>A wedding site<br><em>your guests will actually touch</em></h1>
-    <p class="sub">Four real, physics-driven effects, not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.</p>
+    <div class="eyebrow on-dark" id="modeEyebrow">Touch It Before You Buy It</div>
+    <h1 id="modeHeadline">A wedding site<br><em>your guests will actually touch</em></h1>
+    <p class="sub" id="modeSub">Four real, physics-driven effects, not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.</p>
   </div>
 
   <div class="picker-controls">
-    <div class="picker-row">
+    <div class="picker-row" id="experienceControls">
       <div class="picker-label">The effect: touch the canvas above to try it</div>
       <div class="effect-choices" id="effectChoices"></div>
     </div>
-    <div class="picker-row">
+    <div class="picker-row" id="experiencePaletteRow">
       <div class="picker-label">The palette</div>
       <div class="palette-choices" id="paletteChoices"></div>
     </div>
+    <div class="picker-row" id="storybookControls" style="display:none">
+      <div class="picker-label">The theme</div>
+      <div class="sb-grid" id="sbGrid"></div>
+      <p class="sb-note">Storybook themes are illustrated once, in one signature palette designed to match their art — the theme <em>is</em> the palette, so there's nothing to tune here.</p>
+    </div>
     <div class="picker-cta">
       <button class="btn btn-brass" style="width:100%" onclick="goToExperience()" id="ctaBtn">Try it with your names</button>
-      <p class="picker-fine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
+      <p class="picker-fine" id="ctaFine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
     </div>
     <div class="picker-examples">
       <p class="picker-fine">Or open a real invite right here, exactly as your guests would see it</p>
@@ -610,8 +681,12 @@ const EFFECTS = [
   { key:"frost",    label:"Frost"    },
   { key:"polaroid", label:"Polaroid" },
 ];
+const STORYBOOK_THEMES = [
+  { key:"fable", label:"Fable", tag:"Live" },
+  { key:"soon1", label:"More on the way", tag:"Coming soon", soon:true },
+];
 
-let effectIdx = 0, paletteIdx = 0, heroInstance = null;
+let effectIdx = 0, paletteIdx = 0, sbIdx = 0, category = "experience", heroInstance = null;
 
 function applyPalette(p){
   const root = document.documentElement.style;
@@ -711,6 +786,17 @@ function mount(){
   if (heroInstance && heroInstance.stop) heroInstance.stop();
   const canvas = document.getElementById("pickerCanvas");
   const polaroidStageEl = document.getElementById("polaroidStage");
+  const fableGroundEl = document.getElementById("fableGround");
+  heroInstance = null;
+
+  if (category === "storybook"){
+    canvas.style.display = "none";
+    polaroidStageEl.style.display = "none";
+    fableGroundEl.style.display = "flex";
+    return;
+  }
+  fableGroundEl.style.display = "none";
+
   const p = PALETTES[paletteIdx];
   applyPalette(p);
   const effect = EFFECTS[effectIdx].key;
@@ -735,9 +821,41 @@ function renderControls(){
     `<button class="effect-btn ${i===effectIdx?'active':''}" onclick="chooseEffect(${i})">${e.label}</button>`).join("");
   document.getElementById("paletteChoices").innerHTML = PALETTES.map((p,i) =>
     `<button class="palette-btn ${i===paletteIdx?'active':''}" onclick="choosePalette(${i})"><span class="swatch" style="background:${p.brass}"></span>${p.name}</button>`).join("");
+  document.getElementById("sbGrid").innerHTML = STORYBOOK_THEMES.map((t,i) => `
+    <button class="sb-card ${i===sbIdx?'active':''} ${t.soon?'soon':''}" onclick="${t.soon?'':'chooseStorybook('+i+')'}">
+      <div class="sb-swatch"></div>
+      <div class="sb-card-body"><h4>${t.label}</h4><p>${t.tag}</p></div>
+    </button>`).join("");
 }
 function chooseEffect(i){ effectIdx = i; renderControls(); mount(); }
 function choosePalette(i){ paletteIdx = i; renderControls(); mount(); }
+function chooseStorybook(i){ sbIdx = i; renderControls(); mount(); }
+
+function setCategory(cat){
+  category = cat;
+  const isExp = cat === "experience";
+  document.getElementById("pickerHero").classList.toggle("sb-mode", !isExp);
+  document.getElementById("catExpBtn").classList.toggle("active", isExp);
+  document.getElementById("catSbBtn").classList.toggle("active", !isExp);
+  document.getElementById("experienceControls").style.display = isExp ? "" : "none";
+  document.getElementById("experiencePaletteRow").style.display = isExp ? "" : "none";
+  document.getElementById("storybookControls").style.display = isExp ? "none" : "";
+  if (isExp){
+    document.getElementById("modeEyebrow").textContent = "Touch It Before You Buy It";
+    document.getElementById("modeHeadline").innerHTML = "A wedding site<br><em>your guests will actually touch</em>";
+    document.getElementById("modeSub").textContent = "Four real, physics-driven effects, not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.";
+    document.getElementById("ctaBtn").textContent = "Try it with your names";
+    document.getElementById("ctaFine").textContent = "$499 CAD · once · no subscription · you'll set up names, date, and guests next";
+  } else {
+    document.getElementById("modeEyebrow").textContent = "A New Category";
+    document.getElementById("modeHeadline").innerHTML = "A wedding site<br><em>illustrated like a storybook</em>";
+    document.getElementById("modeSub").textContent = "No touch effects here — each Storybook theme is hand-illustrated once, animated throughout, and comes in its own fixed, matching palette.";
+    document.getElementById("ctaBtn").textContent = "Try the Fable theme";
+    document.getElementById("ctaFine").textContent = "$499 CAD · once · no subscription · same wizard, same dashboard, same RSVPs";
+  }
+  renderControls();
+  mount();
+}
 
 renderControls();
 mount();
@@ -745,12 +863,16 @@ mount();
 /* ================= HANDOFF TO THE COMPARE PAGE ================= */
 function notice(m){ const n=document.getElementById("notice"); n.textContent=m; n.classList.add("on"); clearTimeout(n._t); n._t=setTimeout(()=>n.classList.remove("on"),2800); }
 function goToExperience(){
-  // The hero is a quick, no-typing demo — the real decision (with real names) happens on /experience.
-  const p = PALETTES[paletteIdx];
-  sessionStorage.setItem("kymella_experience", JSON.stringify({
-    effect: EFFECTS[effectIdx].key,
-    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep },
-  }));
+  // The hero is a quick, no-typing demo — the real decision (with real names) happens on
+  // /experience. Storybook themes carry no palette (their art is illustrated to match one
+  // fixed look), so there's nothing for palette_json to hold in that branch.
+  const experiencePayload = category === "storybook"
+    ? { effect: STORYBOOK_THEMES[sbIdx].key, palette: {} }
+    : (() => { const p = PALETTES[paletteIdx]; return {
+        effect: EFFECTS[effectIdx].key,
+        palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep },
+      }; })();
+  sessionStorage.setItem("kymella_experience", JSON.stringify(experiencePayload));
   location.href = "/experience";
 }
 
