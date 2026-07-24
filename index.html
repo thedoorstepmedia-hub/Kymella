@@ -171,6 +171,15 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 .palette-btn.active{border-color:var(--brass-soft);background:rgba(232,201,160,.12)}
 .swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(245,239,227,.3) inset}
 .picker-cta{margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.wl-form{width:100%;display:flex;flex-direction:column;gap:10px}
+.wl-input{width:100%;padding:13px 15px;border-radius:2px;background:rgba(245,239,227,.06);border:1px solid rgba(245,239,227,.2);color:var(--mist);font-family:var(--body);font-size:14px}
+.wl-input::placeholder{color:rgba(245,239,227,.4)}
+.wl-input:focus{outline:none;border-color:var(--brass-soft)}
+.picker-hero.sb-mode .wl-input{background:rgba(58,46,34,.04);border-color:rgba(58,46,34,.2);color:var(--ink)}
+.picker-hero.sb-mode .wl-input::placeholder{color:rgba(58,46,34,.4)}
+.wl-success{color:var(--brass-soft);font-weight:600}
+.picker-hero.sb-mode .wl-success{color:#B33953}
+.new-badge{position:absolute;top:-8px;right:-6px;background:#B33953;color:#FFF3ED;font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;font-weight:600;padding:2px 5px;border-radius:3px;line-height:1.4;pointer-events:none}
 .picker-fine{font-size:11.5px;color:rgba(245,239,227,.45)}
 .picker-examples{margin-top:16px;padding-top:16px;border-top:1px solid rgba(245,239,227,.14);display:flex;flex-direction:column;align-items:center;gap:8px}
 .example-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -320,9 +329,18 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <div class="sb-grid" id="sbGrid"></div>
       <p class="sb-note">Storybook themes are illustrated once, in one signature palette designed to match their art — the theme <em>is</em> the palette, so there's nothing to tune here.</p>
     </div>
-    <div class="picker-cta">
+    <div class="picker-cta" id="pickerCtaExperience">
       <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="ctaBtn">Get Started</button>
       <p class="picker-fine" id="ctaFine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
+    </div>
+    <div class="picker-cta" id="pickerCtaWaitlist" style="display:none">
+      <form class="wl-form" id="waitlistForm" onsubmit="return submitWaitlist(event)">
+        <input class="wl-input" type="text" id="wlName" placeholder="Your name" required maxlength="80">
+        <input class="wl-input" type="email" id="wlEmail" placeholder="Email address" required maxlength="120">
+        <button class="btn btn-brass" type="submit" style="width:100%" id="wlSubmitBtn">Join The Waitlist</button>
+      </form>
+      <p class="picker-fine">Fable isn't for sale yet — join the waitlist and we'll email you the moment it opens.</p>
+      <p class="picker-fine wl-success hidden" id="wlSuccess">You're on the list — we'll be in touch when Fable launches.</p>
     </div>
     <div class="picker-examples" id="pickerExamples">
       <p class="picker-fine" id="examplesFine">Or open a real invite right here, exactly as your guests would see it</p>
@@ -371,8 +389,8 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <h2 class="h2 up">One price. One wedding. <em>Everything.</em></h2>
     <div class="price-card up">
       <div class="eyebrow">Kymella</div>
-      <div class="price"><small>$</small>499</div>
-      <div class="price-sub">CAD · once · no subscription</div>
+      <div class="price" id="priceAmount"><small>$</small>499</div>
+      <div class="price-sub" id="priceSub">CAD · once · no subscription</div>
       <div class="plist">
         <div id="priceBullet1">✦ Your chosen hero effect, in your palette</div>
         <div>✦ Unlimited guests, each with a personal invitation link</div>
@@ -381,8 +399,8 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
         <div id="priceBullet5">✦ Optional guest voice notes, yours to keep</div>
         <div>✦ Registry funds, paid directly to you</div>
       </div>
-      <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="priceCta">Get Started</button>
-      <p class="price-fine">Secure checkout · set up in about ten minutes</p>
+      <button class="btn btn-brass" style="width:100%" onclick="handlePriceCta()" id="priceCta">Get Started</button>
+      <p class="price-fine" id="priceFine">Secure checkout · set up in about ten minutes</p>
     </div>
 
     <div class="pricing-or up">Or</div>
@@ -680,7 +698,7 @@ const EFFECTS = [
   { key:"ripple",   label:"Ripple"   },
   { key:"diya",     label:"Diya"     },
   { key:"frost",    label:"Frost"    },
-  { key:"polaroid", label:"Polaroid" },
+  { key:"polaroid", label:"Polaroid", isNew:true },
 ];
 const STORYBOOK_THEMES = [
   { key:"fable", label:"Fable", tag:"Live" },
@@ -825,7 +843,7 @@ function mount(){
 }
 function renderControls(){
   document.getElementById("effectChoices").innerHTML = EFFECTS.map((e,i) =>
-    `<button class="effect-btn ${i===effectIdx?'active':''}" onclick="chooseEffect(${i})">${e.label}</button>`).join("");
+    `<button class="effect-btn ${i===effectIdx?'active':''}" onclick="chooseEffect(${i})" style="position:relative">${e.label}${e.isNew?'<span class="new-badge">New</span>':''}</button>`).join("");
   document.getElementById("paletteChoices").innerHTML = PALETTES.map((p,i) =>
     `<button class="palette-btn ${i===paletteIdx?'active':''}" onclick="choosePalette(${i})"><span class="swatch" style="background:${p.brass}"></span>${p.name}</button>`).join("");
   document.getElementById("sbGrid").innerHTML = STORYBOOK_THEMES.map((t,i) => `
@@ -848,6 +866,10 @@ function setCategory(cat){
   document.getElementById("experienceControls").style.display = isExp ? "" : "none";
   document.getElementById("experiencePaletteRow").style.display = isExp ? "" : "none";
   document.getElementById("storybookControls").style.display = isExp ? "none" : "";
+  // Fable isn't for sale yet -- Storybook mode swaps the checkout CTA for a waitlist signup,
+  // both in the hero and in the pricing card below, rather than letting anyone buy it early.
+  document.getElementById("pickerCtaExperience").style.display = isExp ? "" : "none";
+  document.getElementById("pickerCtaWaitlist").style.display = isExp ? "none" : "";
 
   // Re-skins the WHOLE page, not just the hero -- these CSS custom properties drive the nav
   // accent, every button, and every section below the fold, so switching category has to
@@ -867,6 +889,9 @@ function setCategory(cat){
     document.getElementById("feat1Text").textContent = "Water, flame, or frost: a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.";
     document.getElementById("priceBullet1").textContent = "✦ Your chosen hero effect, in your palette";
     document.getElementById("priceCta").textContent = "Get Started";
+    document.getElementById("priceAmount").innerHTML = "<small>$</small>499";
+    document.getElementById("priceSub").textContent = "CAD · once · no subscription";
+    document.getElementById("priceFine").textContent = "Secure checkout · set up in about ten minutes";
     document.getElementById("feat5Title").textContent = "Voice notes, not just RSVPs";
     document.getElementById("feat5Text").textContent = "Right after replying, guests can leave a short spoken message — up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.";
     document.getElementById("priceBullet5").textContent = "✦ Optional guest voice notes, yours to keep";
@@ -881,7 +906,10 @@ function setCategory(cat){
     document.getElementById("feat1Title").textContent = "The illustrated invitation";
     document.getElementById("feat1Text").textContent = "A fully illustrated, animated scene — hand-drawn art, not a template. Built for atmosphere and story, not a touch effect.";
     document.getElementById("priceBullet1").textContent = "✦ Your chosen Storybook theme, fully illustrated";
-    document.getElementById("priceCta").textContent = "Get the Fable Theme";
+    document.getElementById("priceCta").textContent = "Join The Waitlist";
+    document.getElementById("priceAmount").textContent = "Not Yet For Sale";
+    document.getElementById("priceSub").textContent = "Fable is in development";
+    document.getElementById("priceFine").textContent = "Join the waitlist above and we'll email you the moment it opens";
     document.getElementById("feat5Title").textContent = "A living soundtrack";
     document.getElementById("feat5Text").textContent = "A gentle score plays as guests read, theirs to turn on or off — voice notes belong to the interactive experiences; Storybook themes set the mood with music instead.";
     document.getElementById("priceBullet5").textContent = "✦ A gentle soundtrack, guest-toggled";
@@ -918,16 +946,49 @@ async function goToCheckout(experiencePayload){
   }catch(e){ notice("Checkout is unavailable right now. Please try again shortly."); }
 }
 function startPurchase(){ goToCheckout(currentExperiencePayload()); }
+// The pricing card's single CTA has to branch the same way the hero's does, since Fable isn't
+// for sale yet -- scrolls back up to the real waitlist form rather than duplicating one here.
+function handlePriceCta(){
+  if (category === "storybook"){
+    document.getElementById("catSbBtn").scrollIntoView({ behavior:"smooth", block:"start" });
+    setTimeout(() => document.getElementById("wlName")?.focus(), 500);
+    return;
+  }
+  startPurchase();
+}
 function goToCheckoutFromDemo(){
   if (!activeDemo) return startPurchase();
   // Storybook demos carry no palette name to look up -- same "the theme IS the palette" rule
-  // as everywhere else Storybook shows up.
+  // as everywhere else Storybook shows up. Not for sale yet either, so this sends people to the
+  // waitlist instead of checkout, same as every other Fable entry point.
   if (STORYBOOK_THEMES.some(t => t.key === activeDemo.effect)){
-    return goToCheckout({ effect: activeDemo.effect, palette: {} });
+    closeDemo();
+    setCategory("storybook");
+    document.getElementById("catSbBtn").scrollIntoView({ behavior:"smooth", block:"start" });
+    setTimeout(() => document.getElementById("wlName")?.focus(), 500);
+    return;
   }
   const p = PALETTES.find(x => x.name === activeDemo.palette) || PALETTES[0];
   goToCheckout({ effect: activeDemo.effect,
     palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } });
+}
+async function submitWaitlist(e){
+  e.preventDefault();
+  const name = document.getElementById("wlName").value.trim();
+  const email = document.getElementById("wlEmail").value.trim();
+  const btn = document.getElementById("wlSubmitBtn");
+  btn.disabled = true; btn.textContent = "Joining…";
+  try{
+    const r = await fetch("/api/kymella-waitlist", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ name, email, interest: "storybook" }) });
+    if (!r.ok) throw new Error();
+    document.getElementById("waitlistForm").classList.add("hidden");
+    document.getElementById("wlSuccess").classList.remove("hidden");
+  }catch(err){
+    btn.disabled = false; btn.textContent = "Join The Waitlist";
+    notice("That didn't go through. Please try again.");
+  }
+  return false;
 }
 
 /* ================= real example previews ================= */
