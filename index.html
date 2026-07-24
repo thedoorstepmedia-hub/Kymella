@@ -20,6 +20,7 @@
   --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
+.hidden{display:none!important}
 html{scroll-behavior:smooth}
 body{font-family:var(--body);background:var(--mist);color:var(--ink);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
@@ -323,8 +324,8 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="ctaBtn">Get Started</button>
       <p class="picker-fine" id="ctaFine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
     </div>
-    <div class="picker-examples">
-      <p class="picker-fine">Or open a real invite right here, exactly as your guests would see it</p>
+    <div class="picker-examples" id="pickerExamples">
+      <p class="picker-fine" id="examplesFine">Or open a real invite right here, exactly as your guests would see it</p>
       <div class="example-links" id="exampleLinks"></div>
     </div>
   </div>
@@ -357,7 +358,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <div class="feat up"><h3>RSVPs that run themselves</h3><p>Attendance, party size, meal choices, allergies, transport, per-event attendance for multi-day celebrations, collected automatically.</p></div>
       <div class="feat up"><h3>Your private dashboard</h3><p>Every guest, every reply, a kitchen-ready allergy summary, and one-click CSV export, yours for the whole engagement.</p></div>
       <div class="feat up"><h3>Gentle reminders</h3><p>Guests who haven't replied get a warm nudge. Everyone attending gets final details 48 hours out. You never chase anyone.</p></div>
-      <div class="feat up"><h3>Voice notes, not just RSVPs</h3><p>Right after replying, guests can leave a short spoken message — up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.</p></div>
+      <div class="feat up"><h3 id="feat5Title">Voice notes, not just RSVPs</h3><p id="feat5Text">Right after replying, guests can leave a short spoken message — up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.</p></div>
       <div class="feat up"><h3>Your registry</h3><p>Funds your guests contribute to, paid directly to you through your own payment link.</p></div>
       <div class="feat up"><h3>Multi-day, built in</h3><p>Mehndi, sangeet, ceremony, reception, farewell brunch: add as many events as your celebration holds.</p></div>
     </div>
@@ -377,7 +378,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
         <div>✦ Unlimited guests, each with a personal invitation link</div>
         <div>✦ Full RSVP management, meal counts, and dashboard</div>
         <div>✦ Automatic reminders & final-details messages</div>
-        <div>✦ Optional guest voice notes, yours to keep</div>
+        <div id="priceBullet5">✦ Optional guest voice notes, yours to keep</div>
         <div>✦ Registry funds, paid directly to you</div>
       </div>
       <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="priceCta">Get Started</button>
@@ -866,6 +867,9 @@ function setCategory(cat){
     document.getElementById("feat1Text").textContent = "Water, flame, or frost: a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.";
     document.getElementById("priceBullet1").textContent = "✦ Your chosen hero effect, in your palette";
     document.getElementById("priceCta").textContent = "Get Started";
+    document.getElementById("feat5Title").textContent = "Voice notes, not just RSVPs";
+    document.getElementById("feat5Text").textContent = "Right after replying, guests can leave a short spoken message — up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.";
+    document.getElementById("priceBullet5").textContent = "✦ Optional guest voice notes, yours to keep";
   } else {
     document.getElementById("modeEyebrow").textContent = "A New Category";
     document.getElementById("modeHeadline").innerHTML = "A wedding site<br><em>illustrated like a storybook</em>";
@@ -878,8 +882,12 @@ function setCategory(cat){
     document.getElementById("feat1Text").textContent = "A fully illustrated, animated scene — hand-drawn art, not a template. Built for atmosphere and story, not a touch effect.";
     document.getElementById("priceBullet1").textContent = "✦ Your chosen Storybook theme, fully illustrated";
     document.getElementById("priceCta").textContent = "Get the Fable Theme";
+    document.getElementById("feat5Title").textContent = "A living soundtrack";
+    document.getElementById("feat5Text").textContent = "A gentle score plays as guests read, theirs to turn on or off — voice notes belong to the interactive experiences; Storybook themes set the mood with music instead.";
+    document.getElementById("priceBullet5").textContent = "✦ A gentle soundtrack, guest-toggled";
   }
   renderControls();
+  renderExamples();
   mount();
 }
 
@@ -912,6 +920,11 @@ async function goToCheckout(experiencePayload){
 function startPurchase(){ goToCheckout(currentExperiencePayload()); }
 function goToCheckoutFromDemo(){
   if (!activeDemo) return startPurchase();
+  // Storybook demos carry no palette name to look up -- same "the theme IS the palette" rule
+  // as everywhere else Storybook shows up.
+  if (STORYBOOK_THEMES.some(t => t.key === activeDemo.effect)){
+    return goToCheckout({ effect: activeDemo.effect, palette: {} });
+  }
   const p = PALETTES.find(x => x.name === activeDemo.palette) || PALETTES[0];
   goToCheckout({ effect: activeDemo.effect,
     palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } });
@@ -926,14 +939,23 @@ const DEMOS = [
   { effect: "diya",   palette: "Brass & Ink", label: "Diya — Ananya & Vikram",   url: "https://kymella.com/i/113-43-wOcYorAaIJpo4_HY" },
   { effect: "frost",  palette: "Slate & Blue", label: "Frost — Sofia & Daniel",  url: "https://kymella.com/i/114-44-aSlUTZUzdUfBHhz5" },
 ];
+// Storybook's own demo list -- kept separate from DEMOS above so switching category never
+// shows an interactive-effect wedding under the Storybook tab (they carry no palette to match).
+const STORYBOOK_DEMOS = [];
 let activeDemo = null;
 
 function renderExamples(){
-  document.getElementById("exampleLinks").innerHTML = DEMOS.map((d,i) =>
+  const isExp = category === "experience";
+  const list = isExp ? DEMOS : STORYBOOK_DEMOS;
+  document.getElementById("pickerExamples").classList.toggle("hidden", list.length === 0);
+  document.getElementById("examplesFine").textContent = isExp
+    ? "Or open a real invite right here, exactly as your guests would see it"
+    : "Or open a real Fable invite right here, exactly as your guests would see it";
+  document.getElementById("exampleLinks").innerHTML = list.map((d,i) =>
     `<a onclick="openDemo(${i})">${d.label}</a>`).join("");
 }
 function openDemo(i){
-  activeDemo = DEMOS[i];
+  activeDemo = (category === "experience" ? DEMOS : STORYBOOK_DEMOS)[i];
   document.getElementById("demoIframe").src = activeDemo.url;
   document.getElementById("demoOverlay").classList.add("open");
   document.body.style.overflow = "hidden";
