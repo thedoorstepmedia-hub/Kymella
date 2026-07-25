@@ -19,11 +19,20 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:var(--body);background:var(--ink);color:var(--text);font-size:17.5px;line-height:1.7;-webkit-font-smoothing:antialiased}
+/* A very faint paper-grain wash across the whole page, not just the envelope -- the same
+   SVG-turbulence trick, fixed so it doesn't repeat-scroll, z-index:-1 so it always sits behind
+   real content (a fixed pseudo-element renders above its own ancestor's background-color
+   regardless of z-index, but z-index:-1 keeps it below every normal-flow element without
+   depending on their own stacking contexts). Adds tactility to the flat --ink fill without
+   competing with the canvas hero effects. */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px 160px}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font-family:var(--body);font-size:16.5px}
 :focus-visible{outline:2px solid var(--brass);outline-offset:3px}
-.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;color:var(--brass-soft)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;font-weight:500;color:var(--brass-soft)}
 .eyebrow.on-dark{color:var(--brass-soft)}
 
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 32px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;transition:background .35s ease,backdrop-filter .35s ease}
@@ -51,7 +60,14 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 .envelope-scene::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px 180px}
 .envelope-group{display:flex;flex-direction:column;align-items:center;gap:30px;max-width:520px;width:100%}
 .envelope-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,239,227,.5);text-align:center}
-.envelope-names{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(24px,6.5vw,36px);color:#F5EFE3;text-align:center;line-height:1.2}
+/* Gold-foil shimmer: a bright highlight sweeps across the couple's names on a slow loop, the
+   letterpress-foil-catching-the-light effect -- pure CSS (gradient fill + moving
+   background-position), no new art. Same technique as storybook-fable.html's hero h1. */
+.envelope-names{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(24px,6.5vw,36px);text-align:center;line-height:1.2;
+  background:linear-gradient(100deg,#F5EFE3 30%,#FFFBEF 42%,#FFDE94 50%,#FFFBEF 58%,#F5EFE3 70%);
+  background-size:250% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:namesShimmer 5s ease-in-out 1s infinite}
+@keyframes namesShimmer{0%{background-position:130% 0}50%{background-position:-30% 0}100%{background-position:130% 0}}
 /* No static tilt: a real flat-lay photo (the reference this is now built from) isn't shot at a
    3D angle at all -- the realism comes entirely from shadow layering and fold geometry, not
    perspective. Kept preserve-3d/perspective since the flap still needs a real 3D context for
@@ -97,7 +113,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 /* Fine paper-fibre grain (SVG turbulence, not an image asset) so the gradient reads as stock,
    not a flat CSS fill. */
 .envelope-body-card::after{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:140px 140px;
 }
@@ -115,7 +131,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
    through itself. */
 .envelope-flap-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
 .envelope-flap-front{background:linear-gradient(160deg,#ffffff,#e9e0cf)}
-.envelope-flap-front::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:140px 140px}
+.envelope-flap-front::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:140px 140px}
 .envelope-flap-back{background:linear-gradient(200deg,var(--seal-brass-deep,#8E6836),var(--seal-ink,#0E1F1C));transform:rotateX(180deg)}
 /* A real cast shadow beneath the flap, distinct from the flap's own drop-shadow filter --
    this one deliberately GROWS as the flap actually lifts off the surface, rather than staying
@@ -256,7 +272,7 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 .hero{z-index:1}
 @media(max-width:680px){.section{padding:44px 14px}.inner{padding:40px 24px}}
 .center{text-align:center}
-.h2{font-family:var(--disp);font-style:italic;font-size:clamp(26px,4.5vw,36px);font-weight:500;line-height:1.2;margin:12px 0 14px}
+.h2{font-family:var(--disp);font-style:italic;font-size:clamp(27px,5vw,40px);font-weight:500;line-height:1.15;margin:16px 0 14px}
 .h2 em{font-style:italic;color:var(--brass-deep)}
 .lede{font-size:16.5px;color:var(--text-dim);max-width:460px;margin:0 auto}
 
@@ -267,12 +283,16 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
    collapses to one card per row and never has a partial row to begin with). Flexbox sizes
    each wrapped line independently, so a partially-filled last row just stretches to fill
    itself -- there's no shared track for a "leftover" cell to exist in. */
-.details-grid{display:flex;flex-wrap:wrap;gap:1px;background:var(--line-dk);margin-top:40px;border:1px solid var(--line-dk)}
+/* Was a seamed grid (1px gaps against a --line-dk background, forming hairline borders between
+   opaque --surface panels) -- reads as a bordered box collection sitting ON the page rather
+   than content flowing WITH it. Plain gap + no fill lets each tile breathe as part of the same
+   continuous surface instead. */
+.details-grid{display:flex;flex-wrap:wrap;gap:20px 28px;margin-top:40px}
 /* min-width:0 alongside overflow-wrap on the text itself -- a flex item's default min-width is
    its content's natural width, so one long unbroken string a couple pastes in (a URL in
    arrival/travel info, say) can force this card wider than the screen regardless of how the
    text would otherwise wrap. */
-.dcard{flex:1 1 220px;min-width:0;background:var(--surface);padding:26px 24px}
+.dcard{flex:1 1 220px;min-width:0;padding:2px}
 .dcard .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft)}
 .dcard h3{font-family:var(--disp);font-style:italic;font-size:20px;font-weight:500;margin:8px 0 6px;overflow-wrap:break-word}
 .dcard p{font-size:15px;color:var(--text-dim);overflow-wrap:break-word}
@@ -326,8 +346,9 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
    defaults to "auto", which lets a track grow to fit its content's full max-content width
    instead of staying pinned to the container -- the same overflow bug as an unstyled input,
    just at the grid-track level rather than the form-control level. */
-.hotel-list{margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr);gap:1px;background:var(--line-dk);border:1px solid var(--line-dk)}
-.hotel-card{background:var(--surface);padding:16px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.hotel-list{margin-top:24px;display:flex;flex-direction:column}
+.hotel-card{padding:16px 2px;border-bottom:1px solid var(--line-dk);display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.hotel-card:last-child{border-bottom:none}
 .hotel-card>div:first-child{min-width:0}
 .hotel-card .name{font-family:var(--disp);font-size:17px;overflow-wrap:break-word}
 .hotel-card .detail{font-size:13.5px;color:var(--text-dim);margin-top:3px;overflow-wrap:break-word}
@@ -436,7 +457,15 @@ input,select,textarea{font-family:var(--body);font-size:16.5px}
 .details-grid .state-msg{flex:1 1 100%}
 .up{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1)}
 .up.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.up{opacity:1;transform:none}}
+
+/* Section headings arrive word-by-word instead of fading in as one block with everything else
+   -- makes each section's title read like a considered title card, not just more content that
+   happened to scroll into view. Same mechanism as storybook-fable.html's .wsplit. */
+.wsplit{display:inline-block;overflow:hidden;vertical-align:top}
+.wsplit span{display:inline-block;transform:translateY(110%);opacity:0;transition:transform .6s cubic-bezier(.22,1,.36,1),opacity .5s ease}
+.up.in .wsplit span{transform:translateY(0);opacity:1}
+
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.up{opacity:1;transform:none}.wsplit span{transform:none!important;opacity:1!important}}
 </style>
 </head>
 <body>
@@ -1775,6 +1804,32 @@ async function pledge(fundId){
   }catch(e){ alert("That didn't go through. Please try again."); }
 }
 
+// DOM-aware, not textContent-based: several h2 headings have an <em> around one word ("When
+// & <em>where</em>") -- splitting on textContent would flatten that markup and silently drop
+// the italic. This walks the actual child nodes instead, so a word inside <em> stays inside
+// <em>, just now also wrapped for the stagger.
+function wrapWords(el){
+  let i = 0;
+  function walk(node){
+    if (node.nodeType === 3){
+      const frag = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/).forEach(part => {
+        if (part.trim() === ""){ if (part) frag.appendChild(document.createTextNode(part)); return; }
+        const outer = document.createElement("span"); outer.className = "wsplit";
+        const inner = document.createElement("span"); inner.style.transitionDelay = (i*70) + "ms"; inner.textContent = part;
+        outer.appendChild(inner); frag.appendChild(outer); i++;
+      });
+      node.replaceWith(frag);
+    } else if (node.nodeType === 1){
+      [...node.childNodes].forEach(walk);
+    }
+  }
+  [...el.childNodes].forEach(walk);
+}
+document.querySelectorAll(".h2").forEach(h => {
+  if (h.dataset.split) return; h.dataset.split = "1";
+  wrapWords(h);
+});
 const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
 document.querySelectorAll(".up").forEach(el=>io.observe(el));
 
