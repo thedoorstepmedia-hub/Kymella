@@ -167,6 +167,18 @@ function notice(m){ const n=$("notice"); n.textContent=m; n.classList.add("on");
 
 let SESSION_ID = new URLSearchParams(location.search).get("session_id");
 const FOUNDER_KEY = new URLSearchParams(location.search).get("founder_key"); // for free, unlimited real-flow testing -- never share this URL
+
+// ================= draft resolution =================
+// The wizard now runs BEFORE payment against a draft wedding row created by index.html's email
+// capture (see /api/drafts). DRAFT_ID travels in the URL (harmless, just a row id); DRAFT_KEY is
+// the real secret and only ever comes from localStorage on the SAME device/browser that started
+// it -- cross-device resume is out of scope for v1, so a mismatch just means starting fresh.
+let DRAFT_ID = Number(new URLSearchParams(location.search).get("draft")) || null;
+let DRAFT_KEY = null;
+try {
+  const saved = JSON.parse(localStorage.getItem("kymella_draft") || "null");
+  if (saved && saved.id && (!DRAFT_ID || Number(saved.id) === DRAFT_ID)) { DRAFT_ID = Number(saved.id); DRAFT_KEY = saved.admin_key; }
+} catch (e) { /* no saved draft on this device -- DRAFT_KEY stays null */ }
 // Set on the Kymella picker page before checkout, and read here once, straight after purchase —
 // this is how the couple's chosen hero effect + palette survives the Stripe round-trip.
 let CHOSEN_EXPERIENCE = null;
@@ -611,24 +623,24 @@ async function api(path, method, body, key, extraHeaders){
 async function publish(){
   const log = m => { $("saveLog").textContent = m; };
   try{
-    log("Creating your wedding…");
-    const created = await api("/api/weddings","POST",{ partner1:S.partner1, partner2:S.partner2, wedding_date:S.wedding_date, venue:S.venue||"", checkout_session:SESSION_ID }, null, FOUNDER_KEY ? {"x-setup-key":FOUNDER_KEY} : {});
-    const { id, admin_key, slug } = created;
+    if (!DRAFT_ID || !DRAFT_KEY) throw new Error("Your session expired. Please start again from the homepage.");
+    const id = DRAFT_ID, admin_key = DRAFT_KEY;
 
-    if (created.resumed){
-      // A previous publish attempt got partway: same purchase, same wedding. Clear whatever
-      // it managed to save so this clean retry can't create duplicate events/funds/guests.
-      log("Resuming your earlier attempt…");
-      try{
-        const dash = await api(`/api/weddings/${id}/dashboard`,"GET",null, admin_key);
-        for (const ev of (dash.events||[])) await api(`/api/weddings/${id}/events/${ev.id}`,"DELETE",null, admin_key);
-        for (const f of (dash.registry||[])) await api(`/api/weddings/${id}/registry/${f.id}`,"DELETE",null, admin_key);
-        for (const g of (dash.guests||[])) await api(`/api/weddings/${id}/guests/${g.id}`,"DELETE",null, admin_key);
-      }catch(e){ /* best effort — publish continues either way */ }
-    }
+    // The draft already exists (created by index.html's email capture) -- this is no longer a
+    // creation call, just a save into it. If the couple has run the wizard before on this same
+    // draft (closed the tab and came back), clear whatever it saved previously so this clean
+    // pass can't leave duplicate events/funds/guests sitting alongside the new ones.
+    log("Clearing any earlier draft of this wedding…");
+    try{
+      const dash = await api(`/api/weddings/${id}/dashboard`,"GET",null, admin_key);
+      for (const ev of (dash.events||[])) await api(`/api/weddings/${id}/events/${ev.id}`,"DELETE",null, admin_key);
+      for (const f of (dash.registry||[])) await api(`/api/weddings/${id}/registry/${f.id}`,"DELETE",null, admin_key);
+      for (const g of (dash.guests||[])) await api(`/api/weddings/${id}/guests/${g.id}`,"DELETE",null, admin_key);
+    }catch(e){ /* best effort -- publish continues either way */ }
 
     log("Saving your details…");
     await api(`/api/weddings/${id}`,"PUT",{
+      partner1:S.partner1, partner2:S.partner2, wedding_date:S.wedding_date, venue:S.venue||"",
       venue_address:S.venue_address||"", dress_code:S.dress_code||"", arrival_info:S.arrival_info||"",
       parking_info:S.parking_info||"", kids_policy:S.kids_policy||"", travel_info:S.travel_info||"",
       story_json: S.story.filter(s=>s.text).map(s=>({year:s.year||"", title:s.title, text:s.text})),
@@ -653,9 +665,9 @@ async function publish(){
       log(slot === 1 ? "Saving your hero photo…" : "Saving your story photos…");
       try{ await api(`/api/weddings/${id}/photos/${slot}`,"POST",{ image:S.photos[slot].data, focus:S.photos[slot].focus }, admin_key); }
       catch(e){
-        // Non-fatal by design -- the wedding must still publish even if a photo fails --
-        // but silent failure here is exactly what made an earlier bug invisible, so this
-        // gets a real pause and a visible reason instead of vanishing without a trace.
+        // Non-fatal by design -- the draft must still save even if a photo fails -- but silent
+        // failure here is exactly what made an earlier bug invisible, so this gets a real pause
+        // and a visible reason instead of vanishing without a trace.
         log(`One of your photos didn't save (${e.message || "unknown error"}). Continuing without it.`);
         await new Promise(r => setTimeout(r, 2200));
       }
@@ -665,12 +677,10 @@ async function publish(){
     const preview = await api(`/api/weddings/${id}/guests`,"POST",{ name:`${S.partner1.split(" ")[0]} & ${S.partner2.split(" ")[0]}`, grp:"Preview", max_party:2 }, admin_key);
     const previewUrl = preview.guests[0].invite_url;
 
-    let guestRows = [];
     if (S.guests.length){ log(`Preparing ${S.guests.length} invitations…`);
-      const res = await api(`/api/weddings/${id}/guests`,"POST", S.guests.map(g=>({name:g.name,email:g.email,phone:g.phone||"",grp:g.grp||"Friends",max_party:g.max_party||2})), admin_key);
-      guestRows = res.guests;
+      await api(`/api/weddings/${id}/guests`,"POST", S.guests.map(g=>({name:g.name,email:g.email,phone:g.phone||"",grp:g.grp||"Friends",max_party:g.max_party||2})), admin_key);
     }
-    finishScreen({ id, admin_key, slug, previewUrl, guestRows });
+    previewScreen({ previewUrl });
   }catch(e){
     $("screen").innerHTML = `<div class="label muted">A moment</div><h1 class="h1">That didn't save</h1>
       <p class="lede">${esc(e.message)}. Nothing you typed is lost. Please try again.</p>
@@ -678,9 +688,23 @@ async function publish(){
   }
 }
 async function retryPublish(){
-  // The server resumes the same wedding for this purchase, so a retry is just... trying again.
-  // No new checkout, no second payment.
+  // Same draft, so a retry is just... trying again. No payment involved yet at this point.
   draw();
+}
+// Shown once the wizard has saved everything: the couple sees their REAL invite, built from
+// what they just entered, before any money changes hands. Buying is the only remaining step.
+function previewScreen({ previewUrl }){
+  $("prog").style.width="100%"; $("stepCount").textContent="";
+  $("screen").innerHTML = `
+    <div class="label">Take a look</div>
+    <h1 class="h1">Here's your real invitation</h1>
+    <p class="lede">Exactly what your guests will see: your names, your date, your chosen effect and palette. Open it, touch it, then come back here when you're ready.</p>
+    <div class="nav" style="margin-top:26px;justify-content:flex-start"><a class="btn btn-gold" href="${previewUrl}" target="_blank" rel="noopener">Open my invitation</a></div>
+    <div class="done-card" style="margin-top:40px"><h3>Ready to send it to your guests?</h3>
+      <p>One purchase unlocks your full dashboard: RSVPs, guest management, reminders, and every invitation link. Nothing you've built here is lost either way.</p>
+      <button class="btn btn-solid" style="margin-top:14px" onclick="startCheckout()" id="buyBtn">Buy this invitation — $499 CAD</button>
+    </div>
+    <p class="hint" style="margin-top:10px">By purchasing you agree to our <a class="textlink" href="/privacy" target="_blank" rel="noopener">Terms, Privacy &amp; Refund policy</a>. 14-day full refund if your invitations haven't gone out yet.</p>`;
 }
 function buildFaq(){
   // dress_code, arrival_info, parking_info, and kids_policy each already get their own card in
@@ -727,35 +751,70 @@ function copy(id, name){
   try{ navigator.clipboard?.writeText($(id).value); }catch(e){}
   notice(name ? `${name}'s invitation link copied.` : "Copied.");
 }
-async function gate(){
-  if (FOUNDER_KEY){ draw(); return; } // founder testing: skip Stripe entirely, straight into the real wizard
+async function ensureDraft(){
+  if (DRAFT_ID && DRAFT_KEY) return true;
+  if (FOUNDER_KEY){
+    // Founder testing: skip the email step entirely, straight into a real draft.
+    try{
+      const j = await api("/api/drafts","POST",{ email: "founder-test@kymella.internal" }, null, {"x-setup-key":FOUNDER_KEY});
+      DRAFT_ID = j.id; DRAFT_KEY = j.admin_key;
+      return true;
+    }catch(e){ return false; }
+  }
+  return false;
+}
+function drawEmailCapture(){
+  // Standalone entry (e.g. this link opened directly, or on a different device than the one
+  // that started the draft) -- capture email here instead, same as the homepage's Get Started.
+  $("screen").innerHTML = `
+    <div class="label">Welcome</div>
+    <h1 class="h1">Let's set up your wedding</h1>
+    <p class="lede">First, your email so we can save your progress as you go. Nothing is charged until you're ready to buy.</p>
+    <div class="field"><label>Email</label><input id="f-startemail" type="email" placeholder="you@example.com"></div>
+    <div class="nav"><span></span><div class="right"><button class="btn btn-gold" onclick="beginFromEmailCapture()" id="captureBtn">Begin</button></div></div>`;
+}
+async function beginFromEmailCapture(){
+  const email = $("f-startemail").value.trim();
+  if (!email.includes("@")) { notice("Please enter a valid email."); return; }
+  const btn = $("captureBtn"); btn.disabled = true; btn.textContent = "One moment…";
   try{
-    const r = await fetch(`/api/checkout/verify?session_id=${encodeURIComponent(SESSION_ID||"")}`);
-    const v = await r.json();
-    if (v.ok){ draw(); return; }
-    if (v.reason==="used"){
-      // This purchase already started a wedding (likely an interrupted earlier attempt).
-      // Let them straight back in -- publish resumes the same wedding, no second payment.
-      notice("Welcome back. Picking up where you left off.");
-      draw(); return;
+    const j = await api("/api/drafts","POST",{ email });
+    DRAFT_ID = j.id; DRAFT_KEY = j.admin_key;
+    localStorage.setItem("kymella_draft", JSON.stringify({ id: j.id, admin_key: j.admin_key }));
+    draw();
+  }catch(e){ notice(e.message || "Could not start. Please try again."); btn.disabled = false; btn.textContent = "Begin"; }
+}
+async function init(){
+  // Returning from Stripe for this exact draft: confirm payment, then show the real finish screen.
+  if (DRAFT_ID && DRAFT_KEY && SESSION_ID){
+    $("screen").innerHTML = `<div class="saving"><div class="mono-pulse">$</div><p class="savelog">Confirming your payment…</p></div>`;
+    try{
+      await api(`/api/weddings/${DRAFT_ID}/finalize`,"POST",{ checkout_session:SESSION_ID }, DRAFT_KEY, FOUNDER_KEY ? {"x-setup-key":FOUNDER_KEY} : {});
+      const dash = await api(`/api/weddings/${DRAFT_ID}/dashboard`,"GET",null, DRAFT_KEY);
+      const previewGuest = (dash.guests||[]).find(g => g.grp === "Preview");
+      const guestRows = (dash.guests||[]).filter(g => g.grp !== "Preview").map(g => ({ id:g.id, name:g.name, invite_url:g.invite_url }));
+      finishScreen({ id: DRAFT_ID, admin_key: DRAFT_KEY, previewUrl: previewGuest ? previewGuest.invite_url : `${location.origin}/manage#w=${DRAFT_ID}&k=${DRAFT_KEY}`, guestRows });
+    }catch(e){
+      $("screen").innerHTML = `<div class="label muted">A moment</div><h1 class="h1">That didn't go through</h1>
+        <p class="lede">${esc(e.message)}. You haven't been charged twice -- try again from your invitation.</p>
+        <div class="nav"><button class="btn btn-solid" onclick="location.href='/setup?draft=${DRAFT_ID}'">Back to your invitation</button></div>`;
     }
-    $("screen").innerHTML = `
-      <div class="label muted">One step first</div>
-      <h1 class="h1">Your wedding starts here</h1>
-      <p class="lede">Kymella is a single purchase: one wedding, every feature, no subscription. Complete checkout and you will land right back here.</p>
-      <div class="nav" style="justify-content:flex-start;gap:14px">
-        <button class="btn btn-gold" onclick="startCheckout()">Continue to checkout</button>
-        <a class="textlink" href="/" target="_blank" rel="noopener">Try the live experience first</a>
-      </div>
-      <p class="hint" style="margin-top:22px">By purchasing you agree to our <a class="textlink" href="/privacy" target="_blank" rel="noopener">Terms, Privacy &amp; Refund policy</a>.</p>`;
-  }catch(e){ draw(); } // network hiccup: let the API gate enforce
+    return;
+  }
+  const ok = await ensureDraft();
+  if (ok) { draw(); return; }
+  drawEmailCapture();
 }
 async function startCheckout(){
-  try{ const r=await fetch("/api/checkout",{method:"POST"}); const j=await r.json();
-    if (j.url) location.href=j.url; else notice(j.error || "Checkout is unavailable right now.");
-  }catch(e){ notice("Checkout is unavailable right now."); }
+  const btn = $("buyBtn"); if (btn) { btn.disabled = true; btn.textContent = "One moment…"; }
+  try{
+    const r = await fetch("/api/checkout", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ wedding_id: DRAFT_ID }) });
+    const j = await r.json();
+    if (j.url) location.href = j.url;
+    else { notice(j.error || "Checkout is unavailable right now."); if (btn) { btn.disabled = false; btn.textContent = "Buy this invitation — $499 CAD"; } }
+  }catch(e){ notice("Checkout is unavailable right now."); if (btn) { btn.disabled = false; btn.textContent = "Buy this invitation — $499 CAD"; } }
 }
-gate();
+init();
 </script>
 </body>
 </html>

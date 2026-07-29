@@ -165,6 +165,25 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 .effect-btn{padding:11px 6px;border:1px solid rgba(245,239,227,.18);border-radius:2px;color:var(--mist);font-size:12.5px;font-weight:600;transition:all .2s;background:rgba(245,239,227,.03)}
 .effect-btn:hover{border-color:var(--brass-soft)}
 .effect-btn.active{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+
+/* -- 4-box simultaneous picker: each box runs its own live effect instance at once, instead of
+   one canvas that swaps -- so a couple compares all four side by side before choosing. -- */
+.exp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:480px){.exp-grid{grid-template-columns:repeat(4,1fr)}}
+.exp-box{position:relative;border:1px solid rgba(245,239,227,.18);border-radius:4px;overflow:hidden;aspect-ratio:3/4;cursor:pointer;background:#000;transition:border-color .2s}
+.exp-box:hover{border-color:rgba(232,201,160,.5)}
+.exp-box.active{border-color:var(--brass-soft)}
+.exp-box canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.exp-box-label{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:6px 4px;font-size:10.5px;font-weight:600;text-align:center;color:var(--mist);background:linear-gradient(to top, rgba(0,0,0,.6), transparent);display:flex;align-items:center;justify-content:center;gap:4px}
+.exp-box-check{position:absolute;top:6px;right:6px;z-index:3;width:17px;height:17px;border-radius:50%;border:1.5px solid rgba(245,239,227,.5);background:rgba(14,31,28,.4);color:var(--ink);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.exp-box.active .exp-box-check{background:var(--brass);border-color:var(--brass)}
+.exp-box .new-badge{font-family:var(--mono);font-size:6.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--brass-soft);padding:2px 4px;border-radius:6px}
+.exp-box[data-key="polaroid"] .polaroid-track{width:100%;height:100%;position:absolute;inset:0;aspect-ratio:auto;cursor:pointer}
+.exp-box[data-key="polaroid"] .polaroid-nav{display:none}
+.exp-box[data-key="polaroid"] .polaroid-paper{height:100%;display:flex;flex-direction:column;padding:8px 8px 24px}
+.exp-box[data-key="polaroid"] .polaroid-win{flex:1}
+.exp-box[data-key="polaroid"] .polaroid-shake-hint{bottom:30px;font-size:7.5px}
+.exp-box[data-key="polaroid"] .polaroid-cap-text{font-size:12px}
 .palette-choices{display:flex;gap:10px;flex-wrap:wrap}
 .palette-btn{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 8px;border:1px solid rgba(245,239,227,.18);border-radius:20px;font-size:12px;font-weight:500;color:var(--mist);transition:all .2s;background:rgba(245,239,227,.03)}
 .palette-btn:hover{border-color:var(--brass-soft)}
@@ -316,10 +335,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   </div>
 
   <div class="picker-controls">
-    <div class="picker-row" id="experienceControls">
-      <div class="picker-label">The effect: touch the canvas above to try it</div>
-      <div class="effect-choices" id="effectChoices"></div>
-    </div>
+    <div class="picker-row" id="experienceControls"></div>
     <div class="picker-row" id="experiencePaletteRow">
       <div class="picker-label">The palette</div>
       <div class="palette-choices" id="paletteChoices"></div>
@@ -330,7 +346,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       <p class="sb-note">Storybook themes are illustrated once, in one signature palette designed to match their art: the theme <em>is</em> the palette, so there's nothing to tune here.</p>
     </div>
     <div class="picker-cta" id="pickerCtaExperience">
-      <button class="btn btn-brass" style="width:100%" onclick="startPurchase()" id="ctaBtn">Get Started</button>
+      <button class="btn btn-brass" style="width:100%" onclick="handleExperienceCta()" id="ctaBtn">Get Started</button>
       <p class="picker-fine" id="ctaFine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
     </div>
     <div class="picker-cta" id="pickerCtaWaitlist" style="display:none">
@@ -401,6 +417,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
       </div>
       <button class="btn btn-brass" style="width:100%" onclick="handlePriceCta()" id="priceCta">Get Started</button>
       <p class="price-fine" id="priceFine">Secure checkout · set up in about ten minutes</p>
+      <p class="price-fine">14-day full refund, no questions asked, if your invitations haven't gone out yet</p>
     </div>
 
     <div class="pricing-or up">Or</div>
@@ -477,8 +494,23 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   <div class="links">
     <a href="/privacy">Privacy, Terms &amp; Refunds</a>
     <a href="mailto:info@kymella.com">info@kymella.com</a>
+    <a href="#" onclick="return openResend()">Lost your dashboard link?</a>
   </div>
 </footer>
+
+<div class="inquiry-overlay" id="resendOverlay">
+  <div class="inquiry-card">
+    <button class="inquiry-close" onclick="closeResend()" aria-label="Close">&times;</button>
+    <div class="eyebrow">Lost Your Dashboard Link?</div>
+    <h3 style="font-family:var(--disp);font-weight:500;font-size:22px;margin-top:8px">We'll send it to you</h3>
+    <p class="inquiry-sub">Enter the email you used at checkout. If it matches a purchase, we'll email your dashboard link.</p>
+    <form id="resendForm" onsubmit="return submitResend(event)">
+      <div class="ifield"><label>Email</label><input type="email" id="resendEmail" required></div>
+      <button type="submit" class="btn btn-brass" style="width:100%;margin-top:8px" id="resendSubmit">Send my link</button>
+      <p class="inquiry-msg" id="resendMsg"></p>
+    </form>
+  </div>
+</div>
 
 <div class="notice" id="notice"></div>
 
@@ -842,8 +874,6 @@ function mount(){
   }
 }
 function renderControls(){
-  document.getElementById("effectChoices").innerHTML = EFFECTS.map((e,i) =>
-    `<button class="effect-btn ${i===effectIdx?'active':''}" onclick="chooseEffect(${i})" style="position:relative">${e.label}${e.isNew?'<span class="new-badge">New</span>':''}</button>`).join("");
   document.getElementById("paletteChoices").innerHTML = PALETTES.map((p,i) =>
     `<button class="palette-btn ${i===paletteIdx?'active':''}" onclick="choosePalette(${i})"><span class="swatch" style="background:${p.brass}"></span>${p.name}</button>`).join("");
   document.getElementById("sbGrid").innerHTML = STORYBOOK_THEMES.map((t,i) => `
@@ -852,9 +882,116 @@ function renderControls(){
       <div class="sb-card-body"><h4>${t.label}</h4><p>${t.tag}</p></div>
     </button>`).join("");
 }
-function chooseEffect(i){ effectIdx = i; renderControls(); mount(); }
-function choosePalette(i){ paletteIdx = i; renderControls(); mount(); }
+function choosePalette(i){
+  paletteIdx = i; renderControls(); mount();
+  if (category === "experience" && pickerPhase === "pick") mountExpGrid(); // recolor all 4 boxes live, not just the ambient background
+}
 function chooseStorybook(i){ sbIdx = i; renderControls(); mount(); }
+
+/* ================= 4-box simultaneous picker (Interactive Experience only) =================
+   Draft-first flow: "Get Started" now captures an email and opens an unpaid draft record
+   (see /api/drafts) before anything else -- the wizard in setup.html saves into that same
+   draft the whole way through, and payment only happens at the very end, once the couple has
+   already seen their real invite. pickerPhase gates which half of the panel shows. */
+let pickerPhase = "intro"; // "intro" (email capture) -> "pick" (4-box picker + continue)
+let draftId = null;
+(function loadSavedDraft(){
+  try {
+    const saved = JSON.parse(localStorage.getItem("kymella_draft") || "null");
+    if (saved && saved.id) { draftId = saved.id; pickerPhase = "pick"; }
+  } catch (e) { /* no saved draft -- starts at intro, as normal */ }
+})();
+
+let expInstances = {};
+function mountExpGrid(){
+  Object.values(expInstances).forEach(inst => { try { inst && inst.stop && inst.stop(); } catch (e) {} });
+  expInstances = {};
+  const p = PALETTES[paletteIdx];
+  const opts = { colorTop: p.ink, colorBottom: p.ink2, brass: p.brass, brassSoft: p.brassSoft, mist: p.mist };
+  ["ripple","diya","frost"].forEach(key => {
+    const canvas = document.getElementById(`miniCanvas-${key}`);
+    // Guard against mounting before the grid has been laid out (0-size canvas) -- frost's
+    // getImageData call throws hard on a zero-width source rather than rendering blank.
+    if (canvas && canvas.clientWidth > 0 && canvas.clientHeight > 0) expInstances[key] = mountHero(key, canvas, opts, "Priya & Arjun");
+  });
+  const track = document.getElementById("miniTrack-polaroid"), dots = document.getElementById("miniDots-polaroid");
+  if (track) {
+    track.innerHTML = ""; dots.innerHTML = "";
+    expInstances.polaroid = createPolaroidStack({
+      track, dots, prev: document.getElementById("miniPrev-polaroid"), next: document.getElementById("miniNext-polaroid"),
+    }, [{ cap: "Priya & Arjun", sub: "together, at last" }]);
+  }
+}
+function renderExpGrid(){
+  document.getElementById("expGrid").innerHTML = EFFECTS.map(e => {
+    const active = e.key === EFFECTS[effectIdx].key;
+    const isPolaroid = e.key === "polaroid";
+    return `<div class="exp-box${active?' active':''}" data-key="${e.key}" onclick="selectExpBox('${e.key}')">
+      <div class="exp-box-check">${active?'✓':''}</div>
+      ${isPolaroid
+        ? `<div id="miniTrack-polaroid"></div><div id="miniDots-polaroid" style="display:none"></div><button id="miniPrev-polaroid" style="display:none" type="button"></button><button id="miniNext-polaroid" style="display:none" type="button"></button>`
+        : `<canvas id="miniCanvas-${e.key}"></canvas>`}
+      <div class="exp-box-label">${e.label}${e.isNew?'<span class="new-badge">New</span>':''}</div>
+    </div>`;
+  }).join("");
+  mountExpGrid();
+}
+function selectExpBox(key){
+  effectIdx = EFFECTS.findIndex(e => e.key === key);
+  document.querySelectorAll("#expGrid .exp-box").forEach(el => {
+    const isActive = el.dataset.key === key;
+    el.classList.toggle("active", isActive);
+    el.querySelector(".exp-box-check").textContent = isActive ? "✓" : "";
+  });
+  mount(); // keep the ambient background behind the panel in sync with the current favourite
+}
+function renderExperiencePanel(){
+  const wrap = document.getElementById("experienceControls");
+  const paletteRow = document.getElementById("experiencePaletteRow");
+  const cta = document.getElementById("pickerCtaExperience");
+  if (pickerPhase === "intro"){
+    paletteRow.style.display = "none";
+    cta.style.display = "none";
+    wrap.innerHTML = `
+      <div class="picker-label">Get started</div>
+      <form class="wl-form" id="startForm" onsubmit="return submitStart(event)">
+        <input class="wl-input" type="email" id="startEmail" placeholder="Your email" required maxlength="120">
+        <button class="btn btn-brass" type="submit" style="width:100%" id="startBtn">Get Started</button>
+      </form>
+      <p class="picker-fine">We save your progress as you build. Nothing is charged until you're ready to buy.</p>`;
+  } else {
+    paletteRow.style.display = "";
+    cta.style.display = "";
+    document.getElementById("ctaBtn").textContent = "Continue to your details";
+    document.getElementById("ctaFine").textContent = "Names, date, and guests next -- then see your real invite before paying $499 CAD";
+    wrap.innerHTML = `<div class="picker-label">Touch each one, then choose your favourite</div><div class="exp-grid" id="expGrid"></div>`;
+    renderExpGrid();
+  }
+}
+async function submitStart(e){
+  e.preventDefault();
+  const btn = document.getElementById("startBtn");
+  const email = document.getElementById("startEmail").value.trim();
+  if (!email.includes("@")) { notice("Please enter a valid email."); return false; }
+  btn.disabled = true; btn.textContent = "One moment…";
+  try {
+    const r = await fetch("/api/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { notice(j.error || "Could not start. Please try again."); btn.disabled = false; btn.textContent = "Get Started"; return false; }
+    draftId = j.id;
+    localStorage.setItem("kymella_draft", JSON.stringify({ id: j.id, admin_key: j.admin_key }));
+    pickerPhase = "pick";
+    renderExperiencePanel();
+  } catch (err) {
+    notice("Could not start. Please try again."); btn.disabled = false; btn.textContent = "Get Started";
+  }
+  return false;
+}
+function handleExperienceCta(){
+  if (!draftId) { document.getElementById("startEmail")?.focus(); return; }
+  sessionStorage.setItem("kymella_experience", JSON.stringify(currentExperiencePayload()));
+  location.href = `/setup?draft=${draftId}`;
+}
 
 function setCategory(cat){
   category = cat;
@@ -917,10 +1054,12 @@ function setCategory(cat){
   renderControls();
   renderExamples();
   mount();
+  if (isExp) renderExperiencePanel();
 }
 
 renderControls();
 mount();
+renderExperiencePanel();
 
 /* ================= CHECKOUT HANDOFF -- straight to Stripe, no separate compare page.
    The homepage picker already IS the live preview (real canvas, real palette swaps, real demo
@@ -936,28 +1075,26 @@ function currentExperiencePayload(){
   return { effect: EFFECTS[effectIdx].key,
     palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } };
 }
-async function goToCheckout(experiencePayload){
-  sessionStorage.setItem("kymella_experience", JSON.stringify(experiencePayload));
-  try{
-    const r = await fetch("/api/checkout", { method:"POST" });
-    const j = await r.json();
-    if (j.url) location.href = j.url;
-    else notice("Checkout is unavailable right now. Please try again shortly.");
-  }catch(e){ notice("Checkout is unavailable right now. Please try again shortly."); }
-}
-function startPurchase(){ goToCheckout(currentExperiencePayload()); }
 // The pricing card's single CTA has to branch the same way the hero's does, since Fable isn't
 // for sale yet -- scrolls back up to the real waitlist form rather than duplicating one here.
+// For the interactive product, checkout no longer happens from the homepage at all -- it
+// happens at the end of the setup.html wizard, once the couple has already built and previewed
+// their real invite. So this either starts (or resumes) that draft-first journey.
 function handlePriceCta(){
   if (category === "storybook"){
     document.getElementById("catSbBtn").scrollIntoView({ behavior:"smooth", block:"start" });
     setTimeout(() => document.getElementById("wlName")?.focus(), 500);
     return;
   }
-  startPurchase();
+  if (!draftId){
+    document.getElementById("pickerHero").scrollIntoView({ behavior:"smooth", block:"start" });
+    setTimeout(() => document.getElementById("startEmail")?.focus(), 500);
+    return;
+  }
+  handleExperienceCta();
 }
 function goToCheckoutFromDemo(){
-  if (!activeDemo) return startPurchase();
+  if (!activeDemo) return handlePriceCta();
   // Storybook demos carry no palette name to look up -- same "the theme IS the palette" rule
   // as everywhere else Storybook shows up. Not for sale yet either, so this sends people to the
   // waitlist instead of checkout, same as every other Fable entry point.
@@ -968,9 +1105,18 @@ function goToCheckoutFromDemo(){
     setTimeout(() => document.getElementById("wlName")?.focus(), 500);
     return;
   }
+  if (!draftId){
+    closeDemo();
+    document.getElementById("pickerHero").scrollIntoView({ behavior:"smooth", block:"start" });
+    setTimeout(() => document.getElementById("startEmail")?.focus(), 500);
+    return;
+  }
   const p = PALETTES.find(x => x.name === activeDemo.palette) || PALETTES[0];
-  goToCheckout({ effect: activeDemo.effect,
-    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } });
+  effectIdx = EFFECTS.findIndex(e => e.key === activeDemo.effect); if (effectIdx < 0) effectIdx = 0;
+  paletteIdx = PALETTES.indexOf(p); if (paletteIdx < 0) paletteIdx = 0;
+  sessionStorage.setItem("kymella_experience", JSON.stringify({ effect: activeDemo.effect,
+    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } }));
+  location.href = `/setup?draft=${draftId}`;
 }
 async function submitWaitlist(e){
   e.preventDefault();
@@ -1048,6 +1194,34 @@ function closeInquiry(){
   document.body.style.overflow = "";
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && document.getElementById("inquiryOverlay").classList.contains("open")) closeInquiry(); });
+
+function openResend(){
+  document.getElementById("resendOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  return false;
+}
+function closeResend(){
+  document.getElementById("resendOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && document.getElementById("resendOverlay").classList.contains("open")) closeResend(); });
+async function submitResend(e){
+  e.preventDefault();
+  const btn = document.getElementById("resendSubmit");
+  const msg = document.getElementById("resendMsg");
+  const email = document.getElementById("resendEmail").value.trim();
+  btn.disabled = true;
+  try {
+    await fetch("/api/kymella-resend", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+    // Deliberately the same message whether or not anything was found -- the backend never
+    // reveals which emails have a purchase attached, so the UI can't either.
+    msg.textContent = "If that email matches a purchase, we've sent your dashboard link.";
+  } catch (err) {
+    msg.textContent = "Something went wrong. Please try again or email info@kymella.com.";
+  }
+  btn.disabled = false;
+  return false;
+}
 
 document.getElementById("inquiryForm").addEventListener("submit", async e => {
   e.preventDefault();
