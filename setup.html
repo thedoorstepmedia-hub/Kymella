@@ -436,14 +436,31 @@ function collect(){
   if (STEPS[step]==="basics"){ S.partner1=g("f-p1"); S.partner2=g("f-p2"); S.wedding_date=g("f-date"); S.venue=g("f-venue"); S.venue_address=g("f-addr"); }
   if (STEPS[step]==="practical"){ S.dress_code=g("f-dress"); S.arrival_info=g("f-arrival"); S.parking_info=g("f-parking"); S.kids_policy=g("f-kids"); S.travel_info=g("f-travel"); S.hashtag=g("f-hashtag"); }
 }
+// Keeps whatever's been typed so far in this browser, keyed to the draft -- so leaving mid-wizard
+// (e.g. to go pick a different theme on the homepage, then coming back) never means retyping
+// names, dates, story, guests, everything from scratch. Best-effort only: if it's ever unavailable
+// (private browsing, quota), the wizard just falls back to today's blank-on-return behaviour.
+function saveWizardState(){
+  if (!DRAFT_ID) return;
+  try { localStorage.setItem(`kymella_wizard_${DRAFT_ID}`, JSON.stringify(S)); } catch (e) { /* best effort */ }
+}
+function loadWizardState(){
+  if (!DRAFT_ID) return false;
+  try {
+    const raw = localStorage.getItem(`kymella_wizard_${DRAFT_ID}`);
+    if (!raw) return false;
+    Object.assign(S, JSON.parse(raw));
+    return true;
+  } catch (e) { return false; }
+}
 function next(skip){
   collect();
   if (STEPS[step]==="basics" && !skip){
     if (!S.partner1 || !S.partner2 || !S.wedding_date){ notice("Your names and the date are the one thing we truly need."); return; }
   }
-  step = Math.min(STEPS.length-1, step+1); draw();
+  step = Math.min(STEPS.length-1, step+1); draw(); saveWizardState();
 }
-function prev(){ collect(); step = Math.max(0, step-1); draw(); }
+function prev(){ collect(); step = Math.max(0, step-1); draw(); saveWizardState(); }
 
 function photoStatus(msg){ const el = $("photoStatus"); if (el) el.textContent = msg || ""; }
 function handlePhotoFile(slot, file){
@@ -680,6 +697,10 @@ async function publish(){
     if (S.guests.length){ log(`Preparing ${S.guests.length} invitations…`);
       await api(`/api/weddings/${id}/guests`,"POST", S.guests.map(g=>({name:g.name,email:g.email,phone:g.phone||"",grp:g.grp||"Friends",max_party:g.max_party||2})), admin_key);
     }
+    // Remembered so a return visit (e.g. after going back to the homepage to try a different
+    // theme) can jump straight back to the preview instead of re-running the whole wizard.
+    S._meta = { published: true, previewUrl };
+    saveWizardState();
     previewScreen({ previewUrl });
   }catch(e){
     $("screen").innerHTML = `<div class="label muted">A moment</div><h1 class="h1">That didn't save</h1>
@@ -699,12 +720,17 @@ function previewScreen({ previewUrl }){
     <div class="label">Take a look</div>
     <h1 class="h1">Here's your real invitation</h1>
     <p class="lede">Exactly what your guests will see: your names, your date, your chosen effect and palette. Open it, touch it, then come back here when you're ready.</p>
-    <div class="nav" style="margin-top:26px;justify-content:flex-start"><a class="btn btn-gold" href="${previewUrl}" target="_blank" rel="noopener">Open my invitation</a></div>
+    <div class="nav" style="margin-top:26px;justify-content:flex-start;gap:14px">
+      <a class="btn btn-gold" href="${previewUrl}" target="_blank" rel="noopener">Open my invitation</a>
+      <button class="btn btn-quiet sm" onclick="step=1;draw()">Edit your details</button>
+      <a class="textlink" href="/">Try a different theme</a>
+    </div>
     <div class="done-card" style="margin-top:40px"><h3>Ready to send it to your guests?</h3>
       <p>One purchase unlocks your full dashboard: RSVPs, guest management, reminders, and every invitation link. Nothing you've built here is lost either way.</p>
       <button class="btn btn-solid" style="margin-top:14px" onclick="startCheckout()" id="buyBtn">Buy this invitation — $499 CAD</button>
     </div>
-    <p class="hint" style="margin-top:10px">By purchasing you agree to our <a class="textlink" href="/privacy" target="_blank" rel="noopener">Terms, Privacy &amp; Refund policy</a>. 14-day full refund if your invitations haven't gone out yet.</p>`;
+    <p class="hint" style="margin-top:14px">Everything here, including your theme and every detail, stays fully editable from your dashboard after you buy too -- this isn't your last chance to change something.</p>
+    <p class="hint" style="margin-top:10px">By purchasing you agree to our <a class="textlink" href="/privacy" target="_blank" rel="noopener">Terms, Privacy &amp; Refund policy</a>.</p>`;
 }
 function buildFaq(){
   // dress_code, arrival_info, parking_info, and kids_policy each already get their own card in
@@ -802,7 +828,22 @@ async function init(){
     return;
   }
   const ok = await ensureDraft();
-  if (ok) { draw(); return; }
+  if (ok) {
+    loadWizardState(); // best-effort: restores whatever was typed here before, on this device
+    if (S._meta && S._meta.published) {
+      if (CHOSEN_EXPERIENCE) {
+        // They just picked a (possibly different) theme back on the homepage -- refresh the
+        // invite with it instead of making them click through the whole wizard again for that
+        // alone. STEPS[STEPS.length-1] is "finish", whose draw() case runs publish() directly.
+        step = STEPS.length - 1; draw();
+      } else {
+        previewScreen({ previewUrl: S._meta.previewUrl });
+      }
+      return;
+    }
+    draw();
+    return;
+  }
   drawEmailCapture();
 }
 async function startCheckout(){
