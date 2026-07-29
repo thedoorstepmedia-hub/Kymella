@@ -929,7 +929,7 @@ function renderExpGrid(){
     return `<div class="exp-box${active?' active':''}" data-key="${e.key}" onclick="selectExpBox('${e.key}')">
       <div class="exp-box-check">${active?'✓':''}</div>
       ${isPolaroid
-        ? `<div id="miniTrack-polaroid"></div><div id="miniDots-polaroid" style="display:none"></div><button id="miniPrev-polaroid" style="display:none" type="button"></button><button id="miniNext-polaroid" style="display:none" type="button"></button>`
+        ? `<div id="miniTrack-polaroid"></div><div class="polaroid-nav" style="display:none"><div id="miniDots-polaroid"></div><button id="miniPrev-polaroid" type="button"></button><button id="miniNext-polaroid" type="button"></button></div>`
         : `<canvas id="miniCanvas-${e.key}"></canvas>`}
       <div class="exp-box-label">${e.label}${e.isNew?'<span class="new-badge">New</span>':''}</div>
     </div>`;
