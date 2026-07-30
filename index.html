@@ -883,7 +883,7 @@ function renderControls(){
 }
 function choosePalette(i){
   paletteIdx = i; renderControls(); mount();
-  if (category === "experience" && pickerPhase === "pick") mountExpGrid(); // recolor all 4 boxes live, not just the ambient background
+  if (category === "experience") mountExpGrid(); // recolor all 4 boxes live, not just the ambient background
 }
 function chooseStorybook(i){ sbIdx = i; renderControls(); mount(); }
 
@@ -891,14 +891,15 @@ function chooseStorybook(i){ sbIdx = i; renderControls(); mount(); }
    Draft-first flow: "Get Started" now captures an email and opens an unpaid draft record
    (see /api/drafts) before anything else -- the wizard in setup.html saves into that same
    draft the whole way through, and payment only happens at the very end, once the couple has
-   already seen their real invite. pickerPhase gates which half of the panel shows. */
-let pickerPhase = "intro"; // "intro" (email capture) -> "pick" (4-box picker + continue)
+   already seen their real invite. The 4-box picker itself is always visible and playable with no
+   email wall on it at all -- "touch it before you buy it" is the whole hook, so email is only
+   ever asked for at the moment they actually try to move on (the CTA), not before. */
 let draftId = null;
 (function loadSavedDraft(){
   try {
     const saved = JSON.parse(localStorage.getItem("kymella_draft") || "null");
-    if (saved && saved.id) { draftId = saved.id; pickerPhase = "pick"; }
-  } catch (e) { /* no saved draft -- starts at intro, as normal */ }
+    if (saved && saved.id) draftId = saved.id;
+  } catch (e) { /* no saved draft -- CTA will ask for email when pressed, as normal */ }
 })();
 
 let expInstances = {};
@@ -946,26 +947,23 @@ function selectExpBox(key){
 }
 function renderExperiencePanel(){
   const wrap = document.getElementById("experienceControls");
-  const paletteRow = document.getElementById("experiencePaletteRow");
-  const cta = document.getElementById("pickerCtaExperience");
-  if (pickerPhase === "intro"){
-    paletteRow.style.display = "none";
-    cta.style.display = "none";
-    wrap.innerHTML = `
-      <div class="picker-label">Get started</div>
-      <form class="wl-form" id="startForm" onsubmit="return submitStart(event)">
-        <input class="wl-input" type="email" id="startEmail" placeholder="Your email" required maxlength="120">
-        <button class="btn btn-brass" type="submit" style="width:100%" id="startBtn">Get Started</button>
-      </form>
-      <p class="picker-fine">We save your progress as you build. Nothing is charged until you're ready to buy.</p>`;
-  } else {
-    paletteRow.style.display = "";
-    cta.style.display = "";
-    document.getElementById("ctaBtn").textContent = "Continue to your details";
-    document.getElementById("ctaFine").textContent = "Names, date, and guests next -- then see your real invite before paying $499 CAD";
-    wrap.innerHTML = `<div class="picker-label">Touch each one, then choose your favourite</div><div class="exp-grid" id="expGrid"></div>`;
-    renderExpGrid();
-  }
+  document.getElementById("experiencePaletteRow").style.display = "";
+  document.getElementById("pickerCtaExperience").style.display = "";
+  wrap.innerHTML = `<div class="picker-label">Touch each one, then choose your favourite</div><div class="exp-grid" id="expGrid"></div>`;
+  renderExpGrid();
+}
+// Email is asked for right here, at the CTA, the moment they try to move on -- never before,
+// so the picker itself stays completely open to play with first. Swaps the button for an inline
+// form in place; on success this goes straight on to the wizard, since "continue" was already
+// the whole reason they gave their email in the first place -- no need to render anything back.
+function showEmailCapture(){
+  document.getElementById("pickerCtaExperience").innerHTML = `
+    <form class="wl-form" id="startForm" onsubmit="return submitStart(event)">
+      <input class="wl-input" type="email" id="startEmail" placeholder="Your email" required maxlength="120" autofocus>
+      <button class="btn btn-brass" type="submit" style="width:100%" id="startBtn">Continue</button>
+    </form>
+    <p class="picker-fine">We save your progress as you build. Nothing is charged until you're ready to buy.</p>`;
+  document.getElementById("startEmail")?.focus();
 }
 async function submitStart(e){
   e.preventDefault();
@@ -976,20 +974,22 @@ async function submitStart(e){
   try {
     const r = await fetch("/api/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) { notice(j.error || "Could not start. Please try again."); btn.disabled = false; btn.textContent = "Get Started"; return false; }
+    if (!r.ok) { notice(j.error || "Could not start. Please try again."); btn.disabled = false; btn.textContent = "Continue"; return false; }
     draftId = j.id;
     localStorage.setItem("kymella_draft", JSON.stringify({ id: j.id, admin_key: j.admin_key }));
-    pickerPhase = "pick";
-    renderExperiencePanel();
+    goToWizard();
   } catch (err) {
-    notice("Could not start. Please try again."); btn.disabled = false; btn.textContent = "Get Started";
+    notice("Could not start. Please try again."); btn.disabled = false; btn.textContent = "Continue";
   }
   return false;
 }
-function handleExperienceCta(){
-  if (!draftId) { document.getElementById("startEmail")?.focus(); return; }
+function goToWizard(){
   sessionStorage.setItem("kymella_experience", JSON.stringify(currentExperiencePayload()));
   location.href = `/setup?draft=${draftId}`;
+}
+function handleExperienceCta(){
+  if (!draftId) { showEmailCapture(); return; }
+  goToWizard();
 }
 
 function setCategory(cat){
@@ -1087,7 +1087,7 @@ function handlePriceCta(){
   }
   if (!draftId){
     document.getElementById("pickerHero").scrollIntoView({ behavior:"smooth", block:"start" });
-    setTimeout(() => document.getElementById("startEmail")?.focus(), 500);
+    setTimeout(() => handleExperienceCta(), 500);
     return;
   }
   handleExperienceCta();
@@ -1104,18 +1104,13 @@ function goToCheckoutFromDemo(){
     setTimeout(() => document.getElementById("wlName")?.focus(), 500);
     return;
   }
-  if (!draftId){
-    closeDemo();
-    document.getElementById("pickerHero").scrollIntoView({ behavior:"smooth", block:"start" });
-    setTimeout(() => document.getElementById("startEmail")?.focus(), 500);
-    return;
-  }
   const p = PALETTES.find(x => x.name === activeDemo.palette) || PALETTES[0];
   effectIdx = EFFECTS.findIndex(e => e.key === activeDemo.effect); if (effectIdx < 0) effectIdx = 0;
   paletteIdx = PALETTES.indexOf(p); if (paletteIdx < 0) paletteIdx = 0;
-  sessionStorage.setItem("kymella_experience", JSON.stringify({ effect: activeDemo.effect,
-    palette: { ink:p.ink, ink2:p.ink2, ink3:p.ink3, mist:p.mist, mistDim:p.mistDim, brass:p.brass, brassSoft:p.brassSoft, brassDeep:p.brassDeep } }));
-  location.href = `/setup?draft=${draftId}`;
+  // Same email-then-continue rule as the main CTA -- handleExperienceCta reads the effect/palette
+  // just set above via currentExperiencePayload() once a draft exists (or is created) to proceed.
+  closeDemo();
+  handleExperienceCta();
 }
 async function submitWaitlist(e){
   e.preventDefault();
