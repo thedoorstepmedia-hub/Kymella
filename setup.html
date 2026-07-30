@@ -145,6 +145,17 @@ svg.i{width:17px;height:17px;stroke:currentColor;stroke-width:1.5;fill:none;stro
 .warn{background:#FBF5E6;border:1px solid var(--gold-soft);padding:14px 16px;font-size:13px;color:var(--gold-deep);margin-top:14px}
 .notice{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--ivory);font-size:13.5px;text-align:center;padding:14px 20px;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:200}
 .notice.on{transform:none}
+
+/* -- Preview overlay: same pattern as the homepage's demo overlay. Before payment, the invite
+   is shown in-frame here rather than as a plain navigable link -- a copyable /i/... URL in the
+   address bar is a free, fully working invitation, so it never gets surfaced as its own page
+   pre-purchase. Post-purchase (finishScreen), the couple owns the link and it's meant to be
+   copied/sent, so that one stays a normal link. */
+.preview-overlay{position:fixed;inset:0;z-index:1000;background:#000;display:none}
+.preview-overlay.open{display:block}
+.preview-overlay iframe{width:100%;height:100%;border:0;display:block}
+.preview-close{position:fixed;top:16px;right:16px;z-index:1002;width:42px;height:42px;border-radius:50%;background:rgba(20,20,20,.7);backdrop-filter:blur(6px);color:#fff;font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);transition:background .2s}
+.preview-close:hover{background:rgba(20,20,20,.9)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -159,6 +170,11 @@ svg.i{width:17px;height:17px;stroke:currentColor;stroke-width:1.5;fill:none;stro
 </div>
 <div class="wrap"><div class="screen" id="screen"></div></div>
 <div class="notice" id="notice"></div>
+
+<div class="preview-overlay" id="previewOverlay">
+  <button class="preview-close" onclick="closePreviewOverlay()" aria-label="Close preview">&times;</button>
+  <iframe id="previewIframe" src="about:blank" title="Your wedding invitation preview"></iframe>
+</div>
 <script>
 /* ================= wizard state ================= */
 const $ = id => document.getElementById(id);
@@ -714,14 +730,30 @@ async function retryPublish(){
 }
 // Shown once the wizard has saved everything: the couple sees their REAL invite, built from
 // what they just entered, before any money changes hands. Buying is the only remaining step.
+let PREVIEW_URL = null;
+function openPreviewOverlay(){
+  if (!PREVIEW_URL) return;
+  document.getElementById("previewIframe").src = PREVIEW_URL;
+  document.getElementById("previewOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closePreviewOverlay(){
+  document.getElementById("previewOverlay").classList.remove("open");
+  document.getElementById("previewIframe").src = "about:blank";
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && document.getElementById("previewOverlay").classList.contains("open")) closePreviewOverlay(); });
 function previewScreen({ previewUrl }){
+  // Shown in-frame here, not as a plain link -- before payment, a bare /i/... URL would be a
+  // free, fully working invitation the moment it's copied out of the address bar or shared.
+  PREVIEW_URL = previewUrl;
   $("prog").style.width="100%"; $("stepCount").textContent="";
   $("screen").innerHTML = `
     <div class="label">Take a look</div>
     <h1 class="h1">Here's your real invitation</h1>
     <p class="lede">Exactly what your guests will see: your names, your date, your chosen effect and palette. Open it, touch it, then come back here when you're ready.</p>
     <div class="nav" style="margin-top:26px;justify-content:flex-start;gap:14px">
-      <a class="btn btn-gold" href="${previewUrl}" target="_blank" rel="noopener">Open my invitation</a>
+      <button class="btn btn-gold" onclick="openPreviewOverlay()">Open my invitation</button>
       <button class="btn btn-quiet sm" onclick="step=1;draw()">Edit your details</button>
       <a class="textlink" href="/">Try a different theme</a>
     </div>
