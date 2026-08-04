@@ -936,7 +936,20 @@ function renderExpGrid(){
   }).join("");
   mountExpGrid();
 }
+// Anonymous, first-party only -- no cookies, no visible UI, nothing a visitor sees or has to
+// consent to. Just two counters (a page loaded / someone touched the picker) so a future traffic
+// push can show whether people are landing at all versus landing and bouncing before engaging,
+// instead of guessing the way the last one had to be diagnosed after the fact.
+function trackEvent(event){
+  try {
+    const body = JSON.stringify({ event });
+    if (navigator.sendBeacon) navigator.sendBeacon("/api/kymella-pageview", new Blob([body], { type: "application/json" }));
+    else fetch("/api/kymella-pageview", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true });
+  } catch (e) { /* best effort -- never let tracking break the page */ }
+}
+let pickerTouched = false;
 function selectExpBox(key){
+  if (!pickerTouched) { pickerTouched = true; trackEvent("picker_touch"); }
   effectIdx = EFFECTS.findIndex(e => e.key === key);
   document.querySelectorAll("#expGrid .exp-box").forEach(el => {
     const isActive = el.dataset.key === key;
@@ -1059,6 +1072,7 @@ function setCategory(cat){
 renderControls();
 mount();
 renderExperiencePanel();
+trackEvent("page_view");
 
 /* ================= CHECKOUT HANDOFF -- straight to Stripe, no separate compare page.
    The homepage picker already IS the live preview (real canvas, real palette swaps, real demo
