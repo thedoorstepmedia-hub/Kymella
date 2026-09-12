@@ -8,7 +8,7 @@
 <meta property="og:title" content="Kymella: A wedding site your guests will actually touch">
 <meta property="og:description" content="A real water ripple, a diya flame, a frost reveal: pick one, make it yours, send it to your guests.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230E1F1C'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23B8874A' stroke-width='1.3'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23B8874A' stroke-width='0.8' opacity='0.5'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230E1F1C'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='19' font-style='italic' text-anchor='middle' fill='%23B8874A'%3EK%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -243,6 +243,8 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 .price-card{max-width:440px;margin:48px auto 0;background:#fff;border:1px solid var(--line);padding:44px 38px;text-align:center;position:relative}
 .price-card::before{content:"";position:absolute;inset:8px;border:1px solid var(--line);pointer-events:none}
 .price-card>*{position:relative}
+.price-was{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--brass-deep)}
+.price-founding{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass-deep);background:var(--brass-soft);padding:3px 9px;border-radius:2px;margin-left:8px;vertical-align:middle;top:-3px;position:relative}
 .price{font-family:var(--disp);font-size:56px;font-weight:400;margin-top:6px}
 .price small{font-size:24px;vertical-align:top;top:8px;position:relative}
 .price-sub{font-size:12px;color:var(--ink-3);letter-spacing:.04em;margin-bottom:24px}
@@ -347,7 +349,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     </div>
     <div class="picker-cta" id="pickerCtaExperience">
       <button class="btn btn-brass" style="width:100%" onclick="handleExperienceCta()" id="ctaBtn">Get Started</button>
-      <p class="picker-fine" id="ctaFine">$499 CAD · once · no subscription · you'll set up names, date, and guests next</p>
+      <p class="picker-fine" id="ctaFine">$299 CAD founding price (reg. $499) · once · no subscription · you'll set up names, date, and guests next</p>
     </div>
     <div class="picker-cta" id="pickerCtaWaitlist" style="display:none">
       <form class="wl-form" id="waitlistForm" onsubmit="return submitWaitlist(event)">
@@ -367,7 +369,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 
 <div class="demo-overlay" id="demoOverlay">
   <button class="demo-close" onclick="closeDemo()" aria-label="Close preview">&times;</button>
-  <button class="demo-cta btn btn-brass" id="demoCta" onclick="goToCheckoutFromDemo()">Make Your Own · $499 CAD</button>
+  <button class="demo-cta btn btn-brass" id="demoCta" onclick="goToCheckoutFromDemo()">Make Your Own · $299 CAD</button>
   <iframe id="demoIframe" src="about:blank" title="Wedding invite preview"></iframe>
 </div>
 
@@ -405,8 +407,9 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     <h2 class="h2 up">One price. One wedding. <em>Everything.</em></h2>
     <div class="price-card up">
       <div class="eyebrow">Kymella</div>
-      <div class="price" id="priceAmount"><small>$</small>499</div>
-      <div class="price-sub" id="priceSub">CAD · once · no subscription</div>
+      <div id="priceWasRow"><span class="price-was" id="priceWas">$499</span><span class="price-founding" id="priceFoundingTag">Founding Price</span></div>
+      <div class="price" id="priceAmount"><small>$</small>299</div>
+      <div class="price-sub" id="priceSub">CAD · once · no subscription · first 10 couples</div>
       <div class="plist">
         <div id="priceBullet1">✦ Your chosen hero effect, in your palette</div>
         <div>✦ Unlimited guests, each with a personal invitation link</div>
@@ -416,7 +419,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
         <div>✦ Registry funds, paid directly to you</div>
       </div>
       <button class="btn btn-brass" style="width:100%" onclick="handlePriceCta()" id="priceCta">Get Started</button>
-      <p class="price-fine" id="priceFine">Secure checkout · set up in about ten minutes</p>
+      <p class="price-fine" id="priceFine">Secure checkout · code FOUNDING10 applied at checkout · set up in about ten minutes</p>
     </div>
 
     <div class="pricing-or up">Or</div>
@@ -1031,16 +1034,17 @@ function setCategory(cat){
     document.getElementById("modeHeadline").innerHTML = "A wedding site<br><em>your guests will actually touch</em>";
     document.getElementById("modeSub").textContent = "Four real, physics-driven effects, not decoration. Play with them, pick the one that feels like you, and it becomes your guests' invitation.";
     document.getElementById("ctaBtn").textContent = "Get Started";
-    document.getElementById("ctaFine").textContent = "$499 CAD · once · no subscription · you'll set up names, date, and guests next";
+    document.getElementById("ctaFine").textContent = "$299 CAD founding price (reg. $499) · once · no subscription · you'll set up names, date, and guests next";
     document.getElementById("step1Title").textContent = "Choose your experience";
     document.getElementById("step1Text").textContent = "Pick the hero effect and palette above. This is the one your guests will experience, not a description of it.";
     document.getElementById("feat1Title").textContent = "The interactive invitation";
     document.getElementById("feat1Text").textContent = "Water, flame, or frost: a real effect guests touch, personalized in your palette. Built to be kept, not skimmed.";
     document.getElementById("priceBullet1").textContent = "✦ Your chosen hero effect, in your palette";
     document.getElementById("priceCta").textContent = "Get Started";
-    document.getElementById("priceAmount").innerHTML = "<small>$</small>499";
-    document.getElementById("priceSub").textContent = "CAD · once · no subscription";
-    document.getElementById("priceFine").textContent = "Secure checkout · set up in about ten minutes";
+    document.getElementById("priceWasRow").style.display = "";
+    document.getElementById("priceAmount").innerHTML = "<small>$</small>299";
+    document.getElementById("priceSub").textContent = "CAD · once · no subscription · first 10 couples";
+    document.getElementById("priceFine").textContent = "Secure checkout · code FOUNDING10 applied at checkout · set up in about ten minutes";
     document.getElementById("feat5Title").textContent = "Voice notes, not just RSVPs";
     document.getElementById("feat5Text").textContent = "Right after replying, guests can leave a short spoken message, up to 20 seconds, entirely optional. You keep it, play it back, download it, forever. Something to have long after the wedding, not just a headcount.";
     document.getElementById("priceBullet5").textContent = "✦ Optional guest voice notes, yours to keep";
@@ -1056,6 +1060,7 @@ function setCategory(cat){
     document.getElementById("feat1Text").textContent = "A fully illustrated, animated scene: hand-drawn art, not a template. Built for atmosphere and story, not a touch effect.";
     document.getElementById("priceBullet1").textContent = "✦ Your chosen Storybook theme, fully illustrated";
     document.getElementById("priceCta").textContent = "Join The Waitlist";
+    document.getElementById("priceWasRow").style.display = "none";
     document.getElementById("priceAmount").textContent = "Not Yet For Sale";
     document.getElementById("priceSub").textContent = "Fable is in development";
     document.getElementById("priceFine").textContent = "Join the waitlist above and we'll email you the moment it opens";
