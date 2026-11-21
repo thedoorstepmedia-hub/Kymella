@@ -779,7 +779,33 @@ function etsyUnlockCard(primary){
       <div class="field"><label>Etsy order number</label><input id="f-etsyorder" inputmode="numeric" autocomplete="off" placeholder="e.g. 3412345678"></div>
       <button class="btn btn-solid" style="margin-top:14px" onclick="redeemEtsy()" id="etsyBtn">Unlock my invitation</button>
       <p class="hint" style="margin-top:10px">Essential covers up to 2 events. Multi-Event covers as many as you like. Stuck? Message us on Etsy and we'll sort it out.</p>
+      <p class="hint" style="margin-top:6px"><a class="textlink" href="#" onclick="drawEtsyRecover();return false">Already unlocked? Get back to your dashboard</a></p>
     </div>`;
+}
+// Etsy buyers have no email on file with us, so the order number is how they get back in.
+function drawEtsyRecover(){
+  $("prog").style.width="100%"; $("stepCount").textContent="";
+  $("screen").innerHTML = `
+    <div class="label">Welcome back</div>
+    <h1 class="h1">Find your dashboard</h1>
+    <p class="lede">Bought Kymella on Etsy and already unlocked your invitation? Enter your Etsy order number and we'll take you straight to your dashboard.</p>
+    <div class="field"><label>Etsy order number</label><input id="f-recoverorder" inputmode="numeric" autocomplete="off" placeholder="e.g. 3412345678"></div>
+    <div class="nav"><button class="btn btn-quiet sm" onclick="location.href='/setup?etsy=1'">Back</button><div class="right"><button class="btn btn-gold" onclick="recoverEtsy()" id="recoverBtn">Open my dashboard</button></div></div>
+    <p class="hint" style="margin-top:14px">Haven't unlocked yet? Go back and build your invitation first. Still stuck? Message us on Etsy.</p>`;
+  $("f-recoverorder").focus();
+}
+async function recoverEtsy(){
+  const order = $("f-recoverorder").value.trim();
+  if (!order) { notice("Please enter your Etsy order number."); return; }
+  const btn = $("recoverBtn"); btn.disabled = true; btn.textContent = "Checking with Etsy…";
+  try{
+    const j = await api("/api/etsy/recover","POST",{ etsy_order: order });
+    try { localStorage.setItem("kymella_draft", JSON.stringify({ id: j.id, admin_key: j.admin_key })); } catch (e) {}
+    location.href = `/manage#w=${j.id}&k=${j.admin_key}`;
+  }catch(e){
+    notice(e.message || "We couldn't find that order.");
+    btn.disabled = false; btn.textContent = "Open my dashboard";
+  }
 }
 function showEtsyUnlock(){
   const slot = $("etsySlot"); if (!slot) return;
@@ -869,7 +895,8 @@ function drawEmailCapture(){
     <h1 class="h1">Let's set up your wedding</h1>
     <p class="lede">First, your email so we can save your progress as you go. Nothing is charged until you're ready to buy.</p>
     <div class="field"><label>Email</label><input id="f-startemail" type="email" placeholder="you@example.com"></div>
-    <div class="nav"><span></span><div class="right"><button class="btn btn-gold" onclick="beginFromEmailCapture()" id="captureBtn">Begin</button></div></div>`;
+    <div class="nav"><span></span><div class="right"><button class="btn btn-gold" onclick="beginFromEmailCapture()" id="captureBtn">Begin</button></div></div>
+    ${ETSY_MODE ? `<p class="hint" style="margin-top:18px">Bought on Etsy: there's nothing more to pay. You'll unlock it with your Etsy order number at the end. <a class="textlink" href="#" onclick="drawEtsyRecover();return false">Already unlocked? Get back to your dashboard</a></p>` : ""}`;
 }
 async function beginFromEmailCapture(){
   const email = $("f-startemail").value.trim();

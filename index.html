@@ -1258,5 +1258,18 @@ document.getElementById("inquiryForm").addEventListener("submit", async e => {
   }
 });
 </script>
+<script>
+// Etsy buyers who tap "Try a different theme" land here and would otherwise see the $299 kymella.com
+// price. setup.html remembers them (kymella_etsy) -- reassure them before they worry about paying twice.
+(function etsyBuyerBanner(){
+  try { if (localStorage.getItem("kymella_etsy") !== "1") return; } catch (e) { return; }
+  var b = document.createElement("div");
+  b.setAttribute("role", "status");
+  b.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#0E1F1C;color:#F5EFE3;padding:14px 16px;text-align:center;font:15px/1.4 system-ui,sans-serif;box-shadow:0 -4px 18px rgba(0,0,0,.25)";
+  b.innerHTML = 'Bought on Etsy? There’s nothing more to pay. Pick a theme, tap <b>Get Started</b>, and unlock with your Etsy order number at the end. <a href="/setup?etsy=1" style="color:#E8C9A0;margin-left:6px">Back to my invitation</a>';
+  document.addEventListener("DOMContentLoaded", function(){ document.body.appendChild(b); });
+  if (document.readyState !== "loading") document.body.appendChild(b);
+})();
+</script>
 </body>
 </html>
