@@ -183,6 +183,13 @@ function notice(m){ const n=$("notice"); n.textContent=m; n.classList.add("on");
 
 let SESSION_ID = new URLSearchParams(location.search).get("session_id");
 const FOUNDER_KEY = new URLSearchParams(location.search).get("founder_key"); // for free, unlimited real-flow testing -- never share this URL
+// Etsy buyers arrive via the link in their Etsy download (/setup?etsy=1). Remembered on this
+// device so the order-number box is still the main option if they come back without the param.
+let ETSY_MODE = new URLSearchParams(location.search).get("etsy") === "1";
+try {
+  if (ETSY_MODE) localStorage.setItem("kymella_etsy", "1");
+  else ETSY_MODE = localStorage.getItem("kymella_etsy") === "1";
+} catch (e) { /* storage blocked -- the URL param alone still works */ }
 
 // ================= draft resolution =================
 // The wizard now runs BEFORE payment against a draft wedding row created by index.html's email
@@ -757,12 +764,45 @@ function previewScreen({ previewUrl }){
       <button class="btn btn-quiet sm" onclick="step=1;draw()">Edit your details</button>
       <a class="textlink" href="/">Try a different theme</a>
     </div>
-    <div class="done-card" style="margin-top:40px"><h3>Ready to send it to your guests?</h3>
+    ${ETSY_MODE ? etsyUnlockCard(true) : `<div class="done-card" style="margin-top:40px"><h3>Ready to send it to your guests?</h3>
       <p>One purchase unlocks your full dashboard: RSVPs, guest management, reminders, and every invitation link. Nothing you've built here is lost either way.</p>
       <button class="btn btn-solid" style="margin-top:14px" onclick="startCheckout()" id="buyBtn">Buy this invitation — $499 CAD</button>
-    </div>
+      <p class="hint" style="margin-top:12px"><a class="textlink" href="#" onclick="showEtsyUnlock();return false">Bought Kymella on Etsy? Unlock with your order number</a></p>
+    </div><div id="etsySlot"></div>`}
     <p class="hint" style="margin-top:14px">Everything here, including your theme and every detail, stays fully editable from your dashboard after you buy too -- this isn't your last chance to change something.</p>
     <p class="hint" style="margin-top:10px">By purchasing you agree to our <a class="textlink" href="/privacy" target="_blank" rel="noopener">Terms, Privacy &amp; Refund policy</a>.</p>`;
+}
+// Etsy unlock: the order number + Etsy email stand in for a Stripe payment (see /finalize).
+function etsyUnlockCard(primary){
+  return `<div class="done-card" style="margin-top:${primary ? 40 : 16}px"><h3>${primary ? "Unlock your invitation" : "Bought on Etsy?"}</h3>
+      <p>Enter the order number from your Etsy purchase confirmation email (or Etsy > You > Purchases and reviews). That unlocks your full dashboard: RSVPs, guest management, reminders, and every invitation link.</p>
+      <div class="field"><label>Etsy order number</label><input id="f-etsyorder" inputmode="numeric" autocomplete="off" placeholder="e.g. 3412345678"></div>
+      <button class="btn btn-solid" style="margin-top:14px" onclick="redeemEtsy()" id="etsyBtn">Unlock my invitation</button>
+      <p class="hint" style="margin-top:10px">Essential covers up to 2 events. Multi-Event covers as many as you like. Stuck? Message us on Etsy and we'll sort it out.</p>
+    </div>`;
+}
+function showEtsyUnlock(){
+  const slot = $("etsySlot"); if (!slot) return;
+  slot.innerHTML = etsyUnlockCard(false);
+  $("f-etsyorder").focus();
+}
+async function redeemEtsy(){
+  const order = $("f-etsyorder").value.trim();
+  if (!order) { notice("Please enter your Etsy order number."); return; }
+  const btn = $("etsyBtn"); btn.disabled = true; btn.textContent = "Checking with Etsy…";
+  try{
+    await api(`/api/weddings/${DRAFT_ID}/finalize`,"POST",{ etsy_order: order }, DRAFT_KEY);
+    await showFinishAfterUnlock();
+  }catch(e){
+    notice(e.message || "We couldn't verify that order.");
+    btn.disabled = false; btn.textContent = "Unlock my invitation";
+  }
+}
+async function showFinishAfterUnlock(){
+  const dash = await api(`/api/weddings/${DRAFT_ID}/dashboard`,"GET",null, DRAFT_KEY);
+  const previewGuest = (dash.guests||[]).find(g => g.grp === "Preview");
+  const guestRows = (dash.guests||[]).filter(g => g.grp !== "Preview").map(g => ({ id:g.id, name:g.name, invite_url:g.invite_url }));
+  finishScreen({ id: DRAFT_ID, admin_key: DRAFT_KEY, previewUrl: previewGuest ? previewGuest.invite_url : `${location.origin}/manage#w=${DRAFT_ID}&k=${DRAFT_KEY}`, guestRows });
 }
 function buildFaq(){
   // dress_code, arrival_info, parking_info, and kids_policy each already get their own card in
@@ -848,10 +888,7 @@ async function init(){
     $("screen").innerHTML = `<div class="saving"><div class="mono-pulse">$</div><p class="savelog">Confirming your payment…</p></div>`;
     try{
       await api(`/api/weddings/${DRAFT_ID}/finalize`,"POST",{ checkout_session:SESSION_ID }, DRAFT_KEY, FOUNDER_KEY ? {"x-setup-key":FOUNDER_KEY} : {});
-      const dash = await api(`/api/weddings/${DRAFT_ID}/dashboard`,"GET",null, DRAFT_KEY);
-      const previewGuest = (dash.guests||[]).find(g => g.grp === "Preview");
-      const guestRows = (dash.guests||[]).filter(g => g.grp !== "Preview").map(g => ({ id:g.id, name:g.name, invite_url:g.invite_url }));
-      finishScreen({ id: DRAFT_ID, admin_key: DRAFT_KEY, previewUrl: previewGuest ? previewGuest.invite_url : `${location.origin}/manage#w=${DRAFT_ID}&k=${DRAFT_KEY}`, guestRows });
+      await showFinishAfterUnlock();
     }catch(e){
       $("screen").innerHTML = `<div class="label muted">A moment</div><h1 class="h1">That didn't go through</h1>
         <p class="lede">${esc(e.message)}. You haven't been charged twice -- try again from your invitation.</p>
