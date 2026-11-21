@@ -225,6 +225,13 @@ try {
   const raw = sessionStorage.getItem("kymella_names");
   if (raw) CHOSEN_NAMES = JSON.parse(raw);
 } catch (e) { /* no names carried over — wizard just starts blank, as before */ }
+// Etsy save-the-date buyers arrive with &std=1; remembered like kymella_etsy so a return visit
+// without the param still defaults to the right kind of page.
+let STD_DEFAULT = new URLSearchParams(location.search).get("std") === "1";
+try {
+  if (STD_DEFAULT) localStorage.setItem("kymella_std", "1");
+  else STD_DEFAULT = localStorage.getItem("kymella_std") === "1";
+} catch (e) { /* storage blocked -- URL param alone still works */ }
 let step = 0;
 const S = {
   partner1: CHOSEN_NAMES?.partner1 || "", partner2: CHOSEN_NAMES?.partner2 || "", wedding_date:"", venue:"", venue_address:"",
@@ -244,6 +251,7 @@ const S = {
   registry_note:"Your presence is the greatest gift. Should you wish to contribute, we've set aside a few funds below.",
   funds: [],
   voice_notes_enabled: false, // off by default -- couples opt in, not out
+  invite_mode: STD_DEFAULT ? "save_the_date" : "invitation",
   guests: [],   // computed union of _pasted + _imported -- never written to directly
   _pasted: [],  // derived fresh from the paste textarea on every keystroke
   _imported: [], // accumulated from CSV/XLSX imports -- untouched by the textarea
@@ -277,6 +285,11 @@ function draw(){
     sc.innerHTML = `
       <div class="label muted">${TITLES[step]}</div>
       <h1 class="h1">First, the essentials</h1>
+      <div class="field"><label>What are you sending?</label>
+        <select id="f-mode">
+          <option value="invitation" ${S.invite_mode!=="save_the_date"?"selected":""}>A wedding invitation, with RSVP</option>
+          <option value="save_the_date" ${S.invite_mode==="save_the_date"?"selected":""}>A save the date (formal invitation to follow)</option>
+        </select></div>
       <div class="two">
         <div class="field"><label>Partner one</label><input id="f-p1" placeholder="Full name" value="${esc(S.partner1)}"></div>
         <div class="field"><label>Partner two</label><input id="f-p2" placeholder="Full name" value="${esc(S.partner2)}"></div>
@@ -456,7 +469,7 @@ function navHtml(back, okLabel="Continue", skippable=false){
 }
 function collect(){
   const g = id => $(id)?.value.trim() ?? null;
-  if (STEPS[step]==="basics"){ S.partner1=g("f-p1"); S.partner2=g("f-p2"); S.wedding_date=g("f-date"); S.venue=g("f-venue"); S.venue_address=g("f-addr"); }
+  if (STEPS[step]==="basics"){ S.invite_mode=g("f-mode")||"invitation"; S.partner1=g("f-p1"); S.partner2=g("f-p2"); S.wedding_date=g("f-date"); S.venue=g("f-venue"); S.venue_address=g("f-addr"); }
   if (STEPS[step]==="practical"){ S.dress_code=g("f-dress"); S.arrival_info=g("f-arrival"); S.parking_info=g("f-parking"); S.kids_policy=g("f-kids"); S.travel_info=g("f-travel"); S.hashtag=g("f-hashtag"); }
 }
 // Keeps whatever's been typed so far in this browser, keyed to the draft -- so leaving mid-wizard
@@ -688,6 +701,7 @@ async function publish(){
       faq_json: buildFaq(),
       registry_note: S.funds.length ? S.registry_note : "",
       voice_notes_enabled: !!S.voice_notes_enabled,
+      invite_mode: S.invite_mode === "save_the_date" ? "save_the_date" : "invitation",
       ...(CHOSEN_EXPERIENCE ? { hero_effect: CHOSEN_EXPERIENCE.effect, palette_json: CHOSEN_EXPERIENCE.palette } : {}),
     }, admin_key);
 
@@ -778,7 +792,7 @@ function etsyUnlockCard(primary){
       <p>Enter the order number from your Etsy purchase confirmation email (or Etsy > You > Purchases and reviews). That unlocks your full dashboard: RSVPs, guest management, reminders, and every invitation link.</p>
       <div class="field"><label>Etsy order number</label><input id="f-etsyorder" inputmode="numeric" autocomplete="off" placeholder="e.g. 3412345678"></div>
       <button class="btn btn-solid" style="margin-top:14px" onclick="redeemEtsy()" id="etsyBtn">Unlock my invitation</button>
-      <p class="hint" style="margin-top:10px">Essential covers up to 2 events. Multi-Event covers as many as you like. Stuck? Message us on Etsy and we'll sort it out.</p>
+      <p class="hint" style="margin-top:10px">Essential covers up to 2 events. Multi-Event covers as many as you like. A Save the Date order unlocks a save the date. Stuck? Message us on Etsy and we'll sort it out.</p>
       <p class="hint" style="margin-top:6px"><a class="textlink" href="#" onclick="drawEtsyRecover();return false">Already unlocked? Get back to your dashboard</a></p>
     </div>`;
 }
