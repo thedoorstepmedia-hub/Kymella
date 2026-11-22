@@ -866,7 +866,8 @@ async function showFinishAfterUnlock(){
   const dash = await api(`/api/weddings/${DRAFT_ID}/dashboard`,"GET",null, DRAFT_KEY);
   const previewGuest = (dash.guests||[]).find(g => g.grp === "Preview");
   const guestRows = (dash.guests||[]).filter(g => g.grp !== "Preview").map(g => ({ id:g.id, name:g.name, invite_url:g.invite_url }));
-  finishScreen({ id: DRAFT_ID, admin_key: DRAFT_KEY, previewUrl: previewGuest ? previewGuest.invite_url : `${location.origin}/manage#w=${DRAFT_ID}&k=${DRAFT_KEY}`, guestRows });
+  finishScreen({ id: DRAFT_ID, admin_key: DRAFT_KEY, previewUrl: previewGuest ? previewGuest.invite_url : `${location.origin}/manage#w=${DRAFT_ID}&k=${DRAFT_KEY}`, guestRows,
+    videoUrl: dash.general_invite_url ? `/video?t=${encodeURIComponent(dash.general_invite_url.split("/i/")[1] || "")}` : "" });
 }
 function buildFaq(){
   // dress_code, arrival_info, parking_info, and kids_policy each already get their own card in
@@ -884,7 +885,7 @@ function buildFaq(){
   f.push({q:"What if I have a dietary restriction or allergy?", a:"Let us know when you RSVP below and we'll make sure it's taken care of."});
   return f;
 }
-function finishScreen({id, admin_key, previewUrl, guestRows}){
+function finishScreen({id, admin_key, previewUrl, guestRows, videoUrl}){
   const manageUrl = `${location.origin}/manage#w=${id}&k=${admin_key}`;
   $("prog").style.width="100%"; $("stepCount").textContent="";
   $("screen").innerHTML = `
@@ -898,6 +899,10 @@ function finishScreen({id, admin_key, previewUrl, guestRows}){
       <div class="keybox"><input readonly value="${manageUrl}" id="mUrl"><button class="btn btn-quiet sm" onclick="copy('mUrl')"><svg class="i"><use href="#ic-copy"/></svg> Copy</button></div>
       <div class="warn">Anyone with this link can manage your wedding. Treat it like a password: we can't recover it if lost.</div>
     </div>
+
+    ${videoUrl?`<div class="done-card"><h3>Your video invitation</h3>
+      <p>A 20-second video of your invitation with your music, ready for WhatsApp or Instagram stories. Post it, then send your link so guests can RSVP.</p>
+      <div class="nav" style="margin-top:14px;justify-content:flex-start"><a class="btn btn-quiet sm" href="${videoUrl}" target="_blank" rel="noopener">Make my video</a></div></div>`:""}
 
     ${guestRows.length?`<div class="done-card"><h3>${guestRows.length} invitations, ready to send</h3>
       <p>Each guest has their own personal link. Send them yourself over WhatsApp or text: an invitation should come from you, not from a platform. They're all in your dashboard too.</p>
