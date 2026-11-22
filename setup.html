@@ -252,6 +252,7 @@ const S = {
   funds: [],
   voice_notes_enabled: false, // off by default -- couples opt in, not out
   invite_mode: STD_DEFAULT ? "save_the_date" : "invitation",
+  music_track: "piano", // background music guests hear once they open the envelope; "none" for silence
   guests: [],   // computed union of _pasted + _imported -- never written to directly
   _pasted: [],  // derived fresh from the paste textarea on every keystroke
   _imported: [], // accumulated from CSV/XLSX imports -- untouched by the textarea
@@ -262,6 +263,21 @@ const S = {
   photos: { 1: null, 2: null, 3: null },
 };
 
+// Original tracks composed for Kymella (backend tools/compose_music.py), served at /music/<id>.mp3.
+const MUSIC_CHOICES = [["piano","Soft piano"],["music_box","Music box waltz"],["sitar","Sitar & tanpura"],["none","No music"]];
+let musicPreview = null;
+function stopMusicPreview(){
+  if (musicPreview){ musicPreview.pause(); musicPreview = null; }
+  const b = $("musicPreviewBtn"); if (b) b.innerHTML = "&#9654; Listen";
+}
+function toggleMusicPreview(){
+  if (musicPreview){ stopMusicPreview(); return; }
+  const v = $("f-music")?.value;
+  if (!v || v === "none") return;
+  musicPreview = new Audio(`/music/${v}.mp3`);
+  musicPreview.play().catch(() => stopMusicPreview());
+  $("musicPreviewBtn").innerHTML = "&#10073;&#10073; Stop";
+}
 const STEPS = ["welcome","basics","events","story","photo","practical","registry","guests","finish"];
 const TITLES = ["","The two of you","Your celebration","Your story","A portrait","The practical details","Your registry","Your guest list",""];
 
@@ -290,6 +306,13 @@ function draw(){
           <option value="invitation" ${S.invite_mode!=="save_the_date"?"selected":""}>A wedding invitation, with RSVP</option>
           <option value="save_the_date" ${S.invite_mode==="save_the_date"?"selected":""}>A save the date (formal invitation to follow)</option>
         </select></div>
+      <div class="field"><label>Background music <em>· starts softly when a guest opens the envelope; they can mute it</em></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="f-music" style="flex:1" onchange="stopMusicPreview()">
+            ${MUSIC_CHOICES.map(([v,l])=>`<option value="${v}" ${(S.music_track||"piano")===v?"selected":""}>${l}</option>`).join("")}
+          </select>
+          <button type="button" class="btn" id="musicPreviewBtn" onclick="toggleMusicPreview()" style="white-space:nowrap">&#9654; Listen</button>
+        </div></div>
       <div class="two">
         <div class="field"><label>Partner one</label><input id="f-p1" placeholder="Full name" value="${esc(S.partner1)}"></div>
         <div class="field"><label>Partner two</label><input id="f-p2" placeholder="Full name" value="${esc(S.partner2)}"></div>
@@ -469,7 +492,7 @@ function navHtml(back, okLabel="Continue", skippable=false){
 }
 function collect(){
   const g = id => $(id)?.value.trim() ?? null;
-  if (STEPS[step]==="basics"){ S.invite_mode=g("f-mode")||"invitation"; S.partner1=g("f-p1"); S.partner2=g("f-p2"); S.wedding_date=g("f-date"); S.venue=g("f-venue"); S.venue_address=g("f-addr"); }
+  if (STEPS[step]==="basics"){ stopMusicPreview(); S.music_track=g("f-music")||"piano"; S.invite_mode=g("f-mode")||"invitation"; S.partner1=g("f-p1"); S.partner2=g("f-p2"); S.wedding_date=g("f-date"); S.venue=g("f-venue"); S.venue_address=g("f-addr"); }
   if (STEPS[step]==="practical"){ S.dress_code=g("f-dress"); S.arrival_info=g("f-arrival"); S.parking_info=g("f-parking"); S.kids_policy=g("f-kids"); S.travel_info=g("f-travel"); S.hashtag=g("f-hashtag"); }
 }
 // Keeps whatever's been typed so far in this browser, keyed to the draft -- so leaving mid-wizard
@@ -702,6 +725,7 @@ async function publish(){
       registry_note: S.funds.length ? S.registry_note : "",
       voice_notes_enabled: !!S.voice_notes_enabled,
       invite_mode: S.invite_mode === "save_the_date" ? "save_the_date" : "invitation",
+      music_track: MUSIC_CHOICES.some(([v]) => v === S.music_track) ? S.music_track : "piano",
       ...(CHOSEN_EXPERIENCE ? { hero_effect: CHOSEN_EXPERIENCE.effect, palette_json: CHOSEN_EXPERIENCE.palette } : {}),
     }, admin_key);
 
